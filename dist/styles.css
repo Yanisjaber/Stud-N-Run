@@ -113,3 +113,5 @@ nav a[aria-current="page"] { color:var(--pink); text-decoration:underline; text-
   #navigation-principale a { display:flex; align-items:center; min-height:44px }
   .menu-toggle { min-height:44px }
 }
+
+.demo-notice { padding: .65rem 1rem; background: #2b1740; color: #fff; text-align: center; font-size: .875rem; font-weight: 700; }

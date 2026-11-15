@@ -120,7 +120,6 @@ index = f'''
   </div>
   <span class="scroll-hint">Défiler</span>
 </section>
-{MARQ.format(cls="")}
 <section>
   <div class="wrap">
     <div class="sec-head"><div><p class="eyebrow rv">Choisis ton défi</p><h2 class="rv d1">UNE VILLE.<br><em>DEUX DÉFIS.</em></h2></div>

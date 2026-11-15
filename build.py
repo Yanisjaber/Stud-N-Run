@@ -56,7 +56,7 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <div class="glow" aria-hidden="true"></div>
 <header class="site-header">
   <div class="wrap nav">
-    <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
+    <a class="brand" href="index.html">STUD<span>’N RUN</span></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
     <nav class="nav-links" id="nav" aria-label="Navigation principale">{links}<a class="cta" href="inscriptions.html"{CUR if slug == "inscriptions.html" else ""}>S’inscrire</a></nav>
   </div>
@@ -67,7 +67,7 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <div class="notice" role="note">Site de démonstration · Date, horaires, tarifs et équipe sont fictifs. Le parcours est le tracé réel prévu.</div>
 <footer class="site-footer">
   <div class="wrap">
-    <div class="foot-big" aria-hidden="true">STUD <span>N’</span> RUN</div>
+    <div class="foot-big" aria-hidden="true">STUD<span>’N</span> RUN</div>
     <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse</span><nav aria-label="Pied de page">{foot_links}</nav></div>
   </div>
 </footer>
@@ -79,7 +79,7 @@ def hero(eyebrow, h1, lead):
     return f'<section class="page-hero"><div class="wrap"><p class="eyebrow rv">{eyebrow}</p><h1 class="rv d1">{h1}</h1><p class="lead rv d2">{lead}</p></div></section>'
 
 MARQ = '<div class="marquee{cls}" aria-hidden="true"><div class="marquee-track">' + "".join(
-    f"<span>{w}</span>" for w in ["5 KM", "10 KM", "PLACE SAINT-PIERRE", "TOUS CAMPUS", "18 AVRIL 2027", "UNE VILLE, DEUX DÉFIS"] * 4) + "</div></div>"
+    f"<span>{w}</span>" for w in ["5 KM", "10 KM", "PLACE SAINT-PIERRE", "TOUS CAMPUS", "22 MAI 2027", "UNE VILLE, DEUX DÉFIS"] * 4) + "</div></div>"
 
 def loops(n):
     return f'<svg class="loops" viewBox="0 0 {R["w"]} {R["h"]}" aria-hidden="true">' + "".join(
@@ -88,7 +88,7 @@ def loops(n):
 CTA = '''<section><div class="wrap"><div class="cta-band rv">
 <span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
 <p class="eyebrow" style="color:#fff">500 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
-<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 11 avril 2027. 5 ou 10 km, tu choisis ton défi.</p>
+<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 15 mai 2027. 5 ou 10 km, tu choisis ton défi.</p>
 <div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
 </div></div></section>'''
 
@@ -108,11 +108,11 @@ index = f'''
   <div class="wrap hero-grid">
     <div>
       <p class="eyebrow">Course étudiante · Toulouse</p>
-      <h1><span class="l"><span>STUD</span></span><span class="l"><span><em>N’ RUN</em></span></span></h1>
-      <div class="hero-meta"><span class="chip"><b>18.04</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
+      <h1><span class="l"><span>STUD’N</span></span><span class="l"><span><em>RUN</em></span></span></h1>
+      <div class="hero-meta"><span class="chip"><b>22.05</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
       <p class="lead">Tous les campus de Toulouse sur la même ligne de départ. Une boucle au cœur de la ville, deux ponts sur la Garonne, et une arrivée en fête.</p>
       <div class="btns" style="margin-top:28px"><a class="btn" href="inscriptions.html">Je m’inscris <span class="arr">→</span></a><a class="btn ghost" href="parcours.html">Voir le parcours 3D</a></div>
-      <div class="countdown" data-date="2027-04-18T09:30:00+02:00" aria-label="Compte à rebours avant le départ">
+      <div class="countdown" data-date="2027-05-22T09:30:00+02:00" aria-label="Compte à rebours avant le départ">
         <div><b>–</b><span>jours</span></div><div><b>–</b><span>heures</span></div><div><b>–</b><span>min</span></div><div><b>–</b><span>sec</span></div>
       </div>
     </div>
@@ -212,7 +212,7 @@ PROG = [("8 h 00", "Ouverture du village", "Accueil Place Saint-Pierre, consigne
         ("9 h 30", "Départ 5 & 10 km", "Le départ est donné. Le 5 km fait une boucle, le 10 km en fait deux.", True),
         ("10 h 45", "Fermeture de la course", "Les derniers coureurs du 10 km passent la ligne.", False),
         ("11 h 00", "Remise des prix", "Podiums par distance, prix du campus le plus représenté, puis la fête continue.", True)]
-horaires = hero("Dimanche 18 avril 2027", "LE <em>JOUR J</em>", "Le programme de la journée, du café du matin jusqu’aux podiums.") + f'''
+horaires = hero("Samedi 22 mai 2027", "LE <em>JOUR J</em>", "Le programme de la journée, du café du matin jusqu’aux podiums.") + f'''
 <section style="padding-top:0"><div class="wrap">
 <ol class="timeline">{"".join(f'<li class="tl rv{" key" if k else ""}"><time>{h}</time><div><h3>{t}</h3><p>{d}</p></div></li>' for h, t, d, k in PROG)}</ol>
 </div></section>
@@ -245,7 +245,7 @@ infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et 
 '''
 
 # ---------------- INSCRIPTIONS ----------------
-inscriptions = hero("Inscriptions · du 1er février au 11 avril 2027", "PRENDS TON <em>DOSSARD</em>", "Cette page est un exemple : aucune inscription ni aucun paiement ne sont possibles pour l’instant.") + f'''
+inscriptions = hero("Inscriptions · du 1er février au 15 mai 2027", "PRENDS TON <em>DOSSARD</em>", "Cette page est un exemple : aucune inscription ni aucun paiement ne sont possibles pour l’instant.") + f'''
 <section style="padding-top:0"><div class="wrap">
 <div class="grid-2">
   <div class="card price rv"><span class="badge" style="background:rgba(255,255,255,.1)">Découverte</span><h3 style="font-size:3rem">5 KM</h3><div class="amt">8€<small> / dossard</small></div>
@@ -285,14 +285,14 @@ association = hero("L’association", "PORTER LA <em>COURSE</em>", "Une équipe 
 
 MAP_HEAD = '<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">\n'
 MAP_JS = '<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>\n<script src="parcours-3d.js" defer></script>\n'
-D = "STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre."
+D = "Stud’N Run, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre."
 PAGES = {
-    "index.html": ("STUD N’ RUN · Course étudiante Toulouse", index, "", ""),
-    "parcours.html": ("Parcours · STUD N’ RUN", parcours, MAP_HEAD, MAP_JS),
-    "horaires.html": ("Horaires · STUD N’ RUN", horaires, "", ""),
-    "infos-pratiques.html": ("Infos pratiques · STUD N’ RUN", infos, "", ""),
-    "inscriptions.html": ("Inscriptions · STUD N’ RUN", inscriptions, "", ""),
-    "association.html": ("Association · STUD N’ RUN", association, "", ""),
+    "index.html": ("Stud’N Run · Course étudiante Toulouse", index, "", ""),
+    "parcours.html": ("Parcours · Stud’N Run", parcours, MAP_HEAD, MAP_JS),
+    "horaires.html": ("Horaires · Stud’N Run", horaires, "", ""),
+    "infos-pratiques.html": ("Infos pratiques · Stud’N Run", infos, "", ""),
+    "inscriptions.html": ("Inscriptions · Stud’N Run", inscriptions, "", ""),
+    "association.html": ("Association · Stud’N Run", association, "", ""),
 }
 for slug, (t, body, h, s) in PAGES.items():
     (DIST / slug).write_text(page(slug, t, D, body, h, s))

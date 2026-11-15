@@ -115,3 +115,10 @@ nav a[aria-current="page"] { color:var(--pink); text-decoration:underline; text-
 }
 
 .demo-notice { padding: .65rem 1rem; background: #2b1740; color: #fff; text-align: center; font-size: .875rem; font-weight: 700; }
+
+.map3d-wrap { margin-top:15px }
+#map3d { width:100%; height:min(72vh,640px); border-radius:19px; border:1px solid var(--line); overflow:hidden }
+.map3d-bar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:12px }
+.map3d-bar span { color:var(--muted); font-size:.85rem }
+.km-marker { padding:2px 8px; border-radius:999px; background:var(--deep-pink); color:#ffc5e4; font:700 .75rem var(--body) }
+.start-marker { padding:5px 12px; border-radius:999px; background:#fff; border:3px solid var(--deep-pink); color:var(--deep-pink); font:800 .8rem var(--body) }

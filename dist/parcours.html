@@ -10,7 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>
 <script src="script.js" defer></script>
+<script src="parcours-3d.js" defer></script>
 </head>
 <body>
 <header>
@@ -44,10 +47,11 @@
       </dl>
       <p>Le parcours longe le canal de Brienne, passe par Compans-Caffarelli, Jeanne d’Arc, Saint-Sernin et Esquirol, puis traverse la Garonne par le Pont Neuf et le Pont Saint-Pierre.</p>
     </div>
-    <figure class="route-map">
-      <img src="assets/parcours-carte.jpg" alt="Carte du parcours : boucle de 5 km au départ de la Place Saint-Pierre, avec repères kilométriques" loading="lazy" style="width:100%;height:auto;border-radius:19px;border:1px solid var(--line);margin-top:15px">
-      <figcaption style="color:var(--muted);font-size:.85rem;margin-top:8px">Fond de carte © IGN · Tracé GPX</figcaption>
-    </figure>
+    <div class="map3d-wrap">
+      <div id="map3d" role="img" aria-label="Carte 3D du parcours : boucle de 5 km au départ de la Place Saint-Pierre"></div>
+      <div class="map3d-bar"><button type="button" class="button" id="fly-btn">▶ Survoler le parcours</button><button type="button" class="button secondary" id="reset-btn">Vue d’ensemble</button><span>Clic droit ou Ctrl + glisser pour incliner, molette pour zoomer.</span></div>
+      <noscript><img src="assets/parcours-carte.jpg" alt="Carte du parcours" style="width:100%;height:auto"></noscript>
+    </div>
     <div class="actions" style="justify-content:flex-start;margin-top:20px">
       <a class="button" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF)</a>
       <a class="button secondary" href="assets/stud-n-run-parcours.gpx" download>Télécharger la trace GPX</a>

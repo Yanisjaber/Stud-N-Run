@@ -160,7 +160,6 @@ index = f'''
     </div>
   </div>
 </section>
-{MARQ.format(cls=" alt")}
 {CTA}
 '''
 

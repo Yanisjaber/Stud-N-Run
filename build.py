@@ -87,20 +87,23 @@ def loops(n):
 
 CTA = '''<section><div class="wrap"><div class="cta-band rv">
 <span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
-<p class="eyebrow" style="color:#fff">500 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
+<p class="eyebrow" style="color:#fff">5 000 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
 <p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 15 mai 2027. 5 ou 10 km, tu choisis ton défi.</p>
 <div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
 </div></div></section>'''
 
 STEPS = [
     ("0", "Place Saint-Pierre", "Départ au bord de la Garonne, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne."),
-    ("0,7", "Canal de Brienne", "On longe le quai Saint-Pierre puis le canal, à l’ombre des platanes."),
-    ("1,3", "Compans-Caffarelli", "Cap à l’est sur les boulevards, à côté des campus de l’Arsenal."),
-    ("2,4", "Saint-Sernin", "On tourne autour de la basilique. Point d’eau en vue."),
-    ("3,4", "Esquirol", "Plongée vers le sud, à deux pas du Capitole."),
-    ("3,9", "Pont Neuf", "Première traversée de la Garonne, avec la vue sur les quais."),
-    ("4,5", "Pont Saint-Pierre", "Retour rive droite, dernière ligne droite vers la place. Pour le 10 km, c’est reparti pour un tour."),
+    ("0,2", "Allée de Barcelone", "On remonte le long du canal de Brienne, à l’ombre des platanes."),
+    ("0,8", "Les boulevards", "Leclerc, Duportal, Lascrosses puis d’Arcole : de grandes avenues pour trouver son rythme."),
+    ("2,0", "Saint-Sernin", "Rue de l’Arc puis rue Saint-Bernard jusqu’à la basilique. Point d’eau en vue."),
+    ("2,6", "Capitole", "La rue du Taur mène tout droit à la place du Capitole, le cœur de la ville."),
+    ("3,0", "Centre historique", "Rues Saint-Rome et des Changes jusqu’à Esquirol, puis la rue de Metz vers le fleuve."),
+    ("3,7", "Pont Neuf", "Première traversée de la Garonne, avec la vue sur les quais."),
+    ("4,0", "Saint-Cyprien", "Rue de la République puis rue du Pont Saint-Pierre, côté rive gauche."),
+    ("4,7", "Pont Saint-Pierre", "Retour rive droite, dernière ligne droite vers la place. Pour le 10 km, c’est reparti pour un tour."),
 ]
+KM = R["km_total"]; KMs = f"{KM:.2f}".replace(".", ","); KM2s = f"{2*KM:.2f}".replace(".", ",")
 
 # ---------------- ACCUEIL ----------------
 index = f'''
@@ -126,9 +129,9 @@ index = f'''
     <p class="lead rv d2">La même boucle de 5 km, à courir une fois ou deux. Débutant ou habitué, il y a une distance pour toi.</p></div>
     <div class="duo">
       <article class="dist rv">{loops(1)}<span class="tag">Découverte</span><div class="big">5<small>KM</small></div>
-        <ul><li><span>Boucles</span><b>1</b></li><li><span>Distance</span><b>5,03 km</b></li><li><span>Dénivelé</span><b>≈ 50 m D+</b></li></ul></article>
+        <ul><li><span>Boucles</span><b>1</b></li><li><span>Distance</span><b>{KMs} km</b></li><li><span>Dénivelé</span><b>≈ 50 m D+</b></li></ul></article>
       <article class="dist hot rv d1">{loops(2)}<span class="tag">Challenge</span><div class="big">10<small>KM</small></div>
-        <ul><li><span>Boucles</span><b>2</b></li><li><span>Distance</span><b>10,05 km</b></li><li><span>Dénivelé</span><b>≈ 100 m D+</b></li></ul></article>
+        <ul><li><span>Boucles</span><b>2</b></li><li><span>Distance</span><b>{KM2s} km</b></li><li><span>Dénivelé</span><b>≈ 100 m D+</b></li></ul></article>
     </div>
   </div>
 </section>
@@ -144,8 +147,8 @@ index = f'''
 </section>
 <section style="padding-top:0">
   <div class="wrap stats">
-    <div class="stat rv"><b data-count="500">0</b><span>dossards</span></div>
-    <div class="stat rv d1"><b data-count="5.03">0</b><span>km par boucle</span></div>
+    <div class="stat rv"><b data-count="5000">0</b><span>dossards</span></div>
+    <div class="stat rv d1"><b data-count="{KM}">0</b><span>km par boucle</span></div>
     <div class="stat rv d2"><b data-count="2">0</b><span>ponts sur la Garonne</span></div>
     <div class="stat rv d3"><b data-count="1">0</b><span>place en fête à l’arrivée</span></div>
   </div>
@@ -165,7 +168,7 @@ index = f'''
 
 # ---------------- PARCOURS ----------------
 lo, hi = R["lo"], R["hi"]
-parcours = hero("Le parcours", "LA <em>BOUCLE</em>", "Départ et arrivée Place Saint-Pierre. Une boucle de 5,03 km, une fois pour le 5 km, deux fois pour le 10 km.") + f'''
+parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Place Saint-Pierre. Une boucle de {KMs} km, une fois pour le 5 km, deux fois pour le 10 km.") + f'''
 <section style="padding-top:0">
   <div class="wrap">
     <div class="map-shell rv">
@@ -179,8 +182,8 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", "Départ et arrivée Place 
 <section style="padding-top:0">
   <div class="wrap">
     <div class="stats" style="margin-bottom:60px">
-      <div class="stat rv"><b>5,03</b><span>km par boucle</span></div>
-      <div class="stat rv d1"><b>10,05</b><span>km pour 2 boucles</span></div>
+      <div class="stat rv"><b>{KMs}</b><span>km par boucle</span></div>
+      <div class="stat rv d1"><b>{KM2s}</b><span>km pour 2 boucles</span></div>
       <div class="stat rv d2"><b>≈50</b><span>m D+ par boucle</span></div>
       <div class="stat rv d3"><b>{round(lo)}–{round(hi)}</b><span>m d’altitude</span></div>
     </div>
@@ -189,7 +192,7 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", "Départ et arrivée Place 
       <svg viewBox="0 0 1000 230" role="img" aria-label="Profil altimétrique de la boucle, de {round(lo)} à {round(hi)} mètres">
         <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3d97" stop-opacity=".55"/><stop offset="1" stop-color="#ff3d97" stop-opacity="0"/></linearGradient></defs>
         <path class="area" d="{R["prof"]} L1000 200 L0 200 Z"/><path class="ln" d="{R["prof"]}"/>
-        {"".join(f'<text x="{min(max(i*1000/5.03,14),985):.0f}" y="225" text-anchor="middle">{i} km</text>' for i in range(6))}
+        {"".join(f'<text x="{min(max(i*1000/KM,14),985):.0f}" y="225" text-anchor="middle">{i} km</text>' for i in range(6))}
       </svg>
     </div>
   </div>
@@ -249,17 +252,17 @@ inscriptions = hero("Inscriptions · du 1er février au 15 mai 2027", "PRENDS TO
 <section style="padding-top:0"><div class="wrap">
 <div class="grid-2">
   <div class="card price rv"><span class="badge" style="background:rgba(255,255,255,.1)">Découverte</span><h3 style="font-size:3rem">5 KM</h3><div class="amt">8€<small> / dossard</small></div>
-    <ul><li>1 boucle de 5,03 km</li><li>Chronométrage</li><li>Ravitaillement à l’arrivée</li><li>Accès au village</li></ul>
+    <ul><li>1 boucle de {KMs} km</li><li>Chronométrage</li><li>Ravitaillement à l’arrivée</li><li>Accès au village</li></ul>
     <a class="btn ghost" aria-disabled="true" role="link">Bientôt disponible</a></div>
   <div class="card price feat rv d1"><span class="badge">Challenge</span><h3 style="font-size:3rem">10 KM</h3><div class="amt">8€<small> / dossard</small></div>
-    <ul><li>2 boucles, 10,05 km</li><li>Chronométrage avec temps de passage</li><li>Point d’eau au km 2,5 et 7,5</li><li>Accès au village</li></ul>
+    <ul><li>2 boucles, {KM2s} km</li><li>Chronométrage avec temps de passage</li><li>Point d’eau au km 2,5 et 7,5</li><li>Accès au village</li></ul>
     <a class="btn" aria-disabled="true" role="link">Bientôt disponible</a></div>
 </div>
 <div class="stats" style="margin-top:60px">
-  <div class="stat rv"><b data-count="500">0</b><span>places au total</span></div>
+  <div class="stat rv"><b data-count="5000">0</b><span>places au total</span></div>
   <div class="stat rv d1"><b>18+</b><span>étudiants majeurs</span></div>
   <div class="stat rv d2"><b>01.02</b><span>ouverture</span></div>
-  <div class="stat rv d3"><b>11.04</b><span>clôture</span></div>
+  <div class="stat rv d3"><b>15.05</b><span>clôture</span></div>
 </div>
 </div></section>
 '''

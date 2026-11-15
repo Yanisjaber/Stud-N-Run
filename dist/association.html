@@ -3,50 +3,55 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="STUD N’ RUN, projet de course étudiante à Toulouse. Parcours, horaires, inscriptions et association.">
-<meta name="theme-color" content="#fff6fb">
 <title>Association · STUD N’ RUN</title>
+<meta name="description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<meta name="theme-color" content="#14040c">
+<meta property="og:title" content="Association · STUD N’ RUN">
+<meta property="og:description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2314040c'/%3E%3Ctext x='50' y='70' font-size='58' font-weight='900' font-style='italic' text-anchor='middle' fill='%23ff3d97' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="script.js" defer></script>
 </head>
 <body>
-<header>
-  <div class="wrap navbar">
+<div class="glow" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="wrap nav">
     <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <button type="button" class="menu-toggle" aria-controls="navigation-principale" aria-expanded="false" hidden>Menu</button>
-    <nav id="navigation-principale" aria-label="Navigation principale">
-      <a href="index.html">Accueil</a>
-      <a href="parcours.html">Parcours</a>
-      <a href="horaires.html">Horaires</a>
-      <a href="infos-pratiques.html">Infos pratiques</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="association.html" aria-current="page">Association</a>
-    </nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
+    <nav class="nav-links" id="nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html" aria-current="page">Association</a><a class="cta" href="inscriptions.html">S’inscrire</a></nav>
   </div>
 </header>
-<div class="demo-notice" role="note">Site de démonstration · Toutes les informations et données présentées sont fictives.</div>
 <main>
-  <section class="page-heading" aria-labelledby="titre">
-    <div class="wrap"><h1 id="titre">Association</h1><p class="section-intro">Découvre le projet associatif et les façons de t’impliquer.</p></div>
-  </section>
-  <section class="wrap page-body"><div class="card"><h2>Porter la course</h2><p>Dans cet exemple, une équipe étudiante imaginaire coordonne la course et rassemble les campus toulousains autour du sport.</p>
-        <h3>Une équipe fictive</h3>
-        <ul class="roles"><li><strong>Camille Martin</strong> · Présidence et coordination</li><li><strong>Alex Moreau</strong> · Parcours et logistique</li><li><strong>Lina Bernard</strong> · Bénévoles et vie de campus</li></ul>
-        <h3>Comment s’impliquer</h3>
-        <ul class="roles">
-          <li><strong>Étudiants et BDE</strong> · Relayer la course sur leur campus.</li>
-          <li><strong>Bénévoles</strong> · Aider à l’accueil et au retrait des dossards.</li>
-          <li><strong>Partenaires</strong> · Apporter un soutien matériel ou financier.</li>
-        </ul>
-        <p style="margin-top:1rem">Ces personnes et ces rôles sont fictifs ; aucun contact réel n’est associé à cette démonstration.</p></div></section>
+<section class="page-hero"><div class="wrap"><p class="eyebrow rv">L’association</p><h1 class="rv d1">PORTER LA <em>COURSE</em></h1><p class="lead rv d2">Une équipe étudiante qui rassemble les campus toulousains autour du sport.</p></div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">L’équipe (fictive)</p><h2 class="rv d1">ON EST<br><em>DERRIÈRE.</em></h2></div></div>
+<div class="team"><div class="card member rv"><div class="av" aria-hidden="true">C</div><div><h3>Camille Martin</h3><p>Présidence et coordination</p></div></div><div class="card member rv d1"><div class="av" aria-hidden="true">A</div><div><h3>Alex Moreau</h3><p>Parcours et logistique</p></div></div><div class="card member rv d2"><div class="av" aria-hidden="true">L</div><div><h3>Lina Bernard</h3><p>Bénévoles et vie de campus</p></div></div></div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">Rejoins le mouvement</p><h2 class="rv d1">COMMENT<br><em>T’IMPLIQUER.</em></h2></div></div>
+<div class="grid-3">
+  <div class="card rv"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M21 20c0-2.7-1.6-5-4-5.7"/></svg></span><h3>Étudiants et BDE</h3><p>Relaie la course sur ton campus et monte une équipe avec ton école.</p></div>
+  <div class="card rv d1"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 11V6a1.5 1.5 0 0 1 3 0v5M10 10V4.5a1.5 1.5 0 0 1 3 0V10M13 10V5.5a1.5 1.5 0 0 1 3 0V12M16 9a1.5 1.5 0 0 1 3 0v4a8 8 0 0 1-8 8h-.5a6 6 0 0 1-5-2.7L3 15.5a1.5 1.5 0 0 1 2.4-1.8L7 15"/></svg></span><h3>Bénévoles</h3><p>Accueil, dossards, ravitaillement, signaleurs : environ 30 personnes à mobiliser le jour J.</p></div>
+  <div class="card rv d2"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3z"/></svg></span><h3>Partenaires</h3><p>Apporte un soutien matériel ou financier et associe ta marque à l’événement.</p></div>
+</div>
+<p style="color:var(--muted);font-size:.85rem;margin-top:30px">Ces personnes et ces rôles sont fictifs. Aucun contact réel n’est associé à cette démonstration.</p>
+</div></section>
+<section><div class="wrap"><div class="cta-band rv">
+<span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
+<p class="eyebrow" style="color:#fff">500 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
+<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 11 avril 2027. 5 ou 10 km, tu choisis ton défi.</p>
+<div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
+</div></div></section>
+
 </main>
-<footer>
-  <div class="wrap navbar">
-    <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <small>Événement fictif · Toulouse</small>
+<div class="notice" role="note">Site de démonstration · Date, horaires, tarifs et équipe sont fictifs. Le parcours est le tracé réel prévu.</div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">STUD <span>N’</span> RUN</div>
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse</span><nav aria-label="Pied de page"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html">Association</a><a href="inscriptions.html">Inscriptions</a></nav></div>
   </div>
 </footer>
 </body>

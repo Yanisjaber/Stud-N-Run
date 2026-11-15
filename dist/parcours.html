@@ -3,66 +3,80 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="STUD N’ RUN, projet de course étudiante à Toulouse. Parcours, horaires, inscriptions et association.">
-<meta name="theme-color" content="#fff6fb">
 <title>Parcours · STUD N’ RUN</title>
+<meta name="description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<meta name="theme-color" content="#14040c">
+<meta property="og:title" content="Parcours · STUD N’ RUN">
+<meta property="og:description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2314040c'/%3E%3Ctext x='50' y='70' font-size='58' font-weight='900' font-style='italic' text-anchor='middle' fill='%23ff3d97' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">
-<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>
 <script src="script.js" defer></script>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>
 <script src="parcours-3d.js" defer></script>
 </head>
 <body>
-<header>
-  <div class="wrap navbar">
+<div class="glow" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="wrap nav">
     <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <button type="button" class="menu-toggle" aria-controls="navigation-principale" aria-expanded="false" hidden>Menu</button>
-    <nav id="navigation-principale" aria-label="Navigation principale">
-      <a href="index.html">Accueil</a>
-      <a href="parcours.html" aria-current="page">Parcours</a>
-      <a href="horaires.html">Horaires</a>
-      <a href="infos-pratiques.html">Infos pratiques</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="association.html">Association</a>
-    </nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
+    <nav class="nav-links" id="nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="parcours.html" aria-current="page">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html">Association</a><a class="cta" href="inscriptions.html">S’inscrire</a></nav>
   </div>
 </header>
-<div class="demo-notice" role="note">Site de démonstration · Toutes les informations et données présentées sont fictives.</div>
 <main>
-  <section class="page-heading" aria-labelledby="titre">
-    <div class="wrap"><h1 id="titre">Parcours</h1><p class="section-intro">Découvre le parcours imaginé pour cette édition de démonstration.</p></div>
-  </section>
-  <section class="wrap page-body">
-    <div class="card">
-      <h2>Une boucle, deux distances</h2>
-      <p>Départ et arrivée Place Saint-Pierre. Une boucle de 5 km à parcourir une fois pour le 5 km, deux fois pour le 10 km.</p>
-      <dl class="field-list">
-        <div><dt>5 km</dt><dd>1 boucle · 5,03 km</dd></div>
-        <div><dt>10 km</dt><dd>2 boucles · 10,05 km</dd></div>
-        <div><dt>Dénivelé</dt><dd>environ 50 m D+ par boucle</dd></div>
-        <div><dt>Départ et arrivée</dt><dd>Place Saint-Pierre, Toulouse</dd></div>
-      </dl>
-      <p>Le parcours longe le canal de Brienne, passe par Compans-Caffarelli, Jeanne d’Arc, Saint-Sernin et Esquirol, puis traverse la Garonne par le Pont Neuf et le Pont Saint-Pierre.</p>
+<section class="page-hero"><div class="wrap"><p class="eyebrow rv">Le parcours</p><h1 class="rv d1">LA <em>BOUCLE</em></h1><p class="lead rv d2">Départ et arrivée Place Saint-Pierre. Une boucle de 5,03 km, une fois pour le 5 km, deux fois pour le 10 km.</p></div></section>
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="map-shell rv">
+      <div id="map3d" aria-label="Carte 3D interactive du parcours"></div>
+      <div class="map-ui"><button class="btn" id="fly-btn" type="button">▶&nbsp; Survoler le parcours</button><button class="btn ghost" id="reset-btn" type="button" style="background:rgba(20,4,12,.75)">Vue d’ensemble</button><div class="map-progress"><i></i></div><span class="map-km">0,00 km</span></div>
+      <noscript><img src="assets/parcours-carte.jpg" alt="Carte du parcours"></noscript>
     </div>
-    <div class="map3d-wrap">
-      <div id="map3d" role="img" aria-label="Carte 3D du parcours : boucle de 5 km au départ de la Place Saint-Pierre"></div>
-      <div class="map3d-bar"><button type="button" class="button" id="fly-btn">▶ Survoler le parcours</button><button type="button" class="button secondary" id="reset-btn">Vue d’ensemble</button><span>Clic droit ou Ctrl + glisser pour incliner, molette pour zoomer.</span></div>
-      <noscript><img src="assets/parcours-carte.jpg" alt="Carte du parcours" style="width:100%;height:auto"></noscript>
+    <p style="color:var(--muted);font-size:.85rem;margin-top:12px">Ctrl + molette pour zoomer, clic droit + glisser pour pivoter et incliner. Deux doigts sur mobile.</p>
+  </div>
+</section>
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="stats" style="margin-bottom:60px">
+      <div class="stat rv"><b>5,03</b><span>km par boucle</span></div>
+      <div class="stat rv d1"><b>10,05</b><span>km pour 2 boucles</span></div>
+      <div class="stat rv d2"><b>≈50</b><span>m D+ par boucle</span></div>
+      <div class="stat rv d3"><b>140–158</b><span>m d’altitude</span></div>
     </div>
-    <div class="actions" style="justify-content:flex-start;margin-top:20px">
-      <a class="button" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF)</a>
-      <a class="button secondary" href="assets/stud-n-run-parcours.gpx" download>Télécharger la trace GPX</a>
+    <div class="profile rv">
+      <p class="eyebrow">Profil altimétrique · 1 boucle</p>
+      <svg viewBox="0 0 1000 230" role="img" aria-label="Profil altimétrique de la boucle, de 140 à 158 mètres">
+        <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3d97" stop-opacity=".55"/><stop offset="1" stop-color="#ff3d97" stop-opacity="0"/></linearGradient></defs>
+        <path class="area" d="M0.0 120.5 L3.8 113.6 L5.2 111.8 L13.1 124.0 L13.8 124.9 L14.9 128.4 L15.9 130.2 L23.7 148.5 L25.0 154.6 L26.3 151.1 L28.4 167.8 L41.7 165.1 L44.7 165.1 L46.7 165.1 L58.9 165.1 L60.5 161.6 L61.6 159.0 L63.5 155.5 L65.7 150.3 L70.9 141.5 L89.7 139.8 L104.3 135.4 L119.0 133.7 L133.5 138.9 L135.4 138.9 L136.3 138.9 L138.1 138.9 L139.2 138.0 L139.5 138.0 L143.7 138.0 L150.2 137.2 L161.0 154.6 L171.6 173.0 L183.8 180.0 L195.5 174.8 L207.3 167.8 L209.9 166.9 L216.1 165.1 L219.5 163.4 L220.8 162.5 L236.0 161.6 L251.3 152.9 L252.9 152.0 L253.8 150.3 L254.3 150.3 L255.0 148.5 L257.9 143.3 L264.9 128.4 L268.5 120.5 L272.6 109.2 L273.5 107.4 L279.1 89.9 L281.3 83.8 L289.9 59.3 L294.1 65.5 L295.6 67.2 L297.2 75.1 L298.2 77.7 L308.3 112.7 L318.6 127.5 L320.4 128.4 L321.7 128.4 L322.8 128.4 L324.6 129.3 L326.6 129.3 L328.3 128.4 L331.0 129.3 L332.1 130.2 L333.1 131.0 L351.3 117.0 L358.0 118.8 L368.7 117.0 L379.3 110.1 L390.2 104.8 L401.2 100.4 L402.1 100.4 L403.4 99.6 L420.0 86.4 L436.6 89.9 L440.5 87.3 L451.4 96.1 L462.3 92.6 L471.3 87.3 L474.3 85.6 L476.3 82.1 L477.9 79.5 L480.6 75.1 L481.9 72.5 L483.9 70.7 L486.9 69.0 L496.8 83.0 L497.7 83.8 L498.4 83.8 L499.5 83.0 L505.9 81.2 L518.6 78.6 L522.5 77.7 L531.9 81.2 L545.3 90.8 L558.9 77.7 L563.3 73.3 L566.7 74.2 L568.1 74.2 L569.9 76.0 L585.6 82.1 L589.8 73.3 L593.1 77.7 L608.8 47.1 L619.9 39.2 L625.2 34.9 L633.6 27.0 L639.6 20.9 L644.5 20.0 L646.1 20.9 L656.0 30.5 L663.5 36.6 L669.9 36.6 L670.9 35.7 L672.0 35.7 L674.4 32.2 L694.0 33.1 L712.3 61.1 L722.8 97.8 L725.3 100.4 L727.6 103.1 L736.8 112.7 L754.3 131.9 L771.9 150.3 L788.2 167.8 L804.6 149.4 L821.0 138.9 L836.7 153.8 L852.6 159.0 L863.9 162.5 L866.2 164.3 L870.4 164.3 L871.3 164.3 L889.7 148.5 L889.8 148.5 L896.1 149.4 L896.7 148.5 L909.6 151.1 L917.0 145.0 L928.2 131.9 L939.2 159.9 L942.1 158.1 L943.7 157.3 L945.2 156.4 L960.7 146.8 L976.5 138.0 L992.2 128.4 L999.2 124.0 L1000.0 123.2 L1000 200 L0 200 Z"/><path class="ln" d="M0.0 120.5 L3.8 113.6 L5.2 111.8 L13.1 124.0 L13.8 124.9 L14.9 128.4 L15.9 130.2 L23.7 148.5 L25.0 154.6 L26.3 151.1 L28.4 167.8 L41.7 165.1 L44.7 165.1 L46.7 165.1 L58.9 165.1 L60.5 161.6 L61.6 159.0 L63.5 155.5 L65.7 150.3 L70.9 141.5 L89.7 139.8 L104.3 135.4 L119.0 133.7 L133.5 138.9 L135.4 138.9 L136.3 138.9 L138.1 138.9 L139.2 138.0 L139.5 138.0 L143.7 138.0 L150.2 137.2 L161.0 154.6 L171.6 173.0 L183.8 180.0 L195.5 174.8 L207.3 167.8 L209.9 166.9 L216.1 165.1 L219.5 163.4 L220.8 162.5 L236.0 161.6 L251.3 152.9 L252.9 152.0 L253.8 150.3 L254.3 150.3 L255.0 148.5 L257.9 143.3 L264.9 128.4 L268.5 120.5 L272.6 109.2 L273.5 107.4 L279.1 89.9 L281.3 83.8 L289.9 59.3 L294.1 65.5 L295.6 67.2 L297.2 75.1 L298.2 77.7 L308.3 112.7 L318.6 127.5 L320.4 128.4 L321.7 128.4 L322.8 128.4 L324.6 129.3 L326.6 129.3 L328.3 128.4 L331.0 129.3 L332.1 130.2 L333.1 131.0 L351.3 117.0 L358.0 118.8 L368.7 117.0 L379.3 110.1 L390.2 104.8 L401.2 100.4 L402.1 100.4 L403.4 99.6 L420.0 86.4 L436.6 89.9 L440.5 87.3 L451.4 96.1 L462.3 92.6 L471.3 87.3 L474.3 85.6 L476.3 82.1 L477.9 79.5 L480.6 75.1 L481.9 72.5 L483.9 70.7 L486.9 69.0 L496.8 83.0 L497.7 83.8 L498.4 83.8 L499.5 83.0 L505.9 81.2 L518.6 78.6 L522.5 77.7 L531.9 81.2 L545.3 90.8 L558.9 77.7 L563.3 73.3 L566.7 74.2 L568.1 74.2 L569.9 76.0 L585.6 82.1 L589.8 73.3 L593.1 77.7 L608.8 47.1 L619.9 39.2 L625.2 34.9 L633.6 27.0 L639.6 20.9 L644.5 20.0 L646.1 20.9 L656.0 30.5 L663.5 36.6 L669.9 36.6 L670.9 35.7 L672.0 35.7 L674.4 32.2 L694.0 33.1 L712.3 61.1 L722.8 97.8 L725.3 100.4 L727.6 103.1 L736.8 112.7 L754.3 131.9 L771.9 150.3 L788.2 167.8 L804.6 149.4 L821.0 138.9 L836.7 153.8 L852.6 159.0 L863.9 162.5 L866.2 164.3 L870.4 164.3 L871.3 164.3 L889.7 148.5 L889.8 148.5 L896.1 149.4 L896.7 148.5 L909.6 151.1 L917.0 145.0 L928.2 131.9 L939.2 159.9 L942.1 158.1 L943.7 157.3 L945.2 156.4 L960.7 146.8 L976.5 138.0 L992.2 128.4 L999.2 124.0 L1000.0 123.2"/>
+        <text x="14" y="225" text-anchor="middle">0 km</text><text x="199" y="225" text-anchor="middle">1 km</text><text x="398" y="225" text-anchor="middle">2 km</text><text x="596" y="225" text-anchor="middle">3 km</text><text x="795" y="225" text-anchor="middle">4 km</text><text x="985" y="225" text-anchor="middle">5 km</text>
+      </svg>
     </div>
-    <p class="related"><a href="horaires.html">Voir les horaires →</a></p>
-  </section>
+  </div>
+</section>
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><div><p class="eyebrow rv">Points de passage</p><h2 class="rv d1">KILOMÈTRE<br><em>PAR KILOMÈTRE.</em></h2></div></div>
+    <ol class="timeline"><li class="tl rv key"><time>0 km</time><div><h3>Place Saint-Pierre</h3><p>Départ au bord de la Garonne, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne.</p></div></li><li class="tl rv"><time>0,7 km</time><div><h3>Canal de Brienne</h3><p>On longe le quai Saint-Pierre puis le canal, à l’ombre des platanes.</p></div></li><li class="tl rv"><time>1,3 km</time><div><h3>Compans-Caffarelli</h3><p>Cap à l’est sur les boulevards, à côté des campus de l’Arsenal.</p></div></li><li class="tl rv"><time>2,4 km</time><div><h3>Saint-Sernin</h3><p>On tourne autour de la basilique. Point d’eau en vue.</p></div></li><li class="tl rv"><time>3,4 km</time><div><h3>Esquirol</h3><p>Plongée vers le sud, à deux pas du Capitole.</p></div></li><li class="tl rv"><time>3,9 km</time><div><h3>Pont Neuf</h3><p>Première traversée de la Garonne, avec la vue sur les quais.</p></div></li><li class="tl rv key"><time>4,5 km</time><div><h3>Pont Saint-Pierre</h3><p>Retour rive droite, dernière ligne droite vers la place. Pour le 10 km, c’est reparti pour un tour.</p></div></li></ol>
+    <div class="btns rv" style="margin-top:50px"><a class="btn" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF) <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-parcours.gpx" download>Trace GPX pour ta montre <span class="arr">↓</span></a></div>
+  </div>
+</section>
+<section><div class="wrap"><div class="cta-band rv">
+<span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
+<p class="eyebrow" style="color:#fff">500 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
+<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 11 avril 2027. 5 ou 10 km, tu choisis ton défi.</p>
+<div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
+</div></div></section>
+
 </main>
-<footer>
-  <div class="wrap navbar">
-    <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <small>Événement fictif · Toulouse</small>
+<div class="notice" role="note">Site de démonstration · Date, horaires, tarifs et équipe sont fictifs. Le parcours est le tracé réel prévu.</div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">STUD <span>N’</span> RUN</div>
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse</span><nav aria-label="Pied de page"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html">Association</a><a href="inscriptions.html">Inscriptions</a></nav></div>
   </div>
 </footer>
 </body>

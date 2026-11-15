@@ -3,67 +3,100 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="STUD N’ RUN, projet de course étudiante à Toulouse. Parcours, horaires, inscriptions et association.">
-<meta name="theme-color" content="#fff6fb">
-<title>Accueil · STUD N’ RUN</title>
+<title>STUD N’ RUN · Course étudiante Toulouse</title>
+<meta name="description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<meta name="theme-color" content="#14040c">
+<meta property="og:title" content="STUD N’ RUN · Course étudiante Toulouse">
+<meta property="og:description" content="STUD N’ RUN, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2314040c'/%3E%3Ctext x='50' y='70' font-size='58' font-weight='900' font-style='italic' text-anchor='middle' fill='%23ff3d97' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 <script src="script.js" defer></script>
 </head>
 <body>
-<header>
-  <div class="wrap navbar">
+<div class="glow" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="wrap nav">
     <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <button type="button" class="menu-toggle" aria-controls="navigation-principale" aria-expanded="false" hidden>Menu</button>
-    <nav id="navigation-principale" aria-label="Navigation principale">
-      <a href="index.html" aria-current="page">Accueil</a>
-      <a href="parcours.html">Parcours</a>
-      <a href="horaires.html">Horaires</a>
-      <a href="infos-pratiques.html">Infos pratiques</a>
-      <a href="inscriptions.html">Inscriptions</a>
-      <a href="association.html">Association</a>
-    </nav>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
+    <nav class="nav-links" id="nav" aria-label="Navigation principale"><a href="index.html" aria-current="page">Accueil</a><a href="parcours.html">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html">Association</a><a class="cta" href="inscriptions.html">S’inscrire</a></nav>
   </div>
 </header>
-<div class="demo-notice" role="note">Site de démonstration · Toutes les informations et données présentées sont fictives.</div>
 <main>
-  
-  <section class="hero" aria-labelledby="titre">
-    <div class="wrap hero-grid">
-      <div>
-        <p class="eyebrow">Course étudiante · Toulouse</p>
-        <h1 id="titre">STUD <span>N’ RUN</span></h1>
-        <p class="lead">Une course à pied pour réunir les étudiants des écoles et universités toulousaines, tous campus confondus.</p>
-        <div class="actions">
-          <a class="button" href="parcours.html">Voir le parcours&nbsp; →</a>
-          <a class="button secondary" href="inscriptions.html">Infos inscriptions</a>
-        </div>
+
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="eyebrow">Course étudiante · Toulouse</p>
+      <h1><span class="l"><span>STUD</span></span><span class="l"><span><em>N’ RUN</em></span></span></h1>
+      <div class="hero-meta"><span class="chip"><b>18.04</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
+      <p class="lead">Tous les campus de Toulouse sur la même ligne de départ. Une boucle au cœur de la ville, deux ponts sur la Garonne, et une arrivée en fête.</p>
+      <div class="btns" style="margin-top:28px"><a class="btn" href="inscriptions.html">Je m’inscris <span class="arr">→</span></a><a class="btn ghost" href="parcours.html">Voir le parcours 3D</a></div>
+      <div class="countdown" data-date="2027-04-18T09:30:00+02:00" aria-label="Compte à rebours avant le départ">
+        <div><b>–</b><span>jours</span></div><div><b>–</b><span>heures</span></div><div><b>–</b><span>min</span></div><div><b>–</b><span>sec</span></div>
       </div>
     </div>
-  </section>
-
-  <div class="facts">
-    <dl class="wrap">
-      <div><dt>Ville</dt><dd>Toulouse</dd></div>
-      <div><dt>Date</dt><dd>18 avril 2027</dd></div>
-      <div><dt>Inscriptions</dt><dd>Du 1er février au 11 avril</dd></div>
-    </dl>
+    <div class="hero-route"><svg class="" viewBox="0 0 813 1000" role="img" aria-label="Tracé de la boucle de 5 km dans Toulouse"><path class="route-bg" d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1"/><path class="route-path" d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1"/><circle class="km-dot" cx="135.3" cy="225.6" r="16"/><text class="km-txt" x="161.3" y="235.6">1</text><circle class="km-dot" cx="670.5" cy="108.3" r="16"/><text class="km-txt" x="696.5" y="118.3">2</text><circle class="km-dot" cx="692.3" cy="570.0" r="16"/><text class="km-txt" x="718.3" y="580.0">3</text><circle class="km-dot" cx="346.9" cy="899.0" r="16"/><text class="km-txt" x="372.9" y="909.0">4</text><circle class="start-dot" cx="320.2" cy="586.3" r="20"/><circle class="runner" r="11" cx="320.2" cy="586.3" style="opacity:0"/></svg></div>
   </div>
+  <span class="scroll-hint">Défiler</span>
+</section>
+<div class="marquee" aria-hidden="true"><div class="marquee-track"><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span></div></div>
+<section>
+  <div class="wrap">
+    <div class="sec-head"><div><p class="eyebrow rv">Choisis ton défi</p><h2 class="rv d1">UNE VILLE.<br><em>DEUX DÉFIS.</em></h2></div>
+    <p class="lead rv d2">La même boucle de 5 km, à courir une fois ou deux. Débutant ou habitué, il y a une distance pour toi.</p></div>
+    <div class="duo">
+      <article class="dist rv"><svg class="loops" viewBox="0 0 813 1000" aria-hidden="true"><path d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1" transform="translate(0 0)"/></svg><span class="tag">Découverte</span><div class="big">5<small>KM</small></div>
+        <ul><li><span>Boucles</span><b>1</b></li><li><span>Distance</span><b>5,03 km</b></li><li><span>Dénivelé</span><b>≈ 50 m D+</b></li></ul></article>
+      <article class="dist hot rv d1"><svg class="loops" viewBox="0 0 813 1000" aria-hidden="true"><path d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1" transform="translate(0 0)"/><path d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1" transform="translate(60 60)"/></svg><span class="tag">Challenge</span><div class="big">10<small>KM</small></div>
+        <ul><li><span>Boucles</span><b>2</b></li><li><span>Distance</span><b>10,05 km</b></li><li><span>Dénivelé</span><b>≈ 100 m D+</b></li></ul></article>
+    </div>
+  </div>
+</section>
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><div><p class="eyebrow rv">La boucle</p><h2 class="rv d1">5 KM DANS<br><em>LA VILLE ROSE.</em></h2></div>
+    <a class="btn ghost rv d2" href="parcours.html">Explorer en 3D <span class="arr">→</span></a></div>
+    <div class="story">
+      <div class="story-map"><svg class="" viewBox="0 0 813 1000" role="img" aria-label="Tracé de la boucle de 5 km dans Toulouse"><path class="route-bg" d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1"/><path class="route-path" d="M320.2 586.3 L326.1 576.2 L327.1 572.1 L307.0 558.6 L305.0 557.9 L302.0 559.3 L300.1 562.0 L285.9 580.9 L282.4 583.0 L284.4 586.3 L278.0 585.7 L244.2 562.6 L236.3 557.9 L231.4 554.5 L244.2 519.3 L244.7 514.6 L244.7 511.2 L242.7 505.8 L239.8 499.7 L228.5 488.1 L177.5 461.7 L137.8 441.4 L97.6 421.1 L57.8 401.5 L52.9 398.1 L51.0 396.0 L50.0 390.6 L50.0 387.2 L50.5 386.6 L56.4 375.1 L65.2 357.4 L80.9 328.3 L96.6 299.9 L113.7 266.7 L130.4 234.9 L147.1 203.0 L150.5 195.6 L158.9 178.7 L168.7 175.3 L172.6 174.6 L215.7 157.0 L258.9 138.7 L259.9 134.0 L262.3 135.3 L262.8 134.0 L264.8 134.7 L272.6 130.6 L292.7 122.5 L303.0 119.1 L315.3 115.7 L317.7 115.0 L333.4 107.6 L339.3 104.9 L363.8 94.7 L375.6 90.0 L379.0 86.6 L383.4 84.5 L386.4 85.2 L414.8 73.0 L443.8 60.8 L448.7 58.1 L450.6 54.7 L454.1 54.1 L459.5 52.7 L465.3 54.1 L469.8 56.8 L477.6 54.1 L478.1 50.7 L481.0 50.0 L534.5 65.6 L554.1 71.0 L585.5 80.5 L616.9 89.3 L648.2 100.8 L680.1 111.6 L682.6 112.3 L686.0 114.3 L725.2 146.8 L755.6 187.5 L763.0 197.0 L732.1 209.1 L701.2 222.0 L675.2 231.5 L666.4 234.2 L666.9 240.3 L666.4 245.0 L664.9 253.2 L663.0 256.5 L659.0 261.3 L651.7 266.7 L625.7 282.3 L623.7 284.3 L623.2 286.3 L623.7 289.7 L629.1 308.7 L639.9 345.9 L642.9 357.4 L650.2 385.2 L657.1 425.8 L663.0 467.2 L666.4 480.0 L668.3 490.2 L669.8 494.2 L670.8 499.7 L678.6 547.1 L680.6 559.9 L690.4 558.6 L698.3 606.0 L702.2 639.8 L703.2 656.1 L702.7 681.8 L704.1 700.1 L706.1 715.0 L707.6 719.8 L711.5 749.5 L712.0 772.6 L714.0 792.2 L711.0 792.2 L711.0 795.6 L703.7 797.0 L646.8 815.2 L593.8 833.5 L562.9 842.3 L556.1 845.7 L549.2 847.7 L521.7 854.5 L469.8 867.4 L417.8 880.9 L369.2 893.1 L320.7 906.0 L272.1 918.2 L225.6 930.4 L178.5 941.9 L144.6 950.0 L137.8 950.0 L138.3 937.1 L138.8 934.4 L164.3 884.3 L164.7 884.3 L173.6 867.4 L172.1 866.0 L189.8 830.8 L201.0 811.2 L216.7 780.7 L232.9 750.9 L236.3 742.8 L237.8 738.0 L239.8 734.0 L261.8 692.0 L284.4 649.3 L306.5 606.7 L316.8 587.7 L318.7 589.1"/><circle class="km-dot" cx="135.3" cy="225.6" r="16"/><text class="km-txt" x="161.3" y="235.6">1</text><circle class="km-dot" cx="670.5" cy="108.3" r="16"/><text class="km-txt" x="696.5" y="118.3">2</text><circle class="km-dot" cx="692.3" cy="570.0" r="16"/><text class="km-txt" x="718.3" y="580.0">3</text><circle class="km-dot" cx="346.9" cy="899.0" r="16"/><text class="km-txt" x="372.9" y="909.0">4</text><circle class="start-dot" cx="320.2" cy="586.3" r="20"/><circle class="runner" r="11" cx="320.2" cy="586.3" style="opacity:0"/></svg></div>
+      <ol class="steps"><li class="step"><span class="km">0<small style="font-size:.45em"> km</small></span><div><h3>Place Saint-Pierre</h3><p>Départ au bord de la Garonne, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne.</p></div></li><li class="step"><span class="km">0,7<small style="font-size:.45em"> km</small></span><div><h3>Canal de Brienne</h3><p>On longe le quai Saint-Pierre puis le canal, à l’ombre des platanes.</p></div></li><li class="step"><span class="km">1,3<small style="font-size:.45em"> km</small></span><div><h3>Compans-Caffarelli</h3><p>Cap à l’est sur les boulevards, à côté des campus de l’Arsenal.</p></div></li><li class="step"><span class="km">2,4<small style="font-size:.45em"> km</small></span><div><h3>Saint-Sernin</h3><p>On tourne autour de la basilique. Point d’eau en vue.</p></div></li><li class="step"><span class="km">3,4<small style="font-size:.45em"> km</small></span><div><h3>Esquirol</h3><p>Plongée vers le sud, à deux pas du Capitole.</p></div></li><li class="step"><span class="km">3,9<small style="font-size:.45em"> km</small></span><div><h3>Pont Neuf</h3><p>Première traversée de la Garonne, avec la vue sur les quais.</p></div></li><li class="step"><span class="km">4,5<small style="font-size:.45em"> km</small></span><div><h3>Pont Saint-Pierre</h3><p>Retour rive droite, dernière ligne droite vers la place. Pour le 10 km, c’est reparti pour un tour.</p></div></li></ol>
+    </div>
+  </div>
+</section>
+<section style="padding-top:0">
+  <div class="wrap stats">
+    <div class="stat rv"><b data-count="500">0</b><span>dossards</span></div>
+    <div class="stat rv d1"><b data-count="5.03">0</b><span>km par boucle</span></div>
+    <div class="stat rv d2"><b data-count="2">0</b><span>ponts sur la Garonne</span></div>
+    <div class="stat rv d3"><b data-count="1">0</b><span>place en fête à l’arrivée</span></div>
+  </div>
+</section>
+<section style="padding-top:0">
+  <div class="wrap">
+    <div class="sec-head"><div><p class="eyebrow rv">Prépare ta course</p><h2 class="rv d1">TOUT CE QU’IL<br><em>FAUT SAVOIR.</em></h2></div></div>
+    <div class="grid-3">
+      <a class="card rv" href="horaires.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 3 5 14h6l-1 7 8-11h-6l1-7z"/></svg></span><span class="go">↗</span><h3>Horaires</h3><p>Dossards, échauffement, départ et remise des prix.</p></a>
+      <a class="card rv d1" href="infos-pratiques.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></span><span class="go">↗</span><h3>Infos pratiques</h3><p>Accès, consigne, ravitaillement et questions fréquentes.</p></a>
+      <a class="card rv d2" href="association.html"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5a3 3 0 0 1 0 6M21 20c0-2.7-1.6-5-4-5.7"/></svg></span><span class="go">↗</span><h3>L’équipe</h3><p>L’asso, les BDE et les bénévoles derrière la course.</p></a>
+    </div>
+  </div>
+</section>
+<div class="marquee alt" aria-hidden="true"><div class="marquee-track"><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span><span>5 KM</span><span>10 KM</span><span>PLACE SAINT-PIERRE</span><span>TOUS CAMPUS</span><span>18 AVRIL 2027</span><span>UNE VILLE, DEUX DÉFIS</span></div></div>
+<section><div class="wrap"><div class="cta-band rv">
+<span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
+<p class="eyebrow" style="color:#fff">500 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
+<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 11 avril 2027. 5 ou 10 km, tu choisis ton défi.</p>
+<div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
+</div></div></section>
 
-  <section class="wrap page-body" aria-labelledby="fiche"><h2 id="fiche">Préparer ta course</h2><div class="grid">
-      <a class="card card-link" href="parcours.html"><h3>Parcours <span aria-hidden="true">→</span></h3><p>Un parcours imaginaire de 5 km</p></a>
-      <a class="card card-link" href="horaires.html"><h3>Horaires <span aria-hidden="true">→</span></h3><p>Programme de la journée</p></a>
-      <a class="card card-link" href="infos-pratiques.html"><h3>Infos pratiques <span aria-hidden="true">→</span></h3><p>Accès, dossards et questions fréquentes</p></a>
-      <a class="card card-link" href="inscriptions.html"><h3>Inscriptions <span aria-hidden="true">→</span></h3><p>Ouverture et tarif du dossard</p></a>
-      <a class="card card-link" href="association.html"><h3>Association <span aria-hidden="true">→</span></h3><p>Équipe, BDE et bénévoles</p></a>
-</div></section>
 </main>
-<footer>
-  <div class="wrap navbar">
-    <a class="brand" href="index.html">STUD <span>N’ RUN</span></a>
-    <small>Événement fictif · Toulouse</small>
+<div class="notice" role="note">Site de démonstration · Date, horaires, tarifs et équipe sont fictifs. Le parcours est le tracé réel prévu.</div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">STUD <span>N’</span> RUN</div>
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse</span><nav aria-label="Pied de page"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="association.html">Association</a><a href="inscriptions.html">Inscriptions</a></nav></div>
   </div>
 </footer>
 </body>

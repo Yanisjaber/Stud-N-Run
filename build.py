@@ -5,7 +5,7 @@ ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
 R = json.loads((ROOT / "route-svg.json").read_text())
 
-NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("horaires.html", "Horaires"),
+NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("place/index.html", "Le village"), ("horaires.html", "Horaires"),
        ("infos-pratiques.html", "Infos pratiques"), ("association.html", "Association")]
 
 ICONS = {
@@ -204,6 +204,13 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Place
     <div class="btns rv" style="margin-top:50px"><a class="btn" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF) <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-parcours.gpx" download>Trace GPX pour ta montre <span class="arr">↓</span></a></div>
   </div>
 </section>
+<section style="padding-top:0"><div class="wrap">
+  <div class="cta-band rv" style="text-align:left;background:linear-gradient(120deg,#33101f,#1f0814)">
+    <p class="eyebrow">Maquette 3D</p><h2 style="font-size:clamp(3rem,8vw,7rem)">LE VILLAGE<br><em>JOUR DE COURSE</em></h2>
+    <p class="lead" style="margin-bottom:26px">La Place Saint-Pierre à l’échelle réelle : bâtiments, quais, gradins, pont et arche de départ et d’arrivée. Survole la place et explore l’implantation du village.</p>
+    <div class="btns"><a class="btn" href="place/index.html">Explorer la place en 3D <span class="arr">→</span></a></div>
+  </div>
+</div></section>
 {CTA}
 '''
 

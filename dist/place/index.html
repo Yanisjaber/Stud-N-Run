@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Place Saint-Pierre · Jour J · STUD N’ RUN</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14040c;--pink:#ff3d97;--blush:#ffc2de;--line:rgba(255,194,222,.18);--muted:rgba(255,236,245,.7)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;font:15px/1.45 'DM Sans',system-ui,sans-serif;color:#fff4f9}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block;outline:none}
+.title{position:fixed;left:22px;top:18px;pointer-events:none;text-shadow:0 2px 24px rgba(20,4,12,.6)}
+.title small{display:block;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:.7rem;color:var(--blush)}
+.title h1{margin:4px 0 0;font:900 italic clamp(2.2rem,5.5vw,4.2rem)/.84 'Barlow Condensed',Impact,sans-serif;letter-spacing:-.02em;text-transform:uppercase}
+.title h1 em{color:var(--pink)}
+.bar{position:fixed;right:18px;top:18px;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:min(560px,58vw)}
+.b{font:700 .8rem 'DM Sans',sans-serif;color:#fff;background:rgba(20,4,12,.72);backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:999px;padding:9px 15px;cursor:pointer;transition:background .2s,border-color .2s}
+.b:hover{border-color:var(--blush)}
+.b.on{background:var(--pink);border-color:var(--pink)}
+.legend{position:fixed;left:18px;bottom:18px;width:310px;max-height:46vh;overflow:auto;background:rgba(20,4,12,.8);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;padding:8px}
+.legend h2{margin:8px 10px 6px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--blush)}
+.legend button{all:unset;box-sizing:border-box;display:flex;gap:10px;align-items:flex-start;width:100%;padding:8px 10px;border-radius:12px;cursor:pointer}
+.legend button:hover{background:rgba(255,255,255,.07)}
+.legend b{flex:none;display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:var(--pink);font-size:.75rem}
+.legend span{font-size:.84rem;font-weight:600;display:block}
+.legend i{font-style:normal;font-size:.74rem;color:var(--muted);display:block;line-height:1.3}
+.pin{position:fixed;left:0;top:0;z-index:2;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;border:2px solid #fff;background:var(--pink);color:#fff;font:800 .72rem 'DM Sans',sans-serif;display:grid;place-items:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.4);will-change:transform;transition:opacity .25s}
+.pin em{position:absolute;left:32px;top:50%;translate:0 -50%;white-space:nowrap;font-style:normal;font-weight:700;background:rgba(20,4,12,.88);padding:5px 10px;border-radius:8px;opacity:0;pointer-events:none;transition:opacity .2s}
+.pin:hover{z-index:3}.pin:hover em{opacity:1}
+.routepanel{position:fixed;right:18px;top:62px;width:390px;max-height:calc(100vh - 150px);overflow:auto;background:rgba(20,4,12,.86);backdrop-filter:blur(14px);border:1px solid var(--line);border-radius:18px;padding:12px 12px 8px;font-size:.78rem}
+.routepanel[hidden]{display:none}
+.routepanel h2{margin:2px 4px 8px;font-size:.68rem;letter-spacing:.16em;text-transform:uppercase;color:var(--blush)}
+.routepanel .row{display:grid;grid-template-columns:48px 1fr auto;gap:8px;padding:7px 6px;border-top:1px solid var(--line);cursor:default}
+.routepanel .row.go{cursor:pointer}.routepanel .row.go:hover{background:rgba(255,255,255,.06)}
+.routepanel .row b{color:var(--pink);font-variant-numeric:tabular-nums}
+.routepanel .row small{display:block;color:var(--muted);font-size:.7rem}
+.routepanel .narrow{color:#ffd23f}
+.pin.sig{width:20px;height:20px;margin:-10px 0 0 -10px;background:#ffd23f;color:#14040c;border-color:#14040c;font-size:.62rem}
+.pin.sig em{left:26px}
+.note{position:fixed;right:18px;bottom:14px;max-width:380px;text-align:right;font-size:.68rem;color:var(--muted);text-shadow:0 1px 8px #000;line-height:1.35}
+.note0{position:fixed;right:18px;bottom:14px;max-width:380px;text-align:right;font-size:.68rem;color:var(--muted);text-shadow:0 1px 8px #000;line-height:1.35}
+.hint{position:fixed;left:50%;bottom:16px;translate:-50% 0;font-size:.72rem;letter-spacing:.06em;color:var(--muted);text-shadow:0 1px 8px #000;pointer-events:none;white-space:nowrap}
+#load{position:fixed;inset:0;display:grid;place-items:center;background:var(--ink);font:900 italic 2rem 'Barlow Condensed',Impact,sans-serif;color:var(--pink);transition:opacity .6s;text-align:center}
+#load small{display:block;font:500 .8rem 'DM Sans',sans-serif;color:var(--muted);margin-top:6px}
+@media (max-width:760px){.legend{width:calc(100% - 36px);max-height:30vh}.bar{max-width:100%;top:auto;bottom:calc(30vh + 30px);right:18px}.note,.hint{display:none}}
+</style>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="title"><small>STUD N’ RUN · Toulouse</small><h1>Place Saint-Pierre<br><em id="sub">jour de course</em></h1></div>
+<div class="bar" id="bar">
+  <a class="b" href="../parcours.html" style="text-decoration:none">← Le site</a>
+  <button class="b" data-v="over">Vue d’ensemble</button>
+  <button class="b" data-v="arch">Arche</button>
+  <button class="b" data-v="start">Départ</button>
+  <button class="b" data-v="finish">Arrivée</button>
+  <button class="b" data-v="sky">Du ciel</button>
+  <button class="b" id="sigBtn">Signaleurs</button>
+  <button class="b" id="routeBtn">Itinéraire</button>
+  <button class="b on" id="race">Jour de course</button>
+</div>
+<div class="legend" id="legend"></div>
+<div class="routepanel" id="routepanel" hidden></div>
+<div class="note">Modèle à l’échelle réelle : bâtiments et hauteurs IGN BD TOPO, arbres et mobilier © contributeurs OpenStreetMap, photo aérienne IGN, tracé GPX. Implantation à valider avec la mairie et la préfecture.</div>
+<div class="hint">Glisser pour tourner · molette pour zoomer · clic droit pour déplacer</div>
+<div id="load"><div>Chargement de la place…<small>photo aérienne, bâtiments, arbres</small></div></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const params = new URLSearchParams(location.search);
+let seed = 11;
+const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+const R = (a, b) => a + (b - a) * rnd();
+const pick = a => a[(rnd() * a.length) | 0];
+
+/* ============ données réelles ============ */
+const S = await (await fetch('data/scene.json')).json();
+const [LAT0, LON0] = S.origin, KX = S.kx, KZ = S.kz;
+const GROUND = 141.5;               // altitude de la place (BD TOPO)
+const WATER_Y = S.water;            // niveau de la Garonne (MNT IGN)
+const RT = await (await fetch('data/route_plan.json')).json();   // parcours officiel annoté
+
+/* ============ renderer / scène ============ */
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
+const scene = new THREE.Scene();
+scene.fog = new THREE.Fog(0xe4d6cf, 260, 820);
+const camera = new THREE.PerspectiveCamera(42, 1, .5, 3000);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.maxPolarAngle = Math.PI * .492; controls.minDistance = 4; controls.maxDistance = 420;
+{
+  const g = new THREE.SphereGeometry(1800, 32, 16), cols = [];
+  const top = new THREE.Color('#5d97d4'), bot = new THREE.Color('#f1e2d8'), c = new THREE.Color(); const p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { c.copy(bot).lerp(top, Math.pow(Math.max(0, p.getY(i) / 1800), .5)); cols.push(c.r, c.g, c.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  scene.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, toneMapped: false, depthWrite: false })));
+}
+scene.add(new THREE.HemisphereLight(0xcfe6ff, 0x9a7b66, 1.1));
+const sun = new THREE.DirectionalLight(0xfff1dc, 2.6);
+sun.position.set(110, 120, 70); sun.target.position.set(0, 0, 0); sun.castShadow = true;
+const SM = params.has('lite') ? 2048 : 4096; sun.shadow.mapSize.set(SM, SM);
+Object.assign(sun.shadow.camera, { left: -130, right: 130, top: 130, bottom: -130, near: 1, far: 420 });
+sun.shadow.bias = -.0004; sun.shadow.normalBias = .08;
+scene.add(sun, sun.target);
+
+/* ============ helpers ============ */
+const M = (color, o = {}) => new THREE.MeshStandardMaterial({ color, roughness: .85, metalness: 0, ...o });
+const box = (w, h, d, mat, x = 0, y = 0, z = 0, cast = true) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = cast; m.receiveShadow = true; return m; };
+function canvasTex(w, h, draw, rep) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8; if (rep) t.wrapS = t.wrapT = THREE.RepeatWrapping; return t;
+}
+function signMesh(w, h, text, { bg = '#ff3d97', fg = '#fff', px = .62, icon } = {}) {
+  const pw = 1024, ph = Math.round(1024 * h / w);
+  const t = canvasTex(pw, ph, (g) => {
+    g.fillStyle = bg; g.fillRect(0, 0, pw, ph); g.fillStyle = fg; g.font = `italic 900 ${ph * px}px Impact, "Arial Black", sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText(text, pw / 2 + (icon ? ph * .3 : 0), ph / 2 + ph * .04, pw * (icon ? .78 : .94));
+    if (icon === 'cross') { g.fillStyle = '#e11d2e'; const s = ph * .55, cx = pw * .09 + s / 2, cy = ph / 2; g.fillRect(cx - s / 6, cy - s / 2, s / 3, s); g.fillRect(cx - s / 2, cy - s / 6, s, s / 3); }
+  });
+  return new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, toneMapped: false }));
+}
+function twoSided(w, h, text, o) { const g = new THREE.Group(), a = signMesh(w, h, text, o), b = signMesh(w, h, text, o); a.position.z = .03; b.position.z = -.03; b.rotation.y = Math.PI; g.add(a, b); return g; }
+const pip = (x, z, poly) => { let c = false; for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) { const [xi, zi] = poly[i], [xj, zj] = poly[j]; if ((zi > z) !== (zj > z) && x < (xj - xi) * (z - zi) / (zj - zi) + xi) c = !c; } return c; };
+// polygone (x,z) -> prisme vertical de y0 à y1
+function prism(ring, y0, y1, mats) {
+  const sh = new THREE.Shape(ring.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const g = new THREE.ExtrudeGeometry(sh, { depth: y1 - y0, bevelEnabled: false, steps: 1 });
+  g.rotateX(-Math.PI / 2); g.translate(0, y0, 0);
+  const m = new THREE.Mesh(g, mats); m.castShadow = m.receiveShadow = true; return m;
+}
+
+/* ============ repère de course (U = sens de course, V = à droite) ============ */
+const O = new THREE.Vector2(-9.72, 11.51);   // ligne de départ / arrivée : tête du pont (GPX officiel)
+const U = new THREE.Vector2(.49, -.87).normalize(), V = new THREE.Vector2(-U.y, U.x);
+const FW = (x, z) => [O.x + U.x * x + V.x * z, O.y + U.y * x + V.y * z];
+const HEAD = Math.atan2(-U.y, U.x);
+function frame(x, z, y = 0) { const g = new THREE.Group(), [wx, wz] = FW(x, z); g.position.set(wx, y, wz); g.rotation.y = HEAD; return g; }
+const toF = (wx, wz) => [(wx - O.x) * U.x + (wz - O.y) * U.y, (wx - O.x) * V.x + (wz - O.y) * V.y];
+
+/* ============ sol : photo aérienne IGN ============ */
+const Z19 = 19, TX0 = 264229, TX1 = 264237, TY0 = 191439, TY1 = 191445, NT = 2 ** Z19;
+const tileLL = (x, y) => { const lon = x / NT * 360 - 180, lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / NT))) * 180 / Math.PI; return [(lon - LON0) * KX, -(lat - LAT0) * KZ]; };
+const TL = tileLL(TX0, TY0), BR = tileLL(TX1 + 1, TY1 + 1);
+const orthoTex = await (async () => {
+  const c = document.createElement('canvas'); c.width = (TX1 - TX0 + 1) * 256; c.height = (TY1 - TY0 + 1) * 256; const g = c.getContext('2d');
+  g.fillStyle = '#6d6259'; g.fillRect(0, 0, c.width, c.height);
+  const jobs = []; for (let x = TX0; x <= TX1; x++) for (let y = TY0; y <= TY1; y++) jobs.push(new Promise(res => { const im = new Image(); im.onload = () => { g.drawImage(im, (x - TX0) * 256, (y - TY0) * 256); res(); }; im.onerror = res; im.src = `data/ortho/${x}_${y}.jpg`; }));
+  await Promise.all(jobs);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 16; return t;
+})();
+const bank = [[-128.61, -33.23], [-117.93, -26.02], [-63.25, 10.1]];
+const bleach1 = S.ways.bleachers.find(b => b.id === 1456519207).p, bleach2 = S.ways.bleachers.find(b => b.id === 1456519206).p;
+// frontière terre / fleuve (terre au nord-est)
+const landPoly = (() => {
+  const x0 = TL[0], z0 = TL[1], x1 = BR[0], z1 = BR[1];
+  const zStart = bank[0][1] + (bank[1][1] - bank[0][1]) / (bank[1][0] - bank[0][0]) * (x0 - bank[0][0]);
+  const b = [[5.63, 50.84], [211.72, 211.12]]; const xEnd = b[0][0] + (z1 - b[0][1]) * (b[1][0] - b[0][0]) / (b[1][1] - b[0][1]);
+  return [[x0, zStart], ...bank, [-61.61, 8.15], [-56.74, 2.32], [-33.31, -1.95], [-31.68, -.99], [-30.24, .13], [-29.69, .48], [-21.2, 5.68], [-17.53, 8.31], [-16.46, 10.45], [-16.36, 11.75], [-26.62, 31.12], [-15.14, 37.91], [-5.57, 19.17], [-4.95, 18.55], [-4.12, 18.34], [-3.42, 18.53], [-2.8, 18.93], [-2.43, 18.39], [2.46, 21.71], [7.37, 25.47], [7.89, 28.35], [10.52, 42.31], [5.63, 50.84], [xEnd, z1], [x1, z1], [x1, z0], [x0, z0]];
+})();
+{
+  const sh = new THREE.Shape(landPoly.map(([x, z]) => new THREE.Vector2(x, -z)));
+  const g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) { uv[2 * i] = (p.getX(i) - TL[0]) / (BR[0] - TL[0]); uv[2 * i + 1] = 1 - (p.getZ(i) - TL[1]) / (BR[1] - TL[1]); }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  const m = new THREE.Mesh(g, M(0xffffff, { map: orthoTex, roughness: .95, emissive: 0x444444, emissiveMap: orthoTex })); m.receiveShadow = true; scene.add(m);
+}
+
+/* ============ Garonne, quais, gradins ============ */
+const waterTex = canvasTex(256, 256, (g, w, h) => {
+  g.fillStyle = '#4e7b6c'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 90; i++) { g.strokeStyle = `rgba(255,255,255,${R(.04, .13)})`; g.lineWidth = R(1, 2.2); const y = R(0, h), x = R(0, w), l = R(20, 70); g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + l / 2, y + R(-4, 4), x + l, y); g.stroke(); }
+}, true); waterTex.repeat.set(160, 160);
+const river = new THREE.Mesh(new THREE.PlaneGeometry(2400, 2400), M(0xffffff, { map: waterTex, roughness: .18, metalness: .1 }));
+river.rotation.x = -Math.PI / 2; river.position.set(0, WATER_Y, 0); river.receiveShadow = true; scene.add(river);
+const brick = M(0x9a5238, { roughness: .9 }), stone = M(0xcdbfa8, { roughness: .8 }), stone2 = M(0xbaa98f, { roughness: .85 });
+function wallAlong(pts, y0 = WATER_Y - .3, y1 = 0) {
+  for (let i = 0; i < pts.length - 1; i++) {
+    const [ax, az] = pts[i], [bx, bz] = pts[i + 1], L = Math.hypot(bx - ax, bz - az), ang = Math.atan2(-(bz - az), bx - ax);
+    for (const [h, yy, th, mat] of [[y1 - y0, (y0 + y1) / 2, .6, brick], [.3, y1 + .12, .9, stone], [.9, y1 + .45, .3, stone]]) {
+      const w = box(L, h, th, mat, (ax + bx) / 2, yy, (az + bz) / 2); w.rotation.y = ang; scene.add(w);
+    }
+  }
+}
+{ // mur de quai ouest et est
+  wallAlong([[landPoly[0][0], landPoly[0][1]], ...bank]);
+  wallAlong([[5.63, 50.84], landPoly[landPoly.length - 4]]);
+}
+function clipHalf(poly, n, T) { // garde dot(p,n) <= T
+  const out = []; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; const da = a[0] * n[0] + a[1] * n[1] - T, db = b[0] * n[0] + b[1] * n[1] - T;
+    if (da <= 0) out.push(a); if ((da < 0 && db > 0) || (da > 0 && db < 0)) { const t = da / (da - db); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); } } return out;
+}
+function gradins(poly, prof) {
+  const ring = poly.slice(0, -1);
+  let best = 0, bi = 0; for (let i = 0; i < ring.length; i++) { const a = ring[i], b = ring[(i + 1) % ring.length], l = Math.hypot(b[0] - a[0], b[1] - a[1]); if (l > best) { best = l; bi = i; } }
+  const a = ring[bi], b = ring[(bi + 1) % ring.length], e = [(b[0] - a[0]) / best, (b[1] - a[1]) / best];
+  let n = [-e[1], e[0]]; const cen = ring.reduce((s, p) => [s[0] + p[0] / ring.length, s[1] + p[1] / ring.length], [0, 0]);
+  if ((((a[0] + b[0]) / 2 - cen[0]) * n[0] + ((a[1] + b[1]) / 2 - cen[1]) * n[1]) < 0) n = [-n[0], -n[1]];
+  const ts = ring.map(p => p[0] * n[0] + p[1] * n[1]), t0 = Math.min(...ts), t1 = Math.max(...ts), tmax = t1 - t0;
+  // niveaux mesurés (MNT IGN 1 m) : marches regroupées par palier
+  const groups = []; let prev = 0;
+  for (const [t, y0] of prof) { if (t < -1) continue; if (groups.length && groups[groups.length - 1].limit >= tmax) break; const y = Math.min(prev, Math.min(0, y0)); prev = y;
+    if (groups.length && Math.abs(groups[groups.length - 1].top - y) < .07) groups[groups.length - 1].limit = t + .5; else groups.push({ top: y, limit: t + .5 }); }
+  groups[groups.length - 1].limit = tmax + .01;
+  const sand = M(0xc4a982, { roughness: .97 });
+  groups.forEach((g, i) => { const w = g.limit - (i ? groups[i - 1].limit : 0), cl = clipHalf(ring, n, t0 + g.limit); if (cl.length >= 3) scene.add(prism(cl, WATER_Y - .3, g.top - .02, w >= 4.5 ? sand : (i % 2 ? stone : stone2))); });
+  // quai bas pavé (bord de l'eau), 5 m le long de l'arête fleuve
+  const low = groups[groups.length - 1].top, q = [a, b, [b[0] + n[0] * 5, b[1] + n[1] * 5], [a[0] + n[0] * 5, a[1] + n[1] * 5]];
+  scene.add(prism(q, WATER_Y - .3, low - .02, M(0x8d8478, { roughness: .95 })));
+  const bol = new THREE.InstancedMesh(new THREE.CylinderGeometry(.12, .15, .5, 8), M(0x222226, { roughness: .6, metalness: .4 }), 12), dd = new THREE.Object3D();
+  for (let i = 0; i < 12; i++) { const f = (i + .5) / 12; dd.position.set(a[0] + (b[0] - a[0]) * f + n[0] * 4.4, low + .25, a[1] + (b[1] - a[1]) * f + n[1] * 4.4); dd.updateMatrix(); bol.setMatrixAt(i, dd.matrix); } scene.add(bol);
+  return { ring, n, t0, groups };
+}
+const G1 = gradins(bleach1, S.grad['1456519207']), G2 = gradins(bleach2, S.grad['1456519206']);
+{
+  const ix = (x, z) => landPoly.findIndex(p => Math.abs(p[0] - x) < .02 && Math.abs(p[1] - z) < .02);
+  const a = ix(-63.25, 10.1), e = ix(-26.62, 31.12), f = ix(-15.14, 37.91), b = ix(5.63, 50.84);
+  wallAlong(landPoly.slice(a, e + 1)); wallAlong(landPoly.slice(f, b + 1));
+}
+{ // sous le pont : le quai bas continue d'une gradin à l'autre, avec la culée en brique sous le tablier
+  const E = [-26.62, 31.12], F = [-15.14, 37.91], n1 = G1.n, n2 = G2.n, low = G1.groups[G1.groups.length - 1].top, y0 = WATER_Y - .3;
+  scene.add(prism([E, F, [F[0] + n2[0] * 5, F[1] + n2[1] * 5], [E[0] + n1[0] * 5, E[1] + n1[1] * 5]], y0, low - .02, M(0x8d8478, { roughness: .95 })));
+  const L = Math.hypot(F[0] - E[0], F[1] - E[1]), h = -.95 - y0, cul = box(L, h, 1.4, brick, (E[0] + F[0]) / 2, y0 + h / 2, (E[1] + F[1]) / 2); cul.rotation.y = Math.atan2(-(F[1] - E[1]), F[0] - E[0]); scene.add(cul);
+  const cop = box(L + .4, .3, 1.7, stone, (E[0] + F[0]) / 2, -1.05, (E[1] + F[1]) / 2); cop.rotation.y = cul.rotation.y; scene.add(cop);
+}
+const gradinY = (G, x, z) => { const t = x * G.n[0] + z * G.n[1] - G.t0; const g = G.groups.find(g => t <= g.limit) || G.groups[G.groups.length - 1]; return g.top; };
+
+/* ============ Pont Saint-Pierre : cotes OSM (13,1 m, 4 piles) + photos ============ */
+const BR_A0 = new THREE.Vector2(-20.885, 34.515), BR_A1 = new THREE.Vector2(-130.52, 242.42);
+const BR_D = BR_A1.clone().sub(BR_A0), BR_L = BR_D.length(); BR_D.normalize();
+const roadTex = canvasTex(512, 128, (g, w, h) => {
+  g.fillStyle = '#3a3a3e'; g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 1400; i++) { g.fillStyle = `rgba(${R(70, 110) | 0},${R(70, 110) | 0},${R(75, 115) | 0},.35)`; g.fillRect(R(0, w), R(0, h), R(1, 3), R(1, 3)); }
+  g.fillStyle = '#f1f1f1'; g.fillRect(0, h / 2 - 1.5, w, 3);
+  for (const y of [h * .5 - h * .384, h * .5 + h * .384]) g.fillRect(0, y - 1.5, 192, 3);
+}, true); roadTex.repeat.set(BR_L / 8, 1);
+{
+  const Lb = BR_L, W = 13.1, hw = W / 2, g = new THREE.Group(), dd = new THREE.Object3D();
+  g.position.set(BR_A0.x, 0, BR_A0.y); g.rotation.y = Math.atan2(-BR_D.y, BR_D.x);
+  const teal = M(0x4a9a87, { roughness: .5, metalness: .45 }), tealD = M(0x2f6f60, { roughness: .55, metalness: .5 }), conc = M(0x8f8b84, { roughness: .96 }), concB = M(0x9c988f, { roughness: .96 }), steelK = M(0x25272c, { roughness: .45, metalness: .65 }), walk = M(0xaaa398, { roughness: .95 }), stoneB = M(0xd6cfc2, { roughness: .85 });
+  const inst = (geo, mat, n, fn) => { const m = new THREE.InstancedMesh(geo, mat, n); for (let i = 0; i < n; i++) { dd.position.set(0, 0, 0); dd.rotation.set(0, 0, 0); dd.scale.set(1, 1, 1); fn(i); dd.updateMatrix(); m.setMatrixAt(i, dd.matrix); } m.castShadow = true; m.receiveShadow = true; g.add(m); return m; };
+  // tablier béton, chaussée marquée, trottoirs
+  g.add(box(Lb, 1.0, W, conc, Lb / 2, -.5, 0));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(Lb, 6.9), new THREE.MeshStandardMaterial({ map: roadTex, roughness: .93 })); road.rotation.x = -Math.PI / 2; road.position.set(Lb / 2, .012, 0); road.receiveShadow = true; g.add(road);
+  for (const s of [-1, 1]) g.add(box(Lb, .16, 2.6, walk, Lb / 2, .08, s * 5.25, false));
+  // glissières béton de chaque côté de la chaussée
+  const nb = Math.floor(Lb / 3);
+  inst(new THREE.BoxGeometry(2.92, .78, .5), concB, nb * 2, i => { dd.position.set(1.5 + (i >> 1) * 3, .39, (i & 1 ? 1 : -1) * 3.7); });
+  // garde-corps vert (partie courante) : barreaudage serré + lisses + poteaux
+  const sA = 24, sB = Lb - 24, Lm = sB - sA, nbar = Math.floor(Lm / .14), npost = Math.floor(Lm / 3) + 1;
+  inst(new THREE.BoxGeometry(.025, 1.0, .025), teal, nbar * 2, i => { dd.position.set(sA + .07 + (i % nbar) * .14, .64, (i < nbar ? -1 : 1) * 6.42); });
+  inst(new THREE.BoxGeometry(.1, 1.22, .1), tealD, npost * 2, i => { dd.position.set(sA + (i % npost) * 3, .75, (i < npost ? -1 : 1) * 6.42); });
+  for (const s of [-1, 1]) g.add(box(Lm, .06, .07, teal, (sA + sB) / 2, 1.17, s * 6.42, false), box(Lm, .05, .05, teal, (sA + sB) / 2, .7, s * 6.42, false), box(Lm, .2, .12, tealD, (sA + sB) / 2, .24, s * 6.42, false));
+  // têtes de pont : muret de brique + balustrade en pierre + pylônes
+  for (const [r0, r1] of [[0, sA], [sB, Lb]]) for (const s of [-1, 1]) {
+    const len = r1 - r0, cx = (r0 + r1) / 2, nbal = Math.floor(len / .32);
+    g.add(box(len, .55, .46, brick, cx, .415, s * 6.3), box(len, .12, .62, stoneB, cx, .75, s * 6.3), box(len, .1, .4, stoneB, cx, 1.47, s * 6.3));
+    inst(new THREE.CylinderGeometry(.065, .085, .5, 8), stoneB, nbal, i => { dd.position.set(r0 + .16 + i * .32, 1.06, s * 6.3); });
+  }
+  for (const x of [.5, sA, sB, Lb - .5]) for (const s of [-1, 1]) {
+    g.add(box(.95, 2.0, .95, stoneB, x, 1.14, s * 6.3), box(1.15, .16, 1.15, stoneB, x, 2.22, s * 6.3));
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), stoneB); ball.position.set(x, 2.5, s * 6.3); ball.castShadow = true; g.add(ball);
+  }
+  // lampadaires à trois lanternes (vert patiné)
+  const glow = new THREE.MeshStandardMaterial({ color: 0xffeebb, emissive: 0xffd88a, emissiveIntensity: .8, roughness: .4 });
+  for (let x = 12; x < Lb - 8; x += 16) for (const s of [-1, 1]) {
+    const l = new THREE.Group(), sh = new THREE.Mesh(new THREE.CylinderGeometry(.08, .13, 3.6, 10), teal); sh.position.y = 2.7; sh.castShadow = true;
+    l.add(box(.5, .9, .5, tealD, 0, .45, 0), sh, box(1.3, .07, .07, tealD, 0, 4.45, 0), box(.3, .4, .3, glow, 0, 4.95, 0, false), box(.24, .36, .24, glow, -.65, 4.2, 0, false), box(.24, .36, .24, glow, .65, 4.2, 0, false));
+    l.position.set(x, .14, s * 5.85); g.add(l);
+  }
+  // sous le tablier : poutres treillis noires + entretoises
+  for (const s of [-1, 1]) g.add(box(Lb, .28, .3, steelK, Lb / 2, -1.2, s * (hw - .9)), box(Lb, .28, .3, steelK, Lb / 2, -2.5, s * (hw - .9)));
+  const nbay = Math.floor(Lb / 3), ang = Math.atan2(1.3, 3);
+  inst(new THREE.BoxGeometry(3.27, .16, .22), steelK, nbay * 2, i => { dd.position.set(1.5 + (i >> 1) * 3, -1.85, ((i & 1) ? 1 : -1) * (hw - .9)); dd.rotation.z = ((i >> 1) % 2 ? 1 : -1) * ang; });
+  inst(new THREE.BoxGeometry(.14, 1.3, .2), steelK, (nbay + 1) * 2, i => { dd.position.set((i >> 1) * 3, -1.85, ((i & 1) ? 1 : -1) * (hw - .9)); });
+  inst(new THREE.BoxGeometry(.18, .14, W - 1.8), steelK, Math.floor(Lb / 6), i => { dd.position.set(3 + i * 6, -1.35, 0); });
+  // piles en brique avec becs pointus (cotes OSM : corps 4,2 × 16,6 m, becs jusqu'à 21,6 m)
+  const y0 = WATER_Y - .3, hP = -1.0 - y0;
+  for (const s of [36.2, 91.0, 145.7, 200.4]) {
+    g.add(box(4.2, hP, 16.6, brick, s, y0 + hP / 2, 0), box(4.8, .3, 17.2, stone, s, -1.15, 0));
+    for (const sg of [-1, 1]) g.add(prism([[s - 2.1, sg * 8.3], [s + 2.1, sg * 8.3], [s, sg * 10.8]], y0, -1.0, brick));
+  }
+  scene.add(g);
+}
+{ // rampe d'accès du pont : même profil que le tablier (chaussée + trottoirs), à la place de la photo aérienne
+  const Q = [[-16.36, 11.75], [-26.62, 31.12], [-15.14, 37.91], [-5.57, 19.17]], nx = -BR_D.y, nz = BR_D.x;
+  const tex = canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#a79f94'; g.fillRect(0, 0, w, h);
+    for (let y = 0; y < h; y += 16) for (let x = 0; x < w; x += 24) { g.fillStyle = `rgba(${R(60, 100) | 0},${R(55, 90) | 0},${R(50, 80) | 0},.12)`; g.fillRect(x + (y / 16 % 2) * 12, y, 23, 15); }
+    const r0 = (6.55 - 3.45) / 13.1 * h, r1 = (6.55 + 3.45) / 13.1 * h;
+    g.fillStyle = '#3a3a3e'; g.fillRect(0, r0, w, r1 - r0); g.fillStyle = '#f1f1f1'; g.fillRect(0, h / 2 - 1.5, w * .6, 3);
+  }, true);
+  const sh = new THREE.Shape(Q.map(([x, z]) => new THREE.Vector2(x, -z))), g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2);
+  const p = g.attributes.position, uv = new Float32Array(p.count * 2);
+  for (let i = 0; i < p.count; i++) { const x = p.getX(i), z = p.getZ(i); uv[2 * i] = ((x - BR_A0.x) * BR_D.x + (z - BR_A0.y) * BR_D.y) / 8; uv[2 * i + 1] = ((x - BR_A0.x) * nx + (z - BR_A0.y) * nz + 6.55) / 13.1; }
+  g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  const m = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: tex, roughness: .93, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 })); m.position.y = .02; m.receiveShadow = true; scene.add(m);
+}
+// axe de la chaussée dans le repère de course : les couloirs suivent le pont puis se recentrent sur la place
+const brF = s => toF(BR_A0.x + BR_D.x * s, BR_A0.y + BR_D.y * s), bz1 = brF(5), bz2 = brF(70);
+const bridgeZ = x => bz1[1] + (bz2[1] - bz1[1]) * (x - bz1[0]) / (bz2[0] - bz1[0]);
+const cz = x => { const t = Math.min(1, Math.max(0, (x + 14) / 12)), k = t * t * (3 - 2 * t); return bridgeZ(Math.min(x, -14)) * (1 - k); };
+const czRot = x => { const m = (cz(x + .5) - cz(x - .5)); return Math.atan2(-(U.y + m * V.y), U.x + m * V.x); };
+
+/* ============ bâtiments réels (IGN BD TOPO) ============ */
+const facade = canvasTex(256, 256, (g) => {
+  g.fillStyle = '#a9553a'; g.fillRect(0, 0, 256, 256);
+  for (let y = 0; y < 256; y += 8) { g.fillStyle = 'rgba(60,20,10,.12)'; g.fillRect(0, y, 256, 1.2); }
+  for (let i = 0; i < 400; i++) { g.fillStyle = `rgba(${R(120, 200) | 0},${R(50, 90) | 0},${R(30, 60) | 0},.18)`; g.fillRect(R(0, 256), R(0, 256), R(6, 14), 4); }
+  for (const x of [24, 152]) { g.fillStyle = '#e9d7bd'; g.fillRect(x - 4, 46, 88, 150); g.fillStyle = '#26323e'; g.fillRect(x + 4, 56, 72, 132); g.fillStyle = '#e9d7bd'; g.fillRect(x + 38, 56, 4, 132); g.fillRect(x + 4, 110, 72, 4); g.fillStyle = '#8a6a50'; g.fillRect(x - 10, 56, 14, 132); g.fillRect(x + 76, 56, 14, 132); g.fillStyle = '#3b3b40'; g.fillRect(x - 8, 188, 96, 6); }
+}, true); facade.repeat.set(1 / 6, 1 / 3.4);
+const wallMats = [0xffffff, 0xf0dccb, 0xe4cdbb, 0xf7e7d6, 0xd9bfa8].map(c => M(c, { map: facade, roughness: .93 }));
+const roofMats = [0xb85c38, 0xa9502f, 0xc26a44, 0x9c4a2d, 0xb0603c].map(c => M(c, { roughness: .9 }));
+for (const b of S.bld) {
+  const off = Math.max(-1, Math.min(9, b.a - GROUND)), yb = Math.min(off, 0) - 2, top = off + b.h;
+  scene.add(prism(b.r, yb, top, [roofMats[(rnd() * 5) | 0], wallMats[(rnd() * 5) | 0]]));
+}
+
+/* ============ arbres & bancs réels (OpenStreetMap) ============ */
+const trees = S.trees.filter(p => pip(p[0], p[1], landPoly));
+{
+  const n = trees.length, bark = M(0xb7a58c, { roughness: 1 });
+  const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.3, .46, 1, 7), bark, n);
+  const can = new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1, 1), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, flatShading: true }), n * 4);
+  const d = new THREE.Object3D(), c = new THREE.Color(), greens = ['#4f8a3a', '#5c9a45', '#427f35', '#66a24a'];
+  trees.forEach(([x, z], i) => {
+    const onPlace = pip(x, z, S.ways.place[0].p), r = onPlace ? R(4.6, 6) : R(2.8, 4.2), h = onPlace ? R(7.5, 9.5) : R(5, 8);
+    d.position.set(x, h / 2, z); d.rotation.set(0, 0, 0); d.scale.set(1, h, 1); d.updateMatrix(); trunk.setMatrixAt(i, d.matrix);
+    for (let k = 0; k < 4; k++) { const rr = r * R(.55, .8); d.position.set(x + R(-r, r) * .55, h + R(-.5, r * .6), z + R(-r, r) * .55); d.scale.set(rr, rr * .78, rr); d.updateMatrix(); can.setMatrixAt(i * 4 + k, d.matrix); can.setColorAt(i * 4 + k, c.set(pick(greens))); }
+  });
+  trunk.castShadow = can.castShadow = true; can.receiveShadow = true; scene.add(trunk, can);
+  const bn = S.benches.filter(p => pip(p[0], p[1], landPoly)), bi = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, .9, .5), M(0x3b4a42, { roughness: .6 }), bn.length);
+  bn.forEach(([x, z], i) => { d.position.set(x, .45, z); d.rotation.set(0, R(0, Math.PI), 0); d.scale.set(1, 1, 1); d.updateMatrix(); bi.setMatrixAt(i, d.matrix); }); bi.castShadow = true; scene.add(bi);
+}
+
+/* ============ groupes ============ */
+const raceGroup = new THREE.Group(); scene.add(raceGroup);
+const restGroup = new THREE.Group(); scene.add(restGroup);
+const pinkMat = M(0xff3d97, { roughness: .5 });
+const dummy = new THREE.Object3D();
+
+/* ---- arche départ / arrivée ---- */
+{
+  const g = frame(0, 0), dk = M(0x2a2230);
+  for (const z of [-4.5, 4.5]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.7, .85, 6.4, 28), pinkMat); p.position.set(0, 3.2, z); p.castShadow = true; g.add(p, box(2.2, .2, 2.2, dk, 0, .1, z)); }
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 10.0, 28), pinkMat); beam.rotation.x = Math.PI / 2; beam.position.set(0, 6.6, 0); beam.castShadow = true; g.add(beam);
+  const ban = twoSided(9.6, 2.6, 'STUD’N RUN', { px: .66 }); ban.position.set(0, 8.9, 0); ban.rotation.y = Math.PI / 2; ban.children.forEach(c => c.material.map.anisotropy = 16);
+  g.add(ban, box(.3, .22, 9.6, dk, 0, 7.25, 0));
+  for (const z of [-4.3, 4.3]) g.add(box(.2, 1.5, .2, dk, 0, 8, z));
+  const dep = twoSided(2.9, 1.0, 'DÉPART', { bg: '#14040c' }); dep.position.set(0, 4.9, -1.6); dep.rotation.y = Math.PI / 2;
+  const arr = twoSided(2.9, 1.0, 'ARRIVÉE', { bg: '#14040c', fg: '#ffc2de' }); arr.position.set(0, 4.9, 1.6); arr.rotation.y = Math.PI / 2; g.add(dep, arr);
+  const clkC = document.createElement('canvas'); clkC.width = 512; clkC.height = 160; const cg = clkC.getContext('2d'), clkT = new THREE.CanvasTexture(clkC); clkT.colorSpace = THREE.SRGBColorSpace;
+  window.__clk = (sec) => { cg.fillStyle = '#0b0206'; cg.fillRect(0, 0, 512, 160); cg.fillStyle = '#ff3b3b'; cg.font = '700 118px "Courier New", monospace'; cg.textAlign = 'center'; cg.textBaseline = 'middle'; cg.fillText(String(Math.floor(sec / 60) % 100).padStart(2, '0') + ':' + String(Math.floor(sec) % 60).padStart(2, '0'), 256, 86); clkT.needsUpdate = true; }; window.__clk(0);
+  g.add(box(1.2, 1.2, 3.2, M(0x14040c), 0, 6.6, 0));
+  for (const sd of [1, -1]) { const c = new THREE.Mesh(new THREE.PlaneGeometry(3.0, .94), new THREE.MeshBasicMaterial({ map: clkT, toneMapped: false })); c.position.set(sd * .62, 6.6, 0); c.rotation.y = sd === 1 ? Math.PI / 2 : -Math.PI / 2; g.add(c); }
+  raceGroup.add(g);
+}
+
+/* ---- couloirs : tapis rose le long du tracé GPX ---- */
+const carpetTex = canvasTex(128, 256, (g, w, h) => { g.fillStyle = '#e8438a'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 9; g.beginPath(); g.moveTo(36, 70); g.lineTo(92, 128); g.lineTo(36, 186); g.stroke(); }, true);
+const carpetMat = M(0xffffff, { map: carpetTex, roughness: .9, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -5, polygonOffsetUnits: -5 });
+function chaikin(pts, it = 2) { for (let k = 0; k < it; k++) { const o = [pts[0]]; for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; o.push([a[0] * .75 + b[0] * .25, a[1] * .75 + b[1] * .25], [a[0] * .25 + b[0] * .75, a[1] * .25 + b[1] * .75]); } o.push(pts[pts.length - 1]); pts = o; } return pts; }
+function mkPath(pts) { const c = [0]; for (let i = 1; i < pts.length; i++) c.push(c[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1])); return { pts, c, len: c[c.length - 1] }; }
+function sample(P, d) {
+  d = Math.max(0, Math.min(P.len, d)); let lo = 0, hi = P.c.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (P.c[m] <= d) lo = m; else hi = m; }
+  const a = P.pts[lo], b = P.pts[hi], l = Math.max(P.c[hi] - P.c[lo], 1e-6), t = (d - P.c[lo]) / l; return { x: a[0] + (b[0] - a[0]) * t, z: a[1] + (b[1] - a[1]) * t, tx: (b[0] - a[0]) / l, tz: (b[1] - a[1]) / l };
+}
+function ribbon(P, hw, y, mat, tile = 4) {
+  const pos = [], uv = [], idx = [];
+  for (let i = 0; i < P.pts.length; i++) { const s = sample(P, P.c[i] + (i === P.pts.length - 1 ? -.01 : .01)); const nx = -s.tz, nz = s.tx;
+    pos.push(P.pts[i][0] + nx * hw, y, P.pts[i][1] + nz * hw, P.pts[i][0] - nx * hw, y, P.pts[i][1] - nz * hw); uv.push(P.c[i] / tile, 1, P.c[i] / tile, 0); if (i) { const a = 2 * (i - 1); idx.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.setIndex(idx); g.computeVertexNormals();
+  const m = new THREE.Mesh(g, mat); m.receiveShadow = true; return m;
+}
+const lanePts = (z0, x0, x1, step) => { const o = []; for (let x = x0; x <= x1 + 1e-6; x += step) o.push(FW(x, cz(x) + z0)); return o; };
+const straight = lanePts(-1.6, -40, 7, 3), Ast = straight[straight.length - 1];
+const bi = RT.pts.findIndex((p, i) => RT.cum[i] >= 46), Bp = RT.pts[bi], Bn = RT.pts[bi + 2], tb = new THREE.Vector2(Bn[0] - Bp[0], Bn[1] - Bp[1]).normalize();
+// point de contrôle = intersection de la tangente de sortie de l'arche (U) et de la tangente du GPX
+const det = U.x * tb.y - U.y * tb.x; let tt = ((Bp[0] - Ast[0]) * tb.y - (Bp[1] - Ast[1]) * tb.x) / (det || 1e-6); tt = Math.max(4, Math.min(22, tt));
+const Cc = [Ast[0] + U.x * tt, Ast[1] + U.y * tt], bez = [];
+for (let k = 1; k <= 24; k++) { const t = k / 24, u = 1 - t; bez.push([u * u * Ast[0] + 2 * u * t * Cc[0] + t * t * Bp[0], u * u * Ast[1] + 2 * u * t * Cc[1] + t * t * Bp[1]]); }
+const gpxRest = RT.pts.filter((p, i) => i > bi && RT.cum[i] <= 125).map(p => [p[0], p[1]]);
+const startStraightLen = mkPath(straight).len;
+const startPath = mkPath(chaikin([...straight, ...bez, ...gpxRest], 1));
+const finPath = mkPath(lanePts(1.6, -95, 26, 5));
+raceGroup.add(ribbon(startPath, 1.45, .05, carpetMat, 4), ribbon(finPath, 1.45, .05, carpetMat, 4));
+{
+  const chq = canvasTex(64, 256, (g) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 2; x++) { g.fillStyle = (x + y) % 2 ? '#fff' : '#111'; g.fillRect(x * 32, y * 32, 32, 32); } });
+  const g = frame(.3, 0), f = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 3.0), new THREE.MeshBasicMaterial({ map: chq, toneMapped: false })); f.rotation.x = -Math.PI / 2; f.position.set(0, .08, 1.6); g.add(f);
+  for (const z of [-1.6, 1.6]) g.add(box(1.2, .06, 2.9, M(0x14040c), -1, .06, z, false));
+  raceGroup.add(g);
+}
+
+/* ---- parcours officiel (GPX) : ligne sur toute la zone modélisée ---- */
+{
+  const inBox = ([x, z]) => x > TL[0] + 8 && x < BR[0] - 8 && z > TL[1] + 8 && z < BR[1] - 8;
+  const line = new THREE.MeshBasicMaterial({ color: 0xffffff, toneMapped: false, transparent: true, opacity: .95, depthTest: true, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, side: THREE.DoubleSide }), halo = new THREE.MeshBasicMaterial({ color: 0xff3d97, toneMapped: false, transparent: true, opacity: .5, depthTest: true, polygonOffset: true, polygonOffsetFactor: -3, polygonOffsetUnits: -3, side: THREE.DoubleSide });
+  let run = [];
+  const flush = () => { if (run.length > 3) { const P = mkPath(run); const a = ribbon(P, .3, .16, line), b = ribbon(P, 1.1, .14, halo); raceGroup.add(a, b); } run = []; };
+  RT.pts.forEach((p, i) => { if (inBox(p) && RT.cum[i] > 128 && RT.cum[i] < RT.length - 135) run.push(p); else flush(); }); flush();
+}
+const sigGroup = new THREE.Group(); sigGroup.visible = false; scene.add(sigGroup);
+const SIG = RT.posts.filter(p => p.x > TL[0] + 8 && p.x < BR[0] - 8 && p.z > TL[1] + 8 && p.z < BR[1] - 8);
+
+/* ---- barrières & oriflammes ---- */
+const barPos = [];
+function barrierLine(x0, x1, z) { const n = Math.round((x1 - x0) / 2.5); for (let i = 0; i < n; i++) { const x = x0 + (i + .5) * (x1 - x0) / n; barPos.push([...FW(x, cz(x) + z), czRot(x)]); } }
+function barrierPath(P, d0, d1, off, skip) { for (let d = d0; d < d1; d += 2.5) { const p = sample(P, d), x = p.x - p.tz * off, z = p.z + p.tx * off; if (skip && skip(x, z)) continue; barPos.push([x, z, Math.atan2(-p.tz, p.tx)]); } }
+barrierLine(-40, 6, -3.2); barrierLine(-40, 26, 3.2); barrierLine(-40, 26, 0);
+{ const d0 = startStraightLen + 1; barrierPath(startPath, d0, d0 + 95, -1.75); barrierPath(startPath, d0 + 2, d0 + 95, 1.75, (x, z) => { const f = toF(x, z); return f[0] > -2 && f[0] < 30 && Math.abs(f[1]) < 1.3; }); }
+{
+  const a = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, 1.05, .05), M(0xb4bac2, { roughness: .4, metalness: .7 }), barPos.length), b = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, .5, .07), M(0xff3d97, { roughness: .6 }), barPos.length);
+  barPos.forEach(([x, z, r], i) => { dummy.position.set(x, .55, z); dummy.rotation.set(0, r, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); a.setMatrixAt(i, dummy.matrix); dummy.position.y = .78; dummy.updateMatrix(); b.setMatrixAt(i, dummy.matrix); });
+  a.castShadow = b.castShadow = true; raceGroup.add(a, b);
+}
+const flags = [];
+for (let x = -36; x <= 24; x += 6) for (const z of [-3.9, 3.9]) {
+  const pv = frame(x, cz(x) + z); pv.add(box(.05, 4.6, .05, M(0xdddddd), 0, 2.3, 0));
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(.95, 2.8), new THREE.MeshBasicMaterial({ color: ((x / 6) | 0) % 2 ? 0xff3d97 : 0xfff4f9, side: THREE.DoubleSide, toneMapped: false })); f.position.set(.5, 3.1, 0); pv.add(f); raceGroup.add(pv); flags.push(pv);
+}
+
+/* ---- village : implantation sur les zones réellement libres (hors arbres, bâtiments, couloir) ---- */
+const placePoly = S.ways.place[0].p, taken = [];
+const keepOut = []; for (const P of [startPath, finPath]) for (let d = 0; d <= P.len; d += 3) { const q = sample(P, d); keepOut.push([q.x, q.z]); }
+RT.pts.forEach((p, i) => { if (RT.cum[i] < 160) keepOut.push(p); });
+function freeSites(count, w, d, { maxR = 95, treeR = 3.2, sep = 8, minDist = 0 } = {}) {
+  const cands = [], px = placePoly.map(p => p[0]), pz = placePoly.map(p => p[1]);
+  for (let x = Math.min(...px); x < Math.max(...px); x += 2) for (let z = Math.min(...pz); z < Math.max(...pz); z += 2) {
+    const r = Math.hypot(x - O.x, z - O.y); if (r > maxR || r < minDist) continue;
+    const [fx, fz] = toF(x, z); if (fx > -50 && fx < 36 && Math.abs(fz) < 10 + d / 2) continue;
+    let ok = true; for (const a of [-w / 2, 0, w / 2]) { for (const b of [-d / 2, 0, d / 2]) { const wx = x + U.x * a + V.x * b, wz = z + U.y * a + V.y * b;
+      if (!pip(wx, wz, placePoly) || keepOut.some(k => Math.hypot(k[0] - wx, k[1] - wz) < 6.5) || S.bld.some(q => pip(wx, wz, q.r)) || trees.some(t => Math.hypot(t[0] - wx, t[1] - wz) < treeR) || !pip(wx, wz, landPoly)) { ok = false; break; } } if (!ok) break; }
+    if (ok) cands.push([x, z, r]);
+  }
+  cands.sort((a, b) => a[2] - b[2]); const out = [];
+  for (const c of cands) { if (out.length >= count) break; if (taken.concat(out).some(t => Math.hypot(t[0] - c[0], t[1] - c[1]) < sep)) continue; out.push(c); }
+  out.forEach(o => taken.push(o)); return out;
+}
+function person(parent, x, z, col, y0 = 0) {
+  const g = new THREE.Group(); g.position.set(x, y0, z);
+  const b = new THREE.Mesh(new THREE.CapsuleGeometry(.2, .75, 4, 8), M(col, { roughness: .8 })); b.position.y = 1; b.castShadow = true;
+  const h = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8), M(pick(['#f1c7a6', '#d9a27a', '#a8714d', '#6f4a33']))); h.position.y = 1.8; h.castShadow = true; g.add(b, h); parent.add(g);
+}
+const sites = {};
+function tent(label, color, o = {}) {
+  const [s] = freeSites(1, 8, 4, { maxR: 110, sep: 7.5 }); if (!s) { sites[label] = null; return; }
+  const [x, z] = s, [, fz] = toF(x, z), g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = HEAD + (fz > 0 ? Math.PI : 0);
+  const w = 8, d = 4, h = 2.7, roofM = M(color, { roughness: .7 }), white = M(0xf6f1ee, { roughness: .8 });
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.1, h, .1, M(0x888a90, { metalness: .6, roughness: .4 }), sx * (w / 2 - .1), h / 2, sz * (d / 2 - .1)));
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(1, 1.2, 4), roofM); roof.rotation.y = Math.PI / 4; roof.scale.set(w / 1.414 * 1.04, 1, d / 1.414 * 1.04); roof.position.y = h + .6; roof.castShadow = true; g.add(roof);
+  g.add(box(w + .1, .35, d + .1, white, 0, h - .1, 0), box(w, h - .4, .05, white, 0, h / 2, -d / 2 + .05), box(.05, h - .4, d, white, -w / 2 + .05, h / 2, 0), box(.05, h - .4, d, white, w / 2 - .05, h / 2, 0), box(w - .6, .95, .9, M(0xeee9e4), 0, .5, d / 2 - 1.2));
+  const sg = signMesh(w * .9, .95, label, { bg: o.bg || '#14040c', fg: o.fg || '#fff', px: .6, icon: o.icon }); sg.position.set(0, h + .35, d / 2 + .02); sg.rotation.x = -.22; g.add(sg);
+  for (let k = 0; k < 2; k++) person(g, R(-w / 3, w / 3), d / 2 - 2.1, pick(['#ff3d97', '#14040c', '#ffffff']));
+  raceGroup.add(g); sites[label] = [x, z];
+}
+tent('RETRAIT DOSSARDS', 0xff3d97); tent('CONSIGNE', 0xf4efec, { bg: '#ff3d97' }); tent('RAVITAILLEMENT', 0x4a1830); tent('BDE & PARTENAIRES', 0xff3d97);
+tent('SECOURS', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross' }); tent('PC COURSE', 0x4a1830); tent('RAVITAILLEMENT ARRIVÉE', 0xff3d97); tent('PARTENAIRES', 0xf4efec, { bg: '#ff3d97' });
+{ // scène + podium
+  const [s] = freeSites(1, 14, 10, { maxR: 120, treeR: 2.6, sep: 6, minDist: 18 });
+  if (s) {
+    const [x, z] = s, f = new THREE.Vector2(O.x - x, O.y - z).normalize(), g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = Math.atan2(f.y, -f.x);
+    const dark = M(0x2a2230, { roughness: .6 }), silver = M(0xc9ccd3, { roughness: .35, metalness: .8 });
+    g.add(box(6, 1.1, 14, dark, 0, .55, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.3, 7.5, .3, silver, sx * 2.8, 3.8, sz * 6.8));
+    g.add(box(6, .4, 14, silver, 0, 7.6, 0));
+    const scr = signMesh(11, 4.2, 'ARRIVÉE · LIVE', { bg: '#c2107a', px: .5 }); scr.position.set(2.7, 4.6, 0); scr.rotation.y = -Math.PI / 2; g.add(scr);
+    const fb = signMesh(14, 1, 'REMISE DES PRIX · 11 H', { bg: '#ff3d97', px: .6 }); fb.position.set(-3.05, .6, 0); fb.rotation.y = -Math.PI / 2; g.add(fb);
+    [[0, 1.2, 0xff3d97], [-2, .9, 0xfff4f9], [2, .6, 0xffc2de]].forEach(([zz, hh, c]) => g.add(box(1.7, hh, 1.7, M(c, { roughness: .5 }), -6.5, hh / 2, zz)));
+    raceGroup.add(g); sites['SCÈNE'] = [x, z];
+  } else sites['SCÈNE'] = null;
+}
+
+/* ---- coureurs & spectateurs ---- */
+const shirts = ['#ff3d97', '#ff3d97', '#ff3d97', '#fff4f9', '#fff4f9', '#14040c', '#ff7ab8', '#ffd23f', '#3d7bff', '#30c48d'], skins = ['#f1c7a6', '#d9a27a', '#a8714d', '#6f4a33'];
+function crowd(n) {
+  const bodies = new THREE.InstancedMesh(new THREE.CapsuleGeometry(.2, .75, 4, 8), M(0xffffff), n), heads = new THREE.InstancedMesh(new THREE.SphereGeometry(.16, 10, 8), M(0xffffff), n), c = new THREE.Color();
+  for (let i = 0; i < n; i++) { bodies.setColorAt(i, c.set(pick(shirts))); heads.setColorAt(i, c.set(pick(skins))); }
+  bodies.castShadow = heads.castShadow = true; bodies.frustumCulled = heads.frustumCulled = false; raceGroup.add(bodies, heads); return { bodies, heads };
+}
+function put(set, i, x, z, y, sc, lean = 0) {
+  dummy.position.set(x, y + sc, z); dummy.rotation.set(0, 0, lean); dummy.scale.setScalar(sc); dummy.updateMatrix(); set.bodies.setMatrixAt(i, dummy.matrix);
+  dummy.position.set(x, y + 1.8 * sc, z); dummy.rotation.set(0, 0, 0); dummy.updateMatrix(); set.heads.setMatrixAt(i, dummy.matrix);
+}
+const starters = []; for (let i = 0; i < 110; i++) { const pen10 = i < 46; starters.push({ d0: 40 + (pen10 ? R(-12, -3) : R(-31, -14)), lat: R(-1.1, 1.1), v: R(3.4, 4.9), ph: R(0, 6) }); }
+const startSet = crowd(starters.length);
+const finishers = []; for (let i = 0; i < 40; i++) finishers.push({ lat: R(-1.1, 1.1), v: R(3, 5), off: R(0, 130), ph: R(0, 6) });
+const finSet = crowd(finishers.length);
+const spectators = [];
+for (let i = 0; i < 150; i++) { const [x, z] = FW(R(-6, 24), (rnd() < .5 ? -1 : 1) * R(6.2, 9)); if (pip(x, z, landPoly) && !keepOut.some(k => Math.hypot(k[0] - x, k[1] - z) < 3.4 && false) && !S.bld.some(q => pip(x, z, q.r)) && !trees.some(t => Math.hypot(t[0] - x, t[1] - z) < 1.2)) spectators.push({ x, z, y: 0, ph: R(0, 6) }); }
+for (const G of [G1, G2]) for (let i = 0; i < 70; i++) {
+  const ring = G.ring; let x, z, tries = 0;
+  do { const a = ring[(rnd() * ring.length) | 0], b = ring[(rnd() * ring.length) | 0], c = ring[(rnd() * ring.length) | 0]; let u = rnd(), v = rnd(); if (u + v > 1) { u = 1 - u; v = 1 - v; } x = a[0] + (b[0] - a[0]) * u + (c[0] - a[0]) * v; z = a[1] + (b[1] - a[1]) * u + (c[1] - a[1]) * v; } while (!pip(x, z, ring) && ++tries < 8);
+  if (tries < 8) spectators.push({ x, z, y: gradinY(G, x, z), ph: R(0, 6) });
+}
+const specSet = crowd(spectators.length);
+
+/* ---- hors course : terrasses de café ---- */
+{
+  const iron = M(0x2e3a34, { roughness: .5, metalness: .4 });
+  for (const [x, z] of freeSites(6, 4, 3, { maxR: 100, sep: 6, treeR: 2.4, minDist: 20 })) {
+    const g = new THREE.Group(); g.position.set(x, 0, z); g.add(box(1.8, .06, .8, M(0x8a6a48), 0, .8, 0), box(1.9, .06, .3, M(0x8a6a48), 0, .45, .7), box(1.9, .06, .3, M(0x8a6a48), 0, .45, -.7));
+    const um = new THREE.Mesh(new THREE.ConeGeometry(1.6, .6, 8), M(0x3a4254)); um.position.y = 2.4; um.castShadow = true; g.add(um, box(.05, 2.2, .05, iron, 0, 1.2, 0)); restGroup.add(g);
+  }
+}
+
+/* ============ pins & vues ============ */
+const camFrom = (fx, fz, y, tx, tz, ty) => { const a = FW(fx, fz), b = FW(tx, tz); return { p: [a[0], y, a[1]], t: [b[0], ty, b[1]] }; };
+const V3 = {
+  over: { p: [-150, 105, 150], t: [-5, 0, 10] },
+  arch: camFrom(-24, -2.5, 3.5, 4, -2.5, 4.6),
+  start: camFrom(2, -2.5, 3.2, -34, -2.5, 1.6),
+  finish: camFrom(34, 2.5, 3.4, -10, 2.5, 1.6),
+  sky: { p: [-6, 230, 14], t: [-6, 0, 4] },
+};
+const A = FW(0, 0), P9 = FW(-9, -2.5), P18 = FW(-18, 2.5);
+const ITEMS = [
+  ['Arche Départ · Arrivée', 'Arche de 16 m de large au-dessus des deux couloirs, avec horloge de course.', [A[0], 11, A[1]], V3.arch, true],
+  ['Sas de départ', 'Sur la tête du pont : 10 km devant, 5 km derrière.', [P9[0], 3, P9[1]], camFrom(-1, -2.5, 3.2, -34, -2.5, 1.6), true],
+  ['Couloir d’arrivée', 'Les coureurs arrivent par le pont Saint-Pierre, puis la zone de récupération.', [P18[0], 3, P18[1]], camFrom(10, 2.5, 3.2, -30, 2.5, 1.6), true],
+];
+for (const [k, t, d] of [['RETRAIT DOSSARDS', 'Retrait des dossards', '8 h – 9 h 15, pièce d’identité et carte étudiante.'], ['CONSIGNE', 'Consigne', 'Consigne gratuite au village.'], ['RAVITAILLEMENT', 'Ravitaillement', 'Eau, fruits et boissons.'], ['BDE & PARTENAIRES', 'BDE & partenaires', 'Stands des campus et des marques.'], ['SECOURS', 'Secours', 'Poste de secours de la Croix-Rouge ou de la Protection civile.'], ['PC COURSE', 'PC course', 'Chronométrage et coordination radio.'], ['RAVITAILLEMENT ARRIVÉE', 'Ravitaillement d’arrivée', 'Eau, fruits, médaille.'], ['PARTENAIRES', 'Partenaires', 'Stands des marques partenaires.'], ['SCÈNE', 'Scène & podium', 'Remise des prix à 11 h.']])
+  if (sites[k]) { const p = sites[k]; ITEMS.push([t, d, [p[0], k === 'SCÈNE' ? 9 : 4.6, p[1]], { p: [p[0] + 15, 8, p[1] + 15], t: [p[0], 1.5, p[1]] }, true]); }
+ITEMS.push(['Pont Saint-Pierre', 'Dernier passage avant la place : 235 m de pont.', [-45, 8, 62], { p: [-5, 14, -20], t: [-60, 0, 100] }, false],
+  ['Gradins sur la Garonne', 'Un spot pour encourager les coureurs.', [(G1.ring[0][0] + G1.ring[2][0]) / 2, 3, (G1.ring[0][1] + G1.ring[2][1]) / 2], { p: [-10, 14, -22], t: [-40, -2, 12] }, false]);
+const legend = document.getElementById('legend');
+legend.innerHTML = '<h2>Sur la place</h2>' + ITEMS.map((it, i) => `<button data-i="${i}"><b>${i + 1}</b><div><span>${it[0]}</span><i>${it[1]}</i></div></button>`).join('');
+const pins = ITEMS.map((it, i) => { const b = document.createElement('button'); b.className = 'pin'; b.innerHTML = `${i + 1}<em>${it[0]}</em>`; b.dataset.i = i; document.body.appendChild(b); return b; });
+let fly = null;
+function flyTo(v) { fly = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...v.p), t1: new THREE.Vector3(...v.t) }; }
+controls.addEventListener('start', () => { fly = null; });
+document.addEventListener('click', e => { const i = e.target.closest('[data-i]'); if (i) flyTo(ITEMS[+i.dataset.i][3]); const v = e.target.closest('[data-v]'); if (v) flyTo(V3[v.dataset.v]); });
+let raceOn = true; const raceBtn = document.getElementById('race');
+function setRace(on) {
+  raceOn = on; raceGroup.visible = on; restGroup.visible = !on; raceBtn.classList.toggle('on', on); raceBtn.textContent = on ? 'Jour de course' : 'Place au repos';
+  document.getElementById('sub').textContent = on ? 'jour de course' : 'au repos'; pins.forEach((p, i) => { p.style.display = (on || !ITEMS[i][4]) ? '' : 'none'; });
+}
+raceBtn.addEventListener('click', () => setRace(!raceOn)); setRace(!params.has('empty'));
+const sigPins = SIG.map(p => { const b = document.createElement('button'); b.className = 'pin sig'; b.style.display = 'none'; b.innerHTML = `${p.n}<em>Poste ${p.n} · ${p.street}${p.names.length ? ' × ' + p.names.join(', ') : ' (virage)'}</em>`; document.body.appendChild(b); return b; });
+let sigOn = false; const sigBtn = document.getElementById('sigBtn');
+sigBtn.addEventListener('click', () => { sigOn = !sigOn; sigBtn.classList.toggle('on', sigOn); sigPins.forEach(b => b.style.display = sigOn ? '' : 'none'); });
+const rp = document.getElementById('routepanel'), inScene = ([x, z]) => x > TL[0] + 8 && x < BR[0] - 8 && z > TL[1] + 8 && z < BR[1] - 8;
+rp.innerHTML = `<h2>Parcours officiel · ${(RT.length / 1000).toFixed(2)} km · ${RT.posts.length} postes (carrefours et virages)</h2>` + RT.sections.map((s, k) => {
+  const pts = RT.pts.slice(s.i0, s.i1 + 1), mid = pts[Math.floor(pts.length / 2)], inside = inScene(mid), narrow = s.wmed && s.wmed < 8 && s.open < .3;
+  return `<div class="row${inside ? ' go' : ''}" data-s="${k}"><b>${(s.start / 1000).toFixed(2)}</b><div>${s.name}<small>${s.hw.join(' · ')}${s.surface.length ? ' · ' + s.surface[0] : ''} · alt. ${s.alt0}→${s.alt1} m${s.wmed && s.open < .5 ? ' · largeur ≈ ' + s.wmed + ' m' : ''}</small></div><span class="${narrow ? 'narrow' : ''}">${s.len} m</span></div>`;
+}).join('');
+document.getElementById('routeBtn').addEventListener('click', e => { rp.hidden = !rp.hidden; e.currentTarget.classList.toggle('on', !rp.hidden); });
+if (params.has('sig')) sigBtn.click(); if (params.has('panel')) document.getElementById('routeBtn').click();
+rp.addEventListener('click', e => { const r = e.target.closest('.row.go'); if (!r) return; const s = RT.sections[+r.dataset.s], pts = RT.pts.slice(s.i0, s.i1 + 1), m = pts[Math.floor(pts.length / 2)]; flyTo({ p: [m[0] + 30, 26, m[1] + 30], t: [m[0], 0, m[1]] }); });
+
+/* ============ boucle ============ */
+function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+addEventListener('resize', resize); resize();
+const v0 = V3[params.get('view')] || V3.over; camera.position.set(...v0.p); controls.target.set(...v0.t);
+if (params.has('cam')) { const q = params.get('cam').split(',').map(Number); camera.position.set(q[0], q[1], q[2]); controls.target.set(q[3], q[4], q[5]); }
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, clock = new THREE.Clock(); let T = params.has('t') ? +params.get('t') : 0, lastClk = -1; const proj = new THREE.Vector3();
+function frameLoop() {
+  const dt = Math.min(clock.getDelta(), .05); if (!params.has('t') && !reduce) T += dt;
+  if (fly) { fly.t = Math.min(1, fly.t + dt / 1.8); const k = fly.t < .5 ? 4 * fly.t ** 3 : 1 - Math.pow(-2 * fly.t + 2, 3) / 2; camera.position.lerpVectors(fly.p0, fly.p1, k); controls.target.lerpVectors(fly.t0, fly.t1, k); if (fly.t >= 1) fly = null; }
+  controls.update(); waterTex.offset.x = T * .0008; flags.forEach((f, i) => { f.rotation.y = HEAD + Math.sin(T * 1.6 + i) * .35; });
+  if (raceOn) {
+    const cyc = T % 60;
+    starters.forEach((s, i) => { const run = Math.max(0, cyc - 7 - (40 - s.d0) * .03), d = s.d0 + run * s.v, p = sample(startPath, d), mv = run > 0, k = d > startPath.len - 20 ? Math.max(0, (startPath.len - d) / 20) : 1;
+      put(startSet, i, p.x - p.tz * s.lat, p.z + p.tx * s.lat, mv ? Math.abs(Math.sin(T * 9 + s.ph)) * .07 : Math.abs(Math.sin(T * 2 + s.ph)) * .02, k, mv ? -.12 : 0); });
+    startSet.bodies.instanceMatrix.needsUpdate = startSet.heads.instanceMatrix.needsUpdate = true;
+    finishers.forEach((f, i) => { const d = (f.off + f.v * T) % finPath.len, p = sample(finPath, d), k = d < 6 ? d / 6 : d > finPath.len - 8 ? Math.max(0, (finPath.len - d) / 8) : 1;
+      put(finSet, i, p.x - p.tz * f.lat * .5, p.z + p.tx * f.lat * .5, Math.abs(Math.sin(T * 9 + f.ph)) * .07, k, -.12); });
+    finSet.bodies.instanceMatrix.needsUpdate = finSet.heads.instanceMatrix.needsUpdate = true;
+    spectators.forEach((s, i) => put(specSet, i, s.x, s.z, s.y + Math.abs(Math.sin(T * 3 + s.ph)) * .1, 1));
+    specSet.bodies.instanceMatrix.needsUpdate = specSet.heads.instanceMatrix.needsUpdate = true;
+    const sec = Math.floor(T * 14); if (sec !== lastClk) { window.__clk(sec); lastClk = sec; }
+  }
+  const w = innerWidth, h = innerHeight;
+  pins.forEach((p, i) => { if (p.style.display === 'none') return; proj.set(...ITEMS[i][2]).project(camera); const vis = proj.z < 1 && Math.abs(proj.x) < 1.05 && Math.abs(proj.y) < 1.05;
+    p.style.opacity = vis ? 1 : 0; p.style.pointerEvents = vis ? 'auto' : 'none'; p.style.transform = `translate(${(proj.x * .5 + .5) * w}px,${(-proj.y * .5 + .5) * h}px)`; });
+  if (sigOn) sigPins.forEach((p, i) => { proj.set(SIG[i].x, 2, SIG[i].z).project(camera); const vis = proj.z < 1 && Math.abs(proj.x) < 1.05 && Math.abs(proj.y) < 1.05; p.style.opacity = vis ? 1 : 0; p.style.pointerEvents = vis ? 'auto' : 'none'; p.style.transform = `translate(${(proj.x * .5 + .5) * w}px,${(-proj.y * .5 + .5) * h}px)`; });
+  renderer.render(scene, camera); requestAnimationFrame(frameLoop);
+}
+frameLoop();
+const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 700); window.__ready = true; window.__sites = sites; window.__dbg = { raceGroup, TL, BR, RT };
+</script>
+</body>
+</html>

@@ -93,17 +93,17 @@ CTA = '''<section><div class="wrap"><div class="cta-band rv">
 </div></div></section>'''
 
 STEPS = [
-    ("0", "Place Saint-Pierre", "Départ au bord de la Garonne, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne."),
-    ("0,2", "Allée de Barcelone", "On remonte le long du canal de Brienne, à l’ombre des platanes."),
-    ("0,8", "Les boulevards", "Leclerc, Duportal, Lascrosses puis d’Arcole : de grandes avenues pour trouver son rythme."),
-    ("2,0", "Saint-Sernin", "Rue de l’Arc puis rue Saint-Bernard jusqu’à la basilique. Point d’eau en vue."),
-    ("2,6", "Capitole", "La rue du Taur mène tout droit à la place du Capitole, le cœur de la ville."),
-    ("3,0", "Centre historique", "Rues Saint-Rome et des Changes jusqu’à Esquirol, puis la rue de Metz vers le fleuve."),
-    ("3,7", "Pont Neuf", "Première traversée de la Garonne, avec la vue sur les quais."),
-    ("4,0", "Saint-Cyprien", "Rue de la République puis rue du Pont Saint-Pierre, côté rive gauche."),
-    ("4,7", "Pont Saint-Pierre", "Retour rive droite, dernière ligne droite vers la place. Pour le 10 km, c’est reparti pour un tour."),
+    ("0", "Esplanade de l’Université", "Départ à deux pas de la Place Saint-Pierre, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne."),
+    ("0,2", "Campus de Toulouse 1", "On remonte le boulevard Duportal puis on traverse le campus par les rues de l’Université et des Puits Creusés."),
+    ("0,9", "Place Anatole France", "Puis la rue Valade, tout droit vers la Place Saint-Pierre et son village."),
+    ("1,3", "Place Saint-Pierre", "Premier passage devant le village, juste avant de rejoindre les quais de la Garonne."),
+    ("1,6", "Les quais", "Quai Lucien Lombard, place de la Daurade puis quais de la Daurade et de Tounis, face au fleuve."),
+    ("2,5", "Quai de Tounis", "Point d’eau sur le quai, demi-tour au bout puis retour sur le même axe vers le Pont Neuf."),
+    ("3,4", "Pont Neuf", "Traversée de la Garonne, avec la vue sur les quais."),
+    ("3,6", "Saint-Cyprien", "Rue de la République puis rue du Pont Saint-Pierre, côté rive gauche."),
+    ("4,4", "Pont Saint-Pierre", "Retour rive droite, dernière ligne droite vers l’esplanade. Pour le 10 km, c’est reparti pour un tour."),
 ]
-KM = R["km_total"]; KMs = f"{KM:.2f}".replace(".", ","); KM2s = f"{2*KM:.2f}".replace(".", ",")
+KM = R["km_total"]; KMs = f"{KM:.2f}".replace(".", ","); KM2s = f"{R.get('km_total2', 2*KM):.2f}".replace(".", ",")
 
 # ---------------- ACCUEIL ----------------
 index = f'''
@@ -168,7 +168,7 @@ index = f'''
 
 # ---------------- PARCOURS ----------------
 lo, hi = R["lo"], R["hi"]
-parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Place Saint-Pierre. Une boucle de {KMs} km, une fois pour le 5 km, deux fois pour le 10 km.") + f'''
+parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Esplanade de l’Université, à côté de la Place Saint-Pierre. Une boucle de {KMs} km, une fois pour le 5 km, deux fois pour le 10 km.") + f'''
 <section style="padding-top:0">
   <div class="wrap">
     <div class="map-shell rv">
@@ -233,7 +233,7 @@ horaires = hero("Samedi 22 mai 2027", "LE <em>JOUR J</em>", "Le programme de la 
 FAQ = [("À qui s’adresse la course ?", "Aux étudiants des écoles et universités de Toulouse, débutants comme coureurs réguliers. Dans cet exemple, la course est ouverte aux étudiants majeurs, quel que soit leur niveau."),
        ("5 ou 10 km, je choisis comment ?", "Le 5 km est une boucle, idéale pour une première course. Le 10 km, ce sont deux boucles pour ceux qui veulent un vrai chrono. Tu choisis à l’inscription."),
        ("Quels documents faut-il fournir ?", "Les justificatifs demandés (carte étudiante, document médical) seront précisés à l’ouverture des inscriptions, selon la réglementation en vigueur."),
-       ("Y a-t-il du ravitaillement ?", "Un point d’eau vers le km 2,5, près de Saint-Sernin, où les coureurs du 10 km passent deux fois. Un ravitaillement complet attend tout le monde à l’arrivée."),
+       ("Y a-t-il du ravitaillement ?", "Un point d’eau vers le km 2,5, sur le quai de Tounis, où les coureurs du 10 km passent deux fois. Un ravitaillement complet attend tout le monde à l’arrivée."),
        ("Je peux venir encourager ?", "Oui ! La Place Saint-Pierre et les deux ponts sont les meilleurs spots. Reste derrière les barrières pour laisser le passage aux coureurs."),
        ("Comment devenir bénévole ?", "Accueil, dossards, signaleurs sur le parcours : découvre les rôles sur la page Association.")]
 infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et réponses aux questions fréquentes.") + f'''

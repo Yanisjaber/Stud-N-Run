@@ -1,0 +1,9 @@
+{
+  "_mode_d_emploi": "Une entrée par école, avec son numéro (E002, E029...) tiré du Google Sheet. Tous les champs sont facultatifs. logo = fichier mis dans dist/logos/. Ne rien publier sans l'accord de l'école.",
+  "_exemple": {
+    "referent": "BDE Droit – Prénom Nom",
+    "instagram": "bde_droit_toulouse",
+    "logo": "logos/E002.png",
+    "texte": "Une phrase de présentation fournie par l'école ou le BDE."
+  }
+}

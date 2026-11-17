@@ -5,7 +5,7 @@ ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
 R = json.loads((ROOT / "route-svg.json").read_text())
 
-NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("place/index.html", "Le village"), ("horaires.html", "Horaires"),
+NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("place/index.html", "Le village"), ("ecoles.html", "Écoles"), ("horaires.html", "Horaires"),
        ("infos-pratiques.html", "Infos pratiques"), ("association.html", "Association")]
 
 ICONS = {
@@ -293,12 +293,339 @@ association = hero("L’association", "PORTER LA <em>COURSE</em>", "Une équipe 
 {CTA}
 '''
 
+# ---------------- ÉCOLES ----------------
+CONTACT_MAIL = "studnrun@gmail.com"
+ECOLES = json.loads((ROOT / "ecoles.json").read_text())
+INFOS = {k: v for k, v in json.loads((ROOT / "ecoles-infos.json").read_text()).items() if not k.startswith("_")}
+for e in ECOLES:
+    i = INFOS.get(e["id"], {})
+    e["i"] = {k: i[k] for k in ("referent", "instagram", "logo", "texte") if i.get(k)}
+import math
+_seen = {}
+for e in ECOLES:  # écarte légèrement les points superposés (même coordonnée)
+    if not e.get("xy"): continue
+    k = tuple(e["xy"]); i = _seen.get(k, 0); _seen[k] = i + 1
+    if i:
+        a, r = i * 2.4, 0.0012 * math.sqrt(i)
+        e["xy"] = [round(e["xy"][0] + r * math.sin(a), 5), round(e["xy"][1] + r * 1.4 * math.cos(a), 5)]
+SCH_DATA = json.dumps(ECOLES, ensure_ascii=False).replace("</", "<\\/")
+GROUPS = list(dict.fromkeys(e["g"] for e in sorted(ECOLES, key=lambda e: e["g"] != "Universités")))
+N_REF = sum(1 for e in ECOLES if e["i"].get("referent"))
+ecoles = f'''<section class="page-hero"><div class="wrap"><p class="eyebrow rv">Le challenge des écoles</p><h1 class="rv d1">{len(ECOLES)} ÉCOLES, <em>UNE COUPE</em></h1></div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sch-tools rv">
+  <label class="sr" for="sch-q">Chercher une école</label>
+  <input id="sch-q" type="search" placeholder="Cherche ton école (ex. INSA, droit, Fermat…)" autocomplete="off">
+  <div class="sch-filters" role="group" aria-label="Filtrer par catégorie">
+    <button type="button" class="chip on" data-g="">Toutes</button>{"".join(f'<button type="button" class="chip" data-g="{g}">{g}</button>' for g in GROUPS)}
+  </div>
+  <div class="sch-bar"><p class="sch-count" aria-live="polite"><b id="sch-n">{len(ECOLES)}</b> écoles</p>
+  <div class="sch-view" role="group" aria-label="Affichage"><button type="button" class="on" data-v="liste" aria-pressed="true">Liste</button><button type="button" data-v="carte" aria-pressed="false">Carte</button></div></div>
+</div>
+<div id="sch-map-wrap" class="sch-map-wrap" hidden><div id="sch-map" aria-label="Carte des écoles"></div><p class="sch-map-note">Point clair&nbsp;: emplacement approximatif (centre de la commune).</p></div>
+<div id="sch-list" class="sch-list"></div>
+<p class="sch-empty" id="sch-empty" hidden>Aucune école ne correspond. Elle n’est pas dans la liste&nbsp;? Pas de souci : choisis «&nbsp;Autre&nbsp;» à l’inscription et écris son nom.</p>
+</div></section>
+<dialog id="sch-dlg" class="sch-dlg" aria-labelledby="sch-dlg-t"><div id="sch-dlg-in"></div></dialog>
+<script id="sch-data" type="application/json">{SCH_DATA}</script>
+{CTA}
+'''
+SCH_HEAD = '''<style>
+.sch-tools { display:grid; gap:16px; margin-bottom:28px }
+#sch-q { width:100%; padding:16px 20px; font:600 1.05rem var(--body); color:var(--cream); background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:999px; outline:none }
+#sch-q::placeholder { color:var(--muted) }
+#sch-q:focus { border-color:var(--pink) }
+.sch-filters { display:flex; flex-wrap:wrap; gap:8px }
+.sch-filters .chip { cursor:pointer; color:var(--cream); font-family:var(--body) }
+.sch-filters .chip.on { background:var(--pink); border-color:var(--pink); color:#fff }
+.sch-count { margin:0; color:var(--muted) }
+.sch-bar { display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap }
+.sch-view { display:inline-flex; padding:4px; border:1px solid var(--line); border-radius:999px; background:rgba(255,255,255,.03) }
+.sch-view button { padding:8px 18px; border:0; border-radius:999px; background:transparent; color:var(--cream); font:700 .9rem var(--body); cursor:pointer }
+.sch-view button.on { background:var(--pink); color:#fff }
+.sch-map-wrap { margin-bottom:10px }
+#sch-map { height:min(70vh,640px); border:1px solid var(--line); border-radius:var(--r); overflow:hidden; background:var(--night) }
+.sch-map-note { margin:10px 0 0; color:var(--muted); font-size:.82rem }
+#sch-map .maplibregl-popup-content { background:var(--night); color:var(--cream); border:1px solid var(--line); border-radius:12px; padding:10px 14px; font:600 .88rem var(--body); box-shadow:0 8px 24px rgba(0,0,0,.4) }
+#sch-map .maplibregl-popup-tip { display:none }
+.sch-count b { color:var(--pink) }
+.sch-grp h3 { font:italic 900 1.6rem/1 var(--display); text-transform:uppercase; margin:34px 0 14px; color:var(--blush) }
+.sch-grp ul { list-style:none; margin:0; padding:0; display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:10px }
+.sch-card { width:100%; height:100%; display:flex; gap:14px; align-items:center; text-align:left; padding:12px 16px; border:1px solid var(--line); border-radius:14px; background:rgba(255,255,255,.03); color:var(--cream); font:inherit; line-height:1.35; cursor:pointer; transition:border-color .2s, background .2s }
+.sch-card:hover { border-color:var(--pink); background:rgba(255,61,151,.06) }
+.sch-card .t { flex:1; min-width:0 }
+.sch-card .t span { display:block; font-size:.8rem; color:var(--muted); margin-top:3px }
+.sch-card .t span.ok { color:var(--pink-2) }
+.sch-logo { flex:none; width:44px; height:44px; border-radius:12px; display:grid; place-items:center; overflow:hidden; background:var(--plum); border:1px solid var(--line); font:italic 900 1.05rem/1 var(--display); color:var(--blush); letter-spacing:.02em }
+.sch-logo img { width:100%; height:100%; object-fit:contain; background:#fff }
+.sch-logo.big { width:84px; height:84px; border-radius:20px; font-size:1.8rem }
+.sch-empty { color:var(--muted) }
+.sch-dlg { width:min(640px,calc(100% - 32px)); max-height:calc(100% - 48px); padding:0; border:1px solid var(--line); border-radius:var(--r); background:var(--night); color:var(--cream) }
+.sch-dlg::backdrop { background:rgba(10,2,6,.75); backdrop-filter:blur(4px) }
+#sch-dlg-in { padding:30px; position:relative }
+.sch-x { position:absolute; top:16px; right:16px; width:40px; height:40px; border-radius:50%; border:1px solid var(--line); background:transparent; color:var(--cream); font-size:1.3rem; cursor:pointer }
+.sch-x:hover { border-color:var(--pink) }
+.sch-hd { display:flex; gap:18px; align-items:center; padding-right:44px }
+.sch-hd h2 { font:italic 900 clamp(1.6rem,4vw,2.1rem)/1.02 var(--display); text-transform:uppercase; margin:0 }
+.sch-hd p { margin:6px 0 0; color:var(--muted); font-size:.9rem }
+.sch-sec { margin-top:24px }
+.sch-sec h3 { margin:0 0 10px; font-size:.75rem; letter-spacing:.14em; text-transform:uppercase; color:var(--pink) }
+.sch-sec p { margin:0 }
+.sch-tags { display:flex; flex-wrap:wrap; gap:6px; margin:0; padding:0; list-style:none }
+.sch-tags li { padding:6px 12px; border:1px solid var(--line); border-radius:999px; font-size:.82rem; background:rgba(255,255,255,.03) }
+.sch-void { padding:20px; border:1px dashed rgba(255,61,151,.5); border-radius:16px; background:rgba(255,61,151,.06) }
+.sch-void b { display:block; font-size:1.05rem; margin-bottom:6px }
+.sch-void p { color:var(--muted); margin:0 0 14px }
+.sch-void .btn { padding:12px 20px; font-size:.9rem }
+.sch-dlg a:not(.btn) { color:var(--pink-2) }
+@media (max-width:520px) { .sch-grp ul { grid-template-columns:1fr } #sch-dlg-in { padding:22px } .sch-logo.big { width:64px; height:64px; font-size:1.4rem } }
+.sch-edit-bt { padding:8px 16px; border:1px dashed var(--pink); border-radius:999px; background:transparent; color:var(--pink); font:700 .85rem var(--body); cursor:pointer }
+.sch-edit-bt.on { background:var(--pink); color:#fff; border-style:solid }
+.sch-edit-panel { position:absolute; top:12px; left:12px; z-index:5; width:min(340px,calc(100% - 70px)); background:var(--night); color:var(--cream); border:1px solid var(--line); border-radius:14px; padding:14px 16px; box-shadow:0 10px 30px rgba(0,0,0,.45); font-size:.9rem }
+.sch-edit-panel b { display:block; margin-bottom:6px }
+.sch-edit-panel p { margin:0 0 6px } .sch-edit-panel .m { color:var(--muted); font-size:.8rem }
+.sch-edit-panel label { display:block; font-size:.8rem; color:var(--muted); margin:4px 0 6px }
+.sch-edit-panel input { display:block; width:100%; margin-top:4px; padding:8px 10px; border-radius:8px; border:1px solid var(--line); background:rgba(255,255,255,.06); color:var(--cream); font:inherit }
+.sch-edit-act { display:flex; gap:8px; justify-content:flex-end; margin-top:8px }
+.sch-edit-act button { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:transparent; color:var(--cream); font:700 .85rem var(--body); cursor:pointer }
+.sch-edit-act .ok { background:var(--pink); border-color:var(--pink); color:#fff }
+.sch-edit-panel .use { margin-left:4px; padding:2px 10px; border-radius:999px; border:1px solid var(--pink); background:transparent; color:var(--pink); font:700 .75rem var(--body); cursor:pointer }
+.sch-edit-panel .err { color:#ff8a8a; font-weight:700 }
+.sch-pin { width:26px; height:26px; border-radius:50%; background:var(--pink); border:4px solid #fff; box-shadow:0 0 0 4px rgba(255,61,151,.35), 0 4px 12px rgba(0,0,0,.5); cursor:grab }
+</style>
+'''
+SCH_JS = '''<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var MAIL = "''' + CONTACT_MAIL + '''";
+  var data = JSON.parse(document.getElementById("sch-data").textContent);
+  var list = document.getElementById("sch-list"), q = document.getElementById("sch-q"),
+      n = document.getElementById("sch-n"), empty = document.getElementById("sch-empty"), g = "",
+      dlg = document.getElementById("sch-dlg"), din = document.getElementById("sch-dlg-in");
+  var byId = {};
+  function norm(s) { return s.normalize("NFD").replace(/[\\u0300-\\u036f]/g, "").toLowerCase(); }
+  function esc(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : s; return d.innerHTML; }
+  var STOP = ["universite", "de", "du", "des", "la", "le", "les", "et", "en", "d", "l", "toulouse", "ut", "ufr", "ecole", "institut", "lycee", "faculte", "general", "generale", "technologique", "polyvalent", "professionnel", "prive", "superieur", "superieure", "nationale", "national", "pierre", "saint", "sainte", "site", "campus"];
+  function initials(name) {
+    var p = name.split(/[–(]/), base = p.length > 1 && p[0].length < 24 ? p[1] : p[0];
+    var BAD = ["UT", "UFR", "UT2J", "INP"], seg = name.split("–").slice(1).join(" "), par = (name.match(/\\(([^)]*)\\)/) || [, ""])[1];
+    var acr = [seg, par, name].map(function (x) { return (x.match(/\\b[A-Z][A-Z0-9]{1,7}\\b/g) || []).filter(function (a) { return BAD.indexOf(a) < 0; })[0]; }).filter(Boolean)[0];
+    if (acr) return acr.length > 5 ? acr.slice(0, 4) : acr;
+    var w = norm(base).replace(/[^a-z0-9 ]/g, " ").split(/\\s+/).filter(function (x) { return x && STOP.indexOf(x) < 0; });
+    return ((w[0] || "?")[0] + (w[1] ? w[1][0] : "")).toUpperCase();
+  }
+  function logo(e, big) {
+    var c = "sch-logo" + (big ? " big" : "");
+    return e.i.logo ? '<span class="' + c + '"><img src="' + esc(e.i.logo) + '" alt="Logo ' + esc(e.n) + '" loading="lazy"></span>'
+                    : '<span class="' + c + '" aria-hidden="true">' + esc(initials(e.n)) + "</span>";
+  }
+  data.forEach(function (e) { e.k = norm(e.n + " " + e.c + " " + e.g + " " + e.f.join(" ")); byId[e.id] = e; });
+  var order = []; data.forEach(function (e) { if (order.indexOf(e.g) < 0) order.push(e.g); });
+  order.sort(function (a, b) { return (a === "Universités" ? -1 : b === "Universités" ? 1 : 0); });
+  function render() {
+    var t = norm(q.value.trim()).split(/\\s+/).filter(Boolean), html = "", count = 0;
+    order.forEach(function (grp) {
+      if (g && grp !== g) return;
+      var items = data.filter(function (e) { return e.g === grp && t.every(function (w) { return e.k.indexOf(w) >= 0; }); })
+                      .sort(function (a, b) { return a.n.localeCompare(b.n, "fr"); });
+      if (!items.length) return;
+      count += items.length;
+      html += '<div class="sch-grp"><h3>' + esc(grp) + ' <small style="font-size:.9rem;color:var(--muted)">(' + items.length + ')</small></h3><ul>' +
+        items.map(function (e) {
+          var ok = !!e.i.referent;
+          return '<li><button type="button" class="sch-card" data-id="' + e.id + '">' + logo(e) +
+            '<span class="t">' + esc(e.n) + '<span' + (ok ? ' class="ok">✓ Référent : ' + esc(e.i.referent) : ">" + esc(e.c)) + "</span></span></button></li>";
+        }).join("") + "</ul></div>";
+    });
+    shown = data.filter(function (e) { return (!g || e.g === g) && t.every(function (w) { return e.k.indexOf(w) >= 0; }); });
+    list.innerHTML = html; n.textContent = count; empty.hidden = count > 0 || view === "carte"; updateMap();
+  }
+  function open(e) {
+    var i = e.i, h = '<button type="button" class="sch-x" aria-label="Fermer">×</button>' +
+      '<div class="sch-hd">' + logo(e, true) + '<div><h2 id="sch-dlg-t">' + esc(e.n) + "</h2><p>" + esc([e.g, e.s, e.c].filter(Boolean).join(" · ")) + "</p></div></div>";
+    if (i.referent || i.texte || i.instagram) {
+      if (i.texte) h += '<div class="sch-sec"><p>' + esc(i.texte) + "</p></div>";
+      if (i.referent) h += '<div class="sch-sec"><h3>Référent Stud’N Run</h3><p>' + esc(i.referent) + "</p></div>";
+      if (i.instagram) { var ig = i.instagram.replace(/^@/, ""); h += '<div class="sch-sec"><h3>Instagram</h3><p><a href="https://instagram.com/' + encodeURIComponent(ig) + '" target="_blank" rel="noopener">@' + esc(ig) + "</a></p></div>"; }
+    } else {
+      var sub = encodeURIComponent("Référent Stud'N Run – " + e.n);
+      h += '<div class="sch-sec sch-void"><b>Aucune info sur cette école pour l’instant.</b>' +
+        "<p>Tu es au BDE, au BDS ou motivé pour représenter ton école&nbsp;? Envoie-nous le nom d’un référent et votre logo&nbsp;: on complète la fiche.</p>" +
+        '<a class="btn" href="mailto:' + MAIL + "?subject=" + sub + '">Devenir référent <span class="arr">→</span></a></div>';
+    }
+    if (e.f.length) h += '<div class="sch-sec"><h3>Formations après le bac (Parcoursup)</h3><ul class="sch-tags">' + e.f.map(function (f) { return "<li>" + esc(f) + "</li>"; }).join("") + "</ul></div>";
+    var adr = [e.a].concat((e.x2 || []).map(function (s) { return s.a; })).filter(Boolean);
+    if (adr.length) h += '<div class="sch-sec"><h3>' + (adr.length > 1 ? "Sites" : "Adresse") + "</h3>" + adr.map(function (a) { return "<p>" + esc(a) + "</p>"; }).join("") + "</div>";
+    if (e.w) h += '<div class="sch-sec"><h3>Site de l’école</h3><p><a href="' + esc(/^https?:/.test(e.w) ? e.w : "https://" + e.w) + '" target="_blank" rel="noopener">' + esc(e.w.replace(/^https?:\\/\\//, "").replace(/\\/$/, "")) + "</a></p></div>";
+    din.innerHTML = h;
+    din.querySelector(".sch-x").addEventListener("click", function () { dlg.close(); });
+    dlg.showModal(); din.querySelector(".sch-x").focus();
+  }
+  list.addEventListener("click", function (ev) { var b = ev.target.closest(".sch-card"); if (b) open(byId[b.getAttribute("data-id")]); });
+  dlg.addEventListener("click", function (ev) { if (ev.target === dlg) dlg.close(); });
+  var view = "liste", map = null, mapReady = false, shown = data;
+  var wrapMap = document.getElementById("sch-map-wrap");
+  function geo() {
+    var f = [];
+    shown.forEach(function (e) {
+      if (e.xy) f.push({ type: "Feature", properties: { id: e.id, n: e.n, ap: e.ap }, geometry: { type: "Point", coordinates: [e.xy[1], e.xy[0]] } });
+      (e.x2 || []).forEach(function (s) { f.push({ type: "Feature", properties: { id: e.id, n: e.n, ap: 0 }, geometry: { type: "Point", coordinates: [s.xy[1], s.xy[0]] } }); });
+    });
+    return { type: "FeatureCollection", features: f };
+  }
+  function updateMap() { if (mapReady) map.getSource("ec").setData(geo()); }
+  function loadLib(cb) {
+    if (window.maplibregl) return cb();
+    var l = document.createElement("link"); l.rel = "stylesheet"; l.href = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"; document.head.appendChild(l);
+    var sc = document.createElement("script"); sc.src = "https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"; sc.onload = cb; document.head.appendChild(sc);
+  }
+  function initMap() {
+    map = new maplibregl.Map({ container: "sch-map", style: "https://tiles.openfreemap.org/styles/liberty", center: [1.444, 43.6], zoom: 11.2, attributionControl: { compact: true }, cooperativeGestures: true });
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
+    map.on("load", function () {
+      map.addSource("ec", { type: "geojson", data: geo(), cluster: true, clusterRadius: 38, clusterMaxZoom: 15 });
+      map.addLayer({ id: "cl", type: "circle", source: "ec", filter: ["has", "point_count"], paint: { "circle-color": "#ff3d97", "circle-opacity": .92, "circle-stroke-width": 3, "circle-stroke-color": "#ffc2de",
+        "circle-radius": ["step", ["get", "point_count"], 16, 10, 21, 30, 27] } });
+      map.addLayer({ id: "cl-n", type: "symbol", source: "ec", filter: ["has", "point_count"], layout: { "text-field": ["get", "point_count_abbreviated"], "text-size": 13, "text-font": ["Noto Sans Bold"] }, paint: { "text-color": "#fff" } });
+      map.addLayer({ id: "pt", type: "circle", source: "ec", filter: ["!", ["has", "point_count"]], paint: {
+        "circle-color": ["case", ["==", ["get", "ap"], 1], "#ffc2de", "#ff3d97"], "circle-radius": 8, "circle-stroke-width": 2.5, "circle-stroke-color": "#14040c" } });
+      map.on("click", "cl", function (ev) {
+        var f = map.queryRenderedFeatures(ev.point, { layers: ["cl"] })[0];
+        map.getSource("ec").getClusterExpansionZoom(f.properties.cluster_id).then(function (z) { map.easeTo({ center: f.geometry.coordinates, zoom: z + .3 }); });
+      });
+      map.on("click", "pt", function (ev) { open(byId[ev.features[0].properties.id]); });
+      var pop = new maplibregl.Popup({ closeButton: false, closeOnClick: false, offset: 12 });
+      map.on("mouseenter", "pt", function (ev) { map.getCanvas().style.cursor = "pointer"; pop.setLngLat(ev.features[0].geometry.coordinates).setText(ev.features[0].properties.n).addTo(map); });
+      map.on("mouseleave", "pt", function () { map.getCanvas().style.cursor = ""; pop.remove(); });
+      map.on("mouseenter", "cl", function () { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "cl", function () { map.getCanvas().style.cursor = ""; });
+      mapReady = true; updateMap();
+    });
+  }
+  function setView(v) {
+    view = v;
+    document.querySelectorAll(".sch-view button").forEach(function (b) { var on = b.getAttribute("data-v") === v; b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); });
+    list.hidden = v !== "liste"; wrapMap.hidden = v !== "carte";
+    if (v === "carte") { empty.hidden = true; if (!map) loadLib(initMap); else map.resize(); }
+    else empty.hidden = shown.length > 0;
+    try { history.replaceState(null, "", v === "carte" ? "#carte" : location.pathname); } catch (e) {}
+  }
+  document.querySelectorAll(".sch-view button").forEach(function (b) { b.addEventListener("click", function () { setView(b.getAttribute("data-v")); }); });
+  q.addEventListener("input", render);
+  document.querySelectorAll(".sch-filters .chip").forEach(function (b) {
+    b.addEventListener("click", function () {
+      document.querySelectorAll(".sch-filters .chip").forEach(function (x) { x.classList.toggle("on", x === b); });
+      g = b.getAttribute("data-g"); render();
+    });
+  });
+  render();
+  if (location.hash === "#carte") setView("carte");
+
+  /* Mode édition des positions : n'apparaît que sur l'ordinateur de l'équipe, quand la page est servie par build/ecoles/editeur.py */
+  if (!/^(localhost|127\\.0\\.0\\.1)$/.test(location.hostname)) return;
+  fetch("/api/ping").then(function (r) { return r.ok ? r.json() : null; }).then(function (ok) { if (ok && ok.editeur) setupEdit(); }).catch(function () {});
+  function setupEdit() {
+    var edit = false, sel = null, selK = 0, mk = null, moved = null;
+    /* site k d'une école : 0 = site principal, 1, 2… = autres sites (champ x2) */
+    function sXY(e, k) { return k ? e.x2[k - 1].xy : e.xy; }
+    function sA(e, k) { return k ? e.x2[k - 1].a : e.a; }
+    function sN(e, k) { return e.x2 && e.x2.length ? e.n + " · site " + (k + 1) + "/" + (e.x2.length + 1) : e.n; }
+    var bt = document.createElement("button"); bt.type = "button"; bt.className = "sch-edit-bt"; bt.textContent = "✎ Déplacer les points";
+    document.querySelector(".sch-bar").appendChild(bt);
+    var pn = document.createElement("div"); pn.className = "sch-edit-panel"; pn.hidden = true; wrapMap.style.position = "relative"; wrapMap.appendChild(pn);
+    function eGeo() {
+      var f = [];
+      data.forEach(function (e) {
+        [e.xy].concat((e.x2 || []).map(function (s) { return s.xy; })).forEach(function (xy, k) {
+          if (xy && !(sel && e.id === sel.id && k === selK)) f.push({ type: "Feature", properties: { id: e.id, n: sN(e, k), k: k }, geometry: { type: "Point", coordinates: [xy[1], xy[0]] } });
+        });
+      });
+      return { type: "FeatureCollection", features: f };
+    }
+    function layers() {
+      if (map.getSource("ece")) return;
+      map.addSource("ece", { type: "geojson", data: eGeo() });
+      map.addLayer({ id: "pt-e", type: "circle", source: "ece", layout: { visibility: "none" }, paint: { "circle-color": "#ff3d97", "circle-radius": 7, "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
+      map.addLayer({ id: "pt-e-n", type: "symbol", source: "ece", minzoom: 14, layout: { visibility: "none", "text-field": ["get", "n"], "text-size": 11, "text-offset": [0, 1.2], "text-anchor": "top", "text-font": ["Noto Sans Regular"], "text-max-width": 12 }, paint: { "text-color": "#14040c", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
+      map.on("click", "pt-e", function (ev) { var p = ev.features[0].properties; pick(byId[p.id], +p.k || 0); });
+      map.on("mouseenter", "pt-e", function () { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "pt-e", function () { map.getCanvas().style.cursor = ""; });
+    }
+    function refresh() { if (map.getSource("ece")) map.getSource("ece").setData(eGeo()); updateMap(); }
+    function msg(h) { pn.innerHTML = h; pn.hidden = false; }
+    function idle() { msg("<b>Mode édition</b><p>Clique sur une école pour la sélectionner, puis glisse son point à la bonne place.</p>"); }
+    function toggle(on) {
+      edit = on; bt.classList.toggle("on", on); bt.textContent = on ? "✓ Terminer l’édition" : "✎ Déplacer les points";
+      if (on) setView("carte");
+      var go = function () {
+        layers();
+        ["cl", "cl-n", "pt"].forEach(function (l) { map.setLayoutProperty(l, "visibility", on ? "none" : "visible"); });
+        ["pt-e", "pt-e-n"].forEach(function (l) { map.setLayoutProperty(l, "visibility", on ? "visible" : "none"); });
+        if (map.cooperativeGestures) map.cooperativeGestures[on ? "disable" : "enable"]();
+        if (!on) cancel(); else idle();
+        pn.hidden = !on;
+      };
+      if (mapReady) go(); else { var t = setInterval(function () { if (mapReady) { clearInterval(t); go(); } }, 150); }
+    }
+    bt.addEventListener("click", function () { toggle(!edit); });
+    function cancel() { if (mk) mk.remove(); mk = null; sel = null; selK = 0; moved = null; if (map) refresh(); if (edit) idle(); }
+    function pick(e, k) {
+      k = k || 0; cancel(); sel = e; selK = k; refresh();
+      var xy = sXY(e, k), ea = sA(e, k), nm = sN(e, k);
+      var el = document.createElement("div"); el.className = "sch-pin";
+      mk = new maplibregl.Marker({ element: el, draggable: true }).setLngLat([xy[1], xy[0]]).addTo(map);
+      msg("<b>" + esc(nm) + "</b><p>Glisse le point rose à la bonne place.</p><p class=\\"m\\">Adresse actuelle : " + esc(ea || "aucune") + "</p>" +
+          '<div class="sch-edit-act"><button type="button" class="x">Annuler</button></div>');
+      pn.querySelector(".x").addEventListener("click", cancel);
+      mk.on("dragend", function () {
+        var p = mk.getLngLat(); moved = { lat: +p.lat.toFixed(6), lon: +p.lng.toFixed(6) };
+        msg("<b>" + esc(nm) + "</b><p class=\\"m\\">Recherche de l’adresse…</p>");
+        fetch("/api/reverse?lat=" + moved.lat + "&lon=" + moved.lon).then(function (r) { return r.json(); }).then(function (rv) {
+          if (!sel || sel.id !== e.id || selK !== k) return;
+          var dLat = (moved.lat - xy[0]) * 111320, dLon = (moved.lon - xy[1]) * 111320 * Math.cos(xy[0] * Math.PI / 180);
+          var dist = Math.round(Math.sqrt(dLat * dLat + dLon * dLon));
+          /* ancienne adresse gardée par défaut si elle existe et que le point a bougé de moins de 300 m (ou si aucune adresse n'est trouvée) */
+          var keep = !!ea && (dist < 300 || !rv.adresse);
+          moved.commune = keep ? e.c : (rv.commune || e.c);
+          var sug = rv.adresse && keep && rv.adresse !== ea;
+          msg("<b>" + esc(nm) + "</b><label>Adresse<input type=\\"text\\" class=\\"ad\\"></label>" +
+              (sug ? '<p class="m">Adresse trouvée à cet endroit : ' + esc(rv.adresse) + ' <button type="button" class="use">utiliser</button></p>' : "") +
+              "<p class=\\"m\\">Point déplacé de " + dist + " m · " + esc(moved.commune) + (keep ? " · ancienne adresse gardée" : (rv.distance > 60 ? " · adresse la plus proche à " + rv.distance + " m, vérifie-la" : "")) + "</p>" +
+              '<div class="sch-edit-act"><button type="button" class="x">Annuler</button><button type="button" class="ok">Valider</button></div>');
+          pn.querySelector(".ad").value = keep ? ea : (rv.adresse || "");
+          if (sug) pn.querySelector(".use").addEventListener("click", function () { pn.querySelector(".ad").value = rv.adresse; moved.commune = rv.commune || e.c; this.parentNode.remove(); });
+          pn.querySelector(".x").addEventListener("click", cancel);
+          pn.querySelector(".ok").addEventListener("click", function () { save(e, k); });
+        });
+      });
+    }
+    function save(e, k) {
+      var b = pn.querySelector(".ok"); b.disabled = true; b.textContent = "Enregistrement…";
+      var body = { id: e.id, site: k, lat: moved.lat, lon: moved.lon, adresse: pn.querySelector(".ad").value.trim(), commune: moved.commune };
+      fetch("/api/save", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })
+        .then(function (r) { return r.json(); }).then(function (res) {
+          if (!res.ok) { b.disabled = false; b.textContent = "Valider"; alertMsg(res.error || "Erreur"); return; }
+          if (k) { e.x2[k - 1] = { xy: [body.lat, body.lon], a: body.adresse || null }; }
+          else { e.xy = [body.lat, body.lon]; e.a = body.adresse || null; e.c = body.commune || e.c; e.ap = 0; }
+          if (mk) mk.remove(); mk = null; sel = null; selK = 0; refresh();
+          msg("<b>✓ Enregistré</b><p>" + esc(sN(e, k)) + "</p><p class=\\"m\\">" + esc(body.adresse || "") + " — Sheet et site mis à jour.</p>");
+          setTimeout(function () { if (edit && !sel) idle(); }, 3500);
+        }).catch(function () { b.disabled = false; b.textContent = "Valider"; alertMsg("Le serveur d’édition ne répond pas."); });
+    }
+    function alertMsg(t) { var p = document.createElement("p"); p.className = "err"; p.textContent = t; pn.appendChild(p); }
+    var oldOpen = open;
+    open = function (e) { if (edit) { if (mapReady) pick(e); return; } oldOpen(e); };
+  }
+});
+</script>
+'''
+
 MAP_HEAD = '<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">\n'
 MAP_JS = '<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>\n<script src="parcours-3d.js" defer></script>\n'
 D = "Stud’N Run, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre."
 PAGES = {
     "index.html": ("Stud’N Run · Course étudiante Toulouse", index, "", ""),
     "parcours.html": ("Parcours · Stud’N Run", parcours, MAP_HEAD, MAP_JS),
+    "ecoles.html": ("Écoles invitées · Stud’N Run", ecoles, SCH_HEAD, SCH_JS),
     "horaires.html": ("Horaires · Stud’N Run", horaires, "", ""),
     "infos-pratiques.html": ("Infos pratiques · Stud’N Run", infos, "", ""),
     "inscriptions.html": ("Inscriptions · Stud’N Run", inscriptions, "", ""),
@@ -307,3 +634,4 @@ PAGES = {
 for slug, (t, body, h, s) in PAGES.items():
     (DIST / slug).write_text(page(slug, t, D, body, h, s))
 print("ok", len(PAGES), "pages")
+

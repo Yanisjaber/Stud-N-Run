@@ -120,7 +120,7 @@ p { margin:0 0 1em }
 @keyframes marq { to { transform:translateX(-50%) } }
 
 /* ---------- sections ---------- */
-section { padding:clamp(80px,12vw,150px) 0; position:relative }
+section { padding:clamp(48px,6vw,80px) 0; position:relative }
 .sec-head { display:flex; justify-content:space-between; align-items:end; gap:30px; flex-wrap:wrap; margin-bottom:56px }
 .sec-head .lead { margin:0 }
 
@@ -182,8 +182,8 @@ a.card .go { position:absolute; right:26px; top:26px; font-size:1.4rem; transiti
 a.card:hover .go { transform:translate(4px,-4px); color:var(--pink) }
 
 /* page hero */
-.page-hero { padding:170px 0 70px; background:radial-gradient(50% 80% at 90% 0%, rgba(255,61,151,.22), transparent 70%) }
-.page-hero h1 { font-size:clamp(4.5rem,13vw,11rem); line-height:.8; margin-bottom:24px }
+.page-hero { padding:130px 0 36px; background:radial-gradient(50% 80% at 90% 0%, rgba(255,61,151,.22), transparent 70%) }
+.page-hero h1 { font-size:clamp(2.4rem,6vw,5.4rem); line-height:.95; margin-bottom:20px }
 
 /* map 3d */
 .map-shell { position:relative; border-radius:var(--r); overflow:hidden; border:1px solid var(--line); background:var(--night) }

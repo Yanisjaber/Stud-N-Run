@@ -344,3 +344,59 @@ a.card:hover .go { transform:translate(4px,-4px); color:var(--pink) }
 @media (max-width:900px) { .timeline::before { left:8px } .tl { grid-template-columns:1fr } .tl::before { left:2px } }
 
 .team { grid-template-columns:repeat(2,minmax(0,1fr)); max-width:720px }
+
+.foot-row .soon { opacity:.6; cursor:default }
+@media (max-width:700px) { .team { grid-template-columns:1fr; max-width:none } }
+
+.foot-social { display:flex; flex-direction:column; gap:8px; align-items:flex-start }
+.foot-social a,.foot-social .soon { text-decoration:none }
+.foot-row { flex-wrap:nowrap; align-items:flex-start; gap:40px }
+.foot-row > span { flex:0 1 300px }
+.foot-row nav { flex:1; justify-content:flex-end; row-gap:10px }
+.foot-social { flex:none }
+@media (max-width:900px) { .foot-row { flex-wrap:wrap; gap:20px } .foot-row nav { justify-content:flex-start; flex:1 1 100% } }
+
+/* réseaux : colonne fixe à droite de l'écran */
+.foot-social { display:none }
+.social-rail { position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:40; display:flex; flex-direction:column; gap:1px; padding:6px; border:1px solid var(--line); border-right:0; border-radius:14px 0 0 14px; background:rgba(20,4,12,.78); backdrop-filter:blur(10px) }
+.social-rail a,.social-rail .soon { display:grid; place-items:center; width:42px; height:42px; border-radius:10px; color:var(--blush); transition:background .25s, color .25s }
+.social-rail a:hover { background:var(--pink); color:#14040c }
+.social-rail .soon { opacity:.55; cursor:default }
+.social-rail svg { width:22px; height:22px }
+@media (max-width:700px) { .social-rail { top:auto; bottom:12px; transform:none; flex-direction:row; border-right:1px solid var(--line); border-radius:14px; right:12px; padding:4px } .social-rail a,.social-rail .soon { width:36px; height:36px } }
+/* réseaux : juste les logos, en haut à droite */
+.social-rail { top:96px; right:14px; transform:none; padding:0; gap:2px; border:0; border-radius:0; background:none; backdrop-filter:none }
+.social-rail a,.social-rail .soon { width:36px; height:36px }
+@media (max-width:700px) { .social-rail { top:auto; bottom:12px; right:12px; padding:0; border:0; background:none } }
+.social-rail { top:20px }
+@media (min-width:701px) and (max-width:1200px) { .site-header .nav { padding-right:44px } }
+@media (max-width:700px) { .social-rail { top:auto } }
+@media (min-width:701px) and (max-width:1300px) { .site-header .nav { padding-right:0 } .social-rail { top:92px } }
+/* réseaux : en pilule, au-dessus de tout pour ne jamais disparaître */
+.social-rail { z-index:60; padding:8px 4px; border:1px solid var(--line); border-radius:999px; background:rgba(20,4,12,.88); backdrop-filter:blur(10px); box-shadow:0 6px 24px rgba(0,0,0,.35) }
+.social-rail a,.social-rail .soon { color:var(--blush) }
+.social-rail .soon { opacity:.8 }
+@media (max-width:700px) { .social-rail { padding:4px 8px } }
+@media (min-width:1301px) { .social-rail { right:4px } }
+/* réseaux : prolongement du menu du haut, qui descend le long du bord droit */
+@media (min-width:701px) {
+  .social-rail { top:76px; right:0; transform:none; z-index:49; padding:10px 8px 12px; gap:2px; border:1px solid var(--line); border-top:0; border-right:0; border-radius:0 0 18px 0; border-bottom-left-radius:18px; background:rgba(20,4,12,.72); backdrop-filter:blur(16px) saturate(1.4); box-shadow:none }
+  .social-rail a,.social-rail .soon { width:38px; height:38px }
+}
+@media (max-width:700px) { .social-rail { z-index:49; border:1px solid var(--line); border-radius:999px; background:rgba(20,4,12,.88) } }
+/* Instagram dans la barre du menu, à droite de S'inscrire ; les autres en dessous */
+@media (min-width:701px) {
+  .social-rail { top:0; padding:19px 8px 12px }
+  .site-header .nav { padding-right:0 }
+}
+@media (min-width:701px) and (max-width:1300px) { .site-header .nav { padding-right:52px } .social-rail { top:0 } }
+@media (min-width:701px) and (max-width:1300px) { .site-header .nav { padding-right:0 } .social-rail { top:76px; padding:10px 8px 12px } }
+/* réseaux : fond plein pour que rien ne passe à travers */
+.social-rail { background:#14040c; backdrop-filter:none; z-index:60 }
+.social-rail a,.social-rail .soon { opacity:1; color:var(--blush) }
+
+/* réseaux : simple rangée d'icônes dans le pied de page */
+.foot-social { display:flex !important; flex-direction:row; gap:10px; margin-top:18px }
+.foot-social a,.foot-social .soon { display:grid; place-items:center; width:40px; height:40px; border:1px solid var(--line); border-radius:50%; color:var(--blush); opacity:1; transition:background .25s,color .25s }
+.foot-social a:hover { background:var(--pink); border-color:var(--pink); color:#14040c }
+.foot-social svg { width:20px; height:20px }

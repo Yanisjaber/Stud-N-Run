@@ -11,7 +11,7 @@ NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("ecoles.html",
 # Partenaires affichés dans le pied de page et sur la page Partenaires. Matecito = PLACEHOLDER (rien n'est signé) : à retirer avant « publie » si pas confirmé.
 PARTNERS = []
 # Réseaux sociaux : renseigner l'URL pour qu'ils s'affichent (rien n'est affiché tant que c'est vide).
-SOCIAL = {"Instagram": "", "TikTok": "", "LinkedIn": ""}
+SOCIAL = {"Instagram": "", "TikTok": "", "LinkedIn": "", "X": "", "YouTube": ""}
 CONTACT = "studnrun@gmail.com"
 
 ICONS = {
@@ -40,7 +40,16 @@ CUR = ' aria-current="page"'
 
 def page(slug, title, desc, body, head_extra="", scripts=""):
     links = "".join(f'<a href="{h}"{CUR if h == slug else ""}>{t}</a>' for h, t in NAV)
-    social_links = "".join(f'<a href="{u}" rel="noopener" target="_blank">{n}</a>' for n, u in SOCIAL.items() if u)
+    SOC_ICONS = {
+        "Instagram": '<rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/>',
+        "TikTok": '<path d="M14 4v10.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 4c.3 2.4 1.9 4 4.5 4.2"/>',
+        "LinkedIn": '<rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 11v5M8 8v.01M12 16v-5M12 13c0-1.4 1-2 2.2-2 1.3 0 1.8.9 1.8 2.2V16"/>',
+        "X": '<path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/>',
+        "YouTube": '<rect x="3" y="6" width="18" height="12" rx="4"/><path d="M10.5 9.5v5l4.2-2.5z" fill="currentColor"/>'}
+    def soc(n, u):
+        svg = f'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{SOC_ICONS[n]}</svg>'
+        return f'<a href="{u}" rel="noopener" target="_blank" aria-label="{n}">{svg}</a>' if u else f'<span class="soon" title="{n} · bientôt" aria-label="{n}, bientôt">{svg}</span>'
+    social_links = "".join(soc(n, u) for n, u in SOCIAL.items())
     partners_strip = ('<div class="foot-partners"><span>Partenaires</span>' + "".join(f'<b>{x}</b>' for x in PARTNERS) + '<a href="partenaires.html">Devenir partenaire →</a></div>') if PARTNERS else ""
     foot_links = "".join(f'<a href="{h}">{t}</a>' for h, t in NAV + [("inscriptions.html", "Inscriptions"), ("benevoles.html", "Bénévoles"), ("contact.html", "Contact")])
     legal = '<div class="foot-legal"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><span>© 2026 Stud’N Run</span></div>'
@@ -79,7 +88,8 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
   <div class="wrap">
     <div class="foot-big" aria-hidden="true">STUD<span>’N</span> RUN</div>
     {partners_strip}
-    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse · <a href="mailto:{CONTACT}">{CONTACT}</a></span><nav aria-label="Pied de page">{foot_links}{social_links}</nav></div>
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse · <a href="mailto:{CONTACT}">{CONTACT}</a></span><nav aria-label="Pied de page">{foot_links}</nav></div>
+    <div class="foot-social" aria-label="Réseaux sociaux">{social_links}</div>
     {legal}
   </div>
 </footer>

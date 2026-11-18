@@ -5,8 +5,14 @@ ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
 R = json.loads((ROOT / "route-svg.json").read_text())
 
-NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("place/index.html", "Le village"), ("ecoles.html", "Écoles"), ("horaires.html", "Horaires"),
-       ("infos-pratiques.html", "Infos pratiques"), ("association.html", "Association")]
+NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("ecoles.html", "Écoles"), ("horaires.html", "Horaires"),
+       ("infos-pratiques.html", "Infos pratiques"), ("actualites.html", "Actualités"), ("partenaires.html", "Partenaires"), ("association.html", "Association")]
+
+# Partenaires affichés dans le pied de page et sur la page Partenaires. Matecito = PLACEHOLDER (rien n'est signé) : à retirer avant « publie » si pas confirmé.
+PARTNERS = []
+# Réseaux sociaux : renseigner l'URL pour qu'ils s'affichent (rien n'est affiché tant que c'est vide).
+SOCIAL = {"Instagram": "", "TikTok": "", "LinkedIn": ""}
+CONTACT = "studnrun@gmail.com"
 
 ICONS = {
     "pin": '<path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -34,7 +40,10 @@ CUR = ' aria-current="page"'
 
 def page(slug, title, desc, body, head_extra="", scripts=""):
     links = "".join(f'<a href="{h}"{CUR if h == slug else ""}>{t}</a>' for h, t in NAV)
-    foot_links = "".join(f'<a href="{h}">{t}</a>' for h, t in NAV + [("inscriptions.html", "Inscriptions")])
+    social_links = "".join(f'<a href="{u}" rel="noopener" target="_blank">{n}</a>' for n, u in SOCIAL.items() if u)
+    partners_strip = ('<div class="foot-partners"><span>Partenaires</span>' + "".join(f'<b>{x}</b>' for x in PARTNERS) + '<a href="partenaires.html">Devenir partenaire →</a></div>') if PARTNERS else ""
+    foot_links = "".join(f'<a href="{h}">{t}</a>' for h, t in NAV + [("inscriptions.html", "Inscriptions"), ("benevoles.html", "Bénévoles"), ("contact.html", "Contact")])
+    legal = '<div class="foot-legal"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><span>© 2026 Stud’N Run</span></div>'
     return f'''<!doctype html>
 <html lang="fr">
 <head>
@@ -45,7 +54,8 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <meta name="theme-color" content="#14040c">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%2314040c'/%3E%3Ctext x='50' y='70' font-size='58' font-weight='900' font-style='italic' text-anchor='middle' fill='%23ff3d97' font-family='Arial'%3ES%3C/text%3E%3C/svg%3E">
+<link rel="icon" href="assets/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -56,7 +66,7 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <div class="glow" aria-hidden="true"></div>
 <header class="site-header">
   <div class="wrap nav">
-    <a class="brand" href="index.html">STUD<span>’N RUN</span></a>
+    <a class="brand" href="index.html"><img src="assets/logo.svg" alt="Stud’N Run" width="244" height="44"></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
     <nav class="nav-links" id="nav" aria-label="Navigation principale">{links}<a class="cta" href="inscriptions.html"{CUR if slug == "inscriptions.html" else ""}>S’inscrire</a></nav>
   </div>
@@ -64,11 +74,13 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <main>
 {body}
 </main>
-<div class="notice" role="note">Site de démonstration · Date, horaires, tarifs et équipe sont fictifs. Le parcours est le tracé réel prévu.</div>
+<div class="notice" role="note">Site en construction · Les tarifs et le parcours sont provisoires.</div>
 <footer class="site-footer">
   <div class="wrap">
     <div class="foot-big" aria-hidden="true">STUD<span>’N</span> RUN</div>
-    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse</span><nav aria-label="Pied de page">{foot_links}</nav></div>
+    {partners_strip}
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse · <a href="mailto:{CONTACT}">{CONTACT}</a></span><nav aria-label="Pied de page">{foot_links}{social_links}</nav></div>
+    {legal}
   </div>
 </footer>
 </body>
@@ -79,7 +91,7 @@ def hero(eyebrow, h1, lead):
     return f'<section class="page-hero"><div class="wrap"><p class="eyebrow rv">{eyebrow}</p><h1 class="rv d1">{h1}</h1><p class="lead rv d2">{lead}</p></div></section>'
 
 MARQ = '<div class="marquee{cls}" aria-hidden="true"><div class="marquee-track">' + "".join(
-    f"<span>{w}</span>" for w in ["5 KM", "10 KM", "PLACE SAINT-PIERRE", "TOUS CAMPUS", "22 MAI 2027", "UNE VILLE, DEUX DÉFIS"] * 4) + "</div></div>"
+    f"<span>{w}</span>" for w in ["5 KM", "10 KM", "PLACE SAINT-PIERRE", "TOUS CAMPUS", "12 JUIN 2027", "UNE VILLE, DEUX DÉFIS"] * 4) + "</div></div>"
 
 def loops(n):
     return f'<svg class="loops" viewBox="0 0 {R["w"]} {R["h"]}" aria-hidden="true">' + "".join(
@@ -88,7 +100,7 @@ def loops(n):
 CTA = '''<section><div class="wrap"><div class="cta-band rv">
 <span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
 <p class="eyebrow" style="color:#fff">5 000 dossards</p><h2>T’ES CHAUD&nbsp;?</h2>
-<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 15 mai 2027. 5 ou 10 km, tu choisis ton défi.</p>
+<p class="lead" style="margin:0 auto 30px;color:#ffe3f0">Inscriptions du 1er février au 5 juin 2027. 5 ou 10 km, tu choisis ton défi.</p>
 <div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
 </div></div></section>'''
 
@@ -112,10 +124,10 @@ index = f'''
     <div>
       <p class="eyebrow">Course étudiante · Toulouse</p>
       <h1><span class="l"><span>STUD’N</span></span><span class="l"><span><em>RUN</em></span></span></h1>
-      <div class="hero-meta"><span class="chip"><b>22.05</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
+      <div class="hero-meta"><span class="chip"><b>12.06</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
       <p class="lead">Tous les campus de Toulouse sur la même ligne de départ. Une boucle au cœur de la ville, deux ponts sur la Garonne, et une arrivée en fête.</p>
       <div class="btns" style="margin-top:28px"><a class="btn" href="inscriptions.html">Je m’inscris <span class="arr">→</span></a><a class="btn ghost" href="parcours.html">Voir le parcours 3D</a></div>
-      <div class="countdown" data-date="2027-05-22T09:30:00+02:00" aria-label="Compte à rebours avant le départ">
+      <div class="countdown" data-date="2027-06-12T17:30:00+02:00" aria-label="Compte à rebours avant le départ">
         <div><b>–</b><span>jours</span></div><div><b>–</b><span>heures</span></div><div><b>–</b><span>min</span></div><div><b>–</b><span>sec</span></div>
       </div>
     </div>
@@ -125,7 +137,7 @@ index = f'''
 </section>
 <section>
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">Choisis ton défi</p><h2 class="rv d1">UNE VILLE.<br><em>DEUX DÉFIS.</em></h2></div>
+    <div class="sec-head"><div><p class="eyebrow rv">Choisis ton défi</p><h2 class="rv d1">UNE VILLE. <em>DEUX DÉFIS.</em></h2></div>
     <p class="lead rv d2">La même boucle de 5 km, à courir une fois ou deux. Débutant ou habitué, il y a une distance pour toi.</p></div>
     <div class="duo">
       <article class="dist rv">{loops(1)}<span class="tag">Découverte</span><div class="big">5<small>KM</small></div>
@@ -137,7 +149,7 @@ index = f'''
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">La boucle</p><h2 class="rv d1">5 KM DANS<br><em>LA VILLE ROSE.</em></h2></div>
+    <div class="sec-head"><div><p class="eyebrow rv">La boucle</p><h2 class="rv d1">5 KM DANS <em>LA VILLE ROSE.</em></h2></div>
     <a class="btn ghost rv d2" href="parcours.html">Explorer en 3D <span class="arr">→</span></a></div>
     <div class="story">
       <div class="story-map">{route_svg(runner=True)}</div>
@@ -147,17 +159,17 @@ index = f'''
 </section>
 <section style="padding-top:0">
   <div class="wrap stats">
-    <div class="stat rv"><b data-count="5000">0</b><span>dossards</span></div>
-    <div class="stat rv d1"><b data-count="{KM}">0</b><span>km par boucle</span></div>
-    <div class="stat rv d2"><b data-count="2">0</b><span>ponts sur la Garonne</span></div>
-    <div class="stat rv d3"><b data-count="1">0</b><span>place en fête à l’arrivée</span></div>
+    <div class="stat rv"><b data-count="5000">0</b><span>coureurs, 5 ou 10 km</span></div>
+    <div class="stat rv d1"><b data-count="189">0</b><span>écoles et universités invitées</span></div>
+    <div class="stat rv d2"><b data-count="200">0</b><span>bénévoles le jour J</span></div>
+    <div class="stat rv d3"><b data-count="3">0</b><span>associations soutenues</span></div>
   </div>
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">Prépare ta course</p><h2 class="rv d1">TOUT CE QU’IL<br><em>FAUT SAVOIR.</em></h2></div></div>
+    <div class="sec-head"><div><p class="eyebrow rv">Prépare ta course</p><h2 class="rv d1">TOUT CE QU’IL <em>FAUT SAVOIR.</em></h2></div></div>
     <div class="grid-3">
-      <a class="card rv" href="horaires.html">{ico("bolt")}<span class="go">↗</span><h3>Horaires</h3><p>Dossards, échauffement, départ et remise des prix.</p></a>
+      <a class="card rv" href="horaires.html">{ico("bolt")}<span class="go">↗</span><h3>Horaires</h3><p>Dossards, départs, remise des prix et after run.</p></a>
       <a class="card rv d1" href="infos-pratiques.html">{ico("pin")}<span class="go">↗</span><h3>Infos pratiques</h3><p>Accès, consigne, ravitaillement et questions fréquentes.</p></a>
       <a class="card rv d2" href="association.html">{ico("users")}<span class="go">↗</span><h3>L’équipe</h3><p>L’asso, les BDE et les bénévoles derrière la course.</p></a>
     </div>
@@ -181,7 +193,7 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Espla
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="stats" style="margin-bottom:60px">
+    <div class="stats" style="margin-bottom:30px">
       <div class="stat rv"><b>{KMs}</b><span>km par boucle</span></div>
       <div class="stat rv d1"><b>{KM2s}</b><span>km pour 2 boucles</span></div>
       <div class="stat rv d2"><b>≈50</b><span>m D+ par boucle</span></div>
@@ -199,14 +211,14 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Espla
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">Points de passage</p><h2 class="rv d1">KILOMÈTRE<br><em>PAR KILOMÈTRE.</em></h2></div></div>
+    <div class="sec-head"><div><p class="eyebrow rv">Points de passage</p><h2 class="rv d1">KILOMÈTRE <em>PAR KILOMÈTRE.</em></h2></div></div>
     <ol class="timeline">{"".join(f'<li class="tl rv{" key" if i in (0, len(STEPS)-1) else ""}"><time>{k} km</time><div><h3>{t}</h3><p>{d}</p></div></li>' for i, (k, t, d) in enumerate(STEPS))}</ol>
     <div class="btns rv" style="margin-top:50px"><a class="btn" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF) <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-parcours.gpx" download>Trace GPX pour ta montre <span class="arr">↓</span></a></div>
   </div>
 </section>
 <section style="padding-top:0"><div class="wrap">
   <div class="cta-band rv" style="text-align:left;background:linear-gradient(120deg,#33101f,#1f0814)">
-    <p class="eyebrow">Maquette 3D</p><h2 style="font-size:clamp(3rem,8vw,7rem)">LE VILLAGE<br><em>JOUR DE COURSE</em></h2>
+    <p class="eyebrow">Maquette 3D</p><h2 style="font-size:clamp(2.2rem,4.6vw,3.8rem)">LE VILLAGE <em>JOUR DE COURSE</em></h2>
     <p class="lead" style="margin-bottom:26px">La Place Saint-Pierre à l’échelle réelle : bâtiments, quais, gradins, pont et arche de départ et d’arrivée. Survole la place et explore l’implantation du village.</p>
     <div class="btns"><a class="btn" href="place/index.html">Explorer la place en 3D <span class="arr">→</span></a></div>
   </div>
@@ -215,16 +227,21 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Espla
 '''
 
 # ---------------- HORAIRES ----------------
-PROG = [("8 h 00", "Ouverture du village", "Accueil Place Saint-Pierre, consigne et stands des BDE.", False),
-        ("8 h 00 – 9 h 15", "Retrait des dossards", "Au stand accueil, avec ta pièce d’identité et ta carte étudiante.", False),
-        ("9 h 15", "Échauffement collectif", "Dix minutes en musique pour se mettre dans le rythme.", False),
-        ("9 h 25", "Appel au départ", "Le 10 km dans le premier sas, le 5 km juste derrière.", False),
-        ("9 h 30", "Départ 5 & 10 km", "Le départ est donné. Le 5 km fait une boucle, le 10 km en fait deux.", True),
-        ("10 h 45", "Fermeture de la course", "Les derniers coureurs du 10 km passent la ligne.", False),
-        ("11 h 00", "Remise des prix", "Podiums par distance, prix du campus le plus représenté, puis la fête continue.", True)]
-horaires = hero("Samedi 22 mai 2027", "LE <em>JOUR J</em>", "Le programme de la journée, du café du matin jusqu’aux podiums.") + f'''
+NBSP = "\u00a0"
+DAYS = [("Vendredi 11 juin", "La veille", [
+          ("17 h – 22 h", "Retrait des dossards", "À TSE (Toulouse School of Economics), avec ta pièce d’identité et ta carte étudiante.", False)]),
+        ("Samedi 12 juin", "Le jour J", [
+          ("9 h – 12 h", "Retrait des dossards", "Toujours à TSE, avec ta pièce d’identité et ta carte étudiante.", False),
+          ("13 h 00", "Ouverture du village", "Accueil, consigne et stands des BDE.", False),
+          ("17 h 20", "Appel du 5 km", "Direction la ligne de départ. Pas d’échauffement collectif : échauffe-toi de ton côté.", False),
+          ("17 h 30", "Départ du 5 km", "Le 5 km fait une boucle.", True),
+          ("18 h 30", "Appel du 10 km", "Le 10 km se place sur la ligne de départ.", False),
+          ("18 h 45", "Départ du 10 km", "Le 10 km fait deux boucles.", True),
+          ("20 h 45", "Remise des prix", "Podiums par distance, prix du campus le plus représenté.", True),
+          ("21 h 30", "After run", "La fête continue au village.", False)])]
+horaires = hero("Vendredi 11 et samedi 12 juin 2027", "LES <em>HORAIRES</em>", "Le programme, de la veille à l’after run.") + f'''
 <section style="padding-top:0"><div class="wrap">
-<ol class="timeline">{"".join(f'<li class="tl rv{" key" if k else ""}"><time>{h}</time><div><h3>{t}</h3><p>{d}</p></div></li>' for h, t, d, k in PROG)}</ol>
+{"".join(f'<div class="day"><h2 class="day-title rv"><em>{d}</em> {t}</h2><ol class="timeline">' + "".join(f'<li class="tl rv{" key" if k else ""}"><time>{h.replace(" ", NBSP)}</time><div><h3>{ti}</h3><p>{de}</p></div></li>' for h, ti, de, k in items) + '</ol></div>' for d, t, items in DAYS)}
 </div></section>
 {CTA}
 '''
@@ -235,12 +252,15 @@ FAQ = [("À qui s’adresse la course ?", "Aux étudiants des écoles et univers
        ("Quels documents faut-il fournir ?", "Les justificatifs demandés (carte étudiante, document médical) seront précisés à l’ouverture des inscriptions, selon la réglementation en vigueur."),
        ("Y a-t-il du ravitaillement ?", "Un point d’eau vers le km 2,5, sur le quai de Tounis, où les coureurs du 10 km passent deux fois. Un ravitaillement complet attend tout le monde à l’arrivée."),
        ("Je peux venir encourager ?", "Oui ! La Place Saint-Pierre et les deux ponts sont les meilleurs spots. Reste derrière les barrières pour laisser le passage aux coureurs."),
+       ("Où va l’argent des inscriptions ?", "Une partie des inscriptions et tous les dons du jour sont reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante : Le Casse-dalle, Le Petit Sab’lé et Le Rayon 31."),
+       ("Mon école ou mon BDE peut participer ?", "Oui, 189 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
+       ("Une question qui n’est pas ici ?", f"Écris-nous à <a href=\"mailto:{CONTACT}\">{CONTACT}</a>, on te répond vite."),
        ("Comment devenir bénévole ?", "Accueil, dossards, signaleurs sur le parcours : découvre les rôles sur la page Association.")]
 infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et réponses aux questions fréquentes.") + f'''
 <section style="padding-top:0"><div class="wrap">
 <div class="grid-3">
   <div class="card rv">{ico("pin")}<h3>Accès</h3><p>Place Saint-Pierre, Toulouse. Viens à pied, à vélo ou en transports, il n’y a pas de parking sur place.</p></div>
-  <div class="card rv d1">{ico("bib")}<h3>Dossards</h3><p>Retrait au stand accueil du village, de 8 h 00 à 9 h 15 le jour de la course.</p></div>
+  <div class="card rv d1">{ico("bib")}<h3>Dossards</h3><p>Retrait à TSE, la veille de 17 h à 22 h ou le matin de la course de 9 h à 12 h.</p></div>
   <div class="card rv d2">{ico("bag")}<h3>Consigne</h3><p>Consigne gratuite au village. Garde tes objets de valeur avec toi.</p></div>
   <div class="card rv">{ico("drop")}<h3>Ravitaillement</h3><p>Point d’eau au km 2,5, ravitaillement complet à l’arrivée. Gobelets recyclables.</p></div>
   <div class="card rv d1">{ico("heart")}<h3>Secours</h3><p>Un poste de secours au village, une équipe mobile sur le parcours et des signaleurs à chaque carrefour.</p></div>
@@ -248,47 +268,179 @@ infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et 
 </div>
 </div></section>
 <section style="padding-top:0"><div class="wrap">
-<div class="sec-head"><div><p class="eyebrow rv">FAQ</p><h2 class="rv d1">QUESTIONS<br><em>FRÉQUENTES.</em></h2></div></div>
+<div class="sec-head"><div><p class="eyebrow rv">FAQ</p><h2 class="rv d1">QUESTIONS <em>FRÉQUENTES.</em></h2></div></div>
 <div class="faq rv">{"".join(f'<details><summary>{q}</summary><p>{a}</p></details>' for q, a in FAQ)}</div>
 </div></section>
 {CTA}
 '''
 
 # ---------------- INSCRIPTIONS ----------------
-inscriptions = hero("Inscriptions · du 1er février au 15 mai 2027", "PRENDS TON <em>DOSSARD</em>", "Cette page est un exemple : aucune inscription ni aucun paiement ne sont possibles pour l’instant.") + f'''
+FORM_JS = """<script>
+document.getElementById("__ID__").addEventListener("submit", function (e) {
+  e.preventDefault(); var f = e.target, n = document.getElementById("__ID__-note");
+  if (!f.prenom.value.trim() || !/^\\S+@\\S+\\.\\S+$/.test(f.email.value) || !f.ok.checked) { n.textContent = "Complète ton prénom, un e-mail valide et coche la case."; return; }
+  var body = "__TXT__\\n\\nPrénom : " + f.prenom.value + "\\nE-mail : " + f.email.value + "\\nÉcole : " + (f.ecole.value || "-");
+  location.href = "mailto:__CONTACT__?subject=" + encodeURIComponent("__SUBJ__") + "&body=" + encodeURIComponent(body);
+  n.textContent = "Ton application e-mail s’ouvre : envoie le message pour valider.";
+});
+</script>""".replace("__CONTACT__", CONTACT)
+PREREG_JS = FORM_JS.replace("__ID__", "prereg").replace("__SUBJ__", "Pré-inscription Stud’N Run").replace("__TXT__", "Bonjour, prévenez-moi à l’ouverture des inscriptions.")
+
+inscriptions = hero("Inscriptions · du 1er février au 5 juin 2027", "PRENDS TON <em>DOSSARD</em>", "Cette page est un exemple : aucune inscription ni aucun paiement ne sont possibles pour l’instant.") + f'''
 <section style="padding-top:0"><div class="wrap">
 <div class="grid-2">
-  <div class="card price rv"><span class="badge" style="background:rgba(255,255,255,.1)">Découverte</span><h3 style="font-size:3rem">5 KM</h3><div class="amt">8€<small> / dossard</small></div>
+  <div class="card price rv"><span class="badge" style="background:rgba(255,255,255,.1)">Découverte</span><h3 style="font-size:3rem">5 KM</h3><div class="amt">10€<small> / dossard</small></div>
     <ul><li>1 boucle de {KMs} km</li><li>Chronométrage</li><li>Ravitaillement à l’arrivée</li><li>Accès au village</li></ul>
     <a class="btn ghost" aria-disabled="true" role="link">Bientôt disponible</a></div>
-  <div class="card price feat rv d1"><span class="badge">Challenge</span><h3 style="font-size:3rem">10 KM</h3><div class="amt">8€<small> / dossard</small></div>
+  <div class="card price feat rv d1"><span class="badge">Challenge</span><h3 style="font-size:3rem">10 KM</h3><div class="amt">10€<small> / dossard</small></div>
     <ul><li>2 boucles, {KM2s} km</li><li>Chronométrage avec temps de passage</li><li>Point d’eau au km 2,5 et 7,5</li><li>Accès au village</li></ul>
     <a class="btn" aria-disabled="true" role="link">Bientôt disponible</a></div>
 </div>
-<div class="stats" style="margin-top:60px">
+<div class="stats" style="margin-top:36px">
   <div class="stat rv"><b data-count="5000">0</b><span>places au total</span></div>
   <div class="stat rv d1"><b>18+</b><span>étudiants majeurs</span></div>
   <div class="stat rv d2"><b>01.02</b><span>ouverture</span></div>
-  <div class="stat rv d3"><b>15.05</b><span>clôture</span></div>
+  <div class="stat rv d3"><b>05.06</b><span>clôture</span></div>
+</div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="card prereg rv"><p class="eyebrow">Avant l’ouverture</p><h2>PRÉVIENS-MOI <em>QUAND ÇA OUVRE</em></h2>
+<p class="lead" style="margin-bottom:24px">Laisse ton e-mail, on t’écrit le jour de l’ouverture des inscriptions. Rien d’autre.</p>
+<form id="prereg" class="form" novalidate>
+  <label>Prénom<input name="prenom" autocomplete="given-name" required></label>
+  <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+  <label>Ton école <small>(facultatif)</small><input name="ecole"></label>
+  <label class="chk"><input type="checkbox" name="ok" required> J’accepte d’être contacté·e par Stud’N Run pour l’ouverture des inscriptions.</label>
+  <button class="btn" type="submit">Me prévenir <span class="arr">→</span></button>
+  <p class="form-note" id="prereg-note" role="status"></p>
+</form></div>
+</div></section>
+{PREREG_JS}
+'''
+
+# ---------------- PARTENAIRES ----------------
+partenaires = hero("Partenaires", "S’ASSOCIER <em>À LA COURSE</em>", "Un public jeune, réuni au même endroit, et une cause qui donne du sens.") + f'''
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">Ils nous soutiennent</p><h2 class="rv d1">NOS <em>PARTENAIRES</em></h2></div></div>
+<div class="partner-wall rv">{"".join(f'<div class="partner-logo">{x}</div>' for x in PARTNERS)}<div class="partner-logo ghost">Votre marque ici</div></div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">Pourquoi s’associer</p><h2 class="rv d1">UN PUBLIC, <em>UNE CAUSE.</em></h2></div></div>
+<div class="grid-3">
+  <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 189 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
+  <div class="card rv d1">{ico("heart")}<h3>Une cause qui donne du sens</h3><p>Une partie des inscriptions et tous les dons du jour sont reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante.</p></div>
+  <div class="card rv d2">{ico("star")}<h3>Un événement fait pour être vu</h3><p>Départ et arrivée au bord de la Garonne, arche, dossards, écran géant : votre soutien est visible du premier au dernier coureur.</p></div>
+</div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="cta-band rv" style="text-align:left;background:linear-gradient(120deg,#33101f,#1f0814)">
+<p class="eyebrow">Devenir partenaire</p><h2 style="font-size:clamp(2.2rem,4.6vw,3.8rem)">PARLONS-EN <em>20 MINUTES</em></h2>
+<p class="lead" style="margin-bottom:26px">Dites-nous ce que vous pouvez engager, en argent ou en nature : nous construisons ensemble la visibilité qui va avec.</p>
+<div class="btns"><a class="btn" href="mailto:{CONTACT}?subject=Partenariat%20Stud%E2%80%99N%20Run">Nous écrire <span class="arr">→</span></a><a class="btn ghost" href="assets/StudNRun_fiche_partenaires.pdf" download>Télécharger la fiche (PDF) <span class="arr">↓</span></a></div>
+</div></div></section>
+'''
+
+
+# ---------------- ACTUALITÉS ----------------
+# Ajouter une actualité = une ligne ici (la plus récente en premier).
+ARTICLES = [
+    ("17 novembre 2026", "La date est fixée : samedi 12 juin 2027",
+     "La première édition de Stud’N Run aura lieu le <b>samedi 12 juin 2027</b>, au départ de l’Esplanade de l’Université, à côté de la Place Saint-Pierre. Les inscriptions ouvriront le 1er février 2027."),
+    ("17 novembre 2026", "Trois associations, une par université",
+     "Une partie des inscriptions et tous les dons du jour seront reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante : Le Casse-dalle (Jean-Jaurès), Le Petit Sab’lé (Paul-Sabatier) et Le Rayon 31 (Capitole)."),
+    ("16 novembre 2026", "Un premier parcours de 4,96 km",
+     "Le tracé provisoire est une boucle de 4,96 km autour du campus de Toulouse 1, avec les quais de la Garonne, le Pont Neuf, Saint-Cyprien et le Pont Saint-Pierre. Le 5 km fait une boucle, le 10 km en fait deux. Il reste à valider avec la Ville."),
+    ("17 novembre 2026", "189 écoles invitées au challenge",
+     "Universités, grandes écoles, écoles de commerce, d’ingénieurs, d’art, de santé : toutes les écoles post-bac de Toulouse sont invitées à monter leur équipe. La liste est sur la page Écoles."),
+]
+actualites = hero("Actualités", "LES <em>NOUVELLES</em>", "Où en est le projet, étape par étape.") + f'''
+<section style="padding-top:0"><div class="wrap"><div class="news">
+{"".join(f'<article class="card news-item rv"><time>{d}</time><h3>{t}</h3><p>{x}</p></article>' for d, t, x in ARTICLES)}
+</div></div></section>
+{CTA}
+'''
+
+# ---------------- BÉNÉVOLES ----------------
+benevoles = hero("Bénévoles", "DEVIENS <em>BÉNÉVOLE</em>", "On cherche environ 200 personnes pour que la course se passe bien. Viens vivre la journée de l’intérieur.") + f'''
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">Les missions</p><h2 class="rv d1">TON RÔLE <em>LE JOUR J.</em></h2></div></div>
+<div class="grid-3">
+  <div class="card rv">{ico("bib")}<h3>Accueil et dossards</h3><p>Tu accueilles les coureurs, tu remets les dossards et tu les orientes dans le village.</p></div>
+  <div class="card rv d1">{ico("pin")}<h3>Signaleurs</h3><p>Posté·e sur le parcours, tu guides les coureurs et tu veilles à la sécurité aux carrefours.</p></div>
+  <div class="card rv d2">{ico("bag")}<h3>Ravitaillement et consigne</h3><p>Eau et ravitaillement à l’arrivée, consigne des sacs, remise des récompenses.</p></div>
+</div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="card prereg rv"><p class="eyebrow">Je me propose</p><h2>JE <em>VEUX AIDER</em></h2>
+<p class="lead">Laisse-nous ton e-mail : on te recontacte avec les détails (horaires, repas, tenue). Une formation courte et un briefing sont prévus avant la course.</p>
+<form id="vol" class="form" novalidate>
+  <label>Prénom<input name="prenom" autocomplete="given-name" required></label>
+  <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+  <label>Ton école <small>(facultatif)</small><input name="ecole"></label>
+  <label class="chk"><input type="checkbox" name="ok" required> J’accepte d’être contacté·e par Stud’N Run au sujet du bénévolat.</label>
+  <button class="btn" type="submit">Proposer mon aide <span class="arr">→</span></button>
+  <p class="form-note" id="vol-note" role="status"></p>
+</form></div>
+</div></section>
+{FORM_JS.replace("__ID__", "vol").replace("__SUBJ__", "Bénévolat Stud’N Run").replace("__TXT__", "Bonjour, je souhaite être bénévole pour la course.")}
+'''
+
+# ---------------- CONTACT ----------------
+contact = hero("Contact", "ON <em>SE PARLE</em> ?", "Une question, une idée, une envie d’aider : écris-nous.") + f'''
+<section style="padding-top:0"><div class="wrap">
+<div class="grid-3">
+  <a class="card rv" href="mailto:{CONTACT}">{ico("users")}<span class="go">↗</span><h3>Coureurs, écoles, BDE</h3><p>{CONTACT}</p></a>
+  <a class="card rv d1" href="mailto:{CONTACT}?subject=Partenariat%20Stud%E2%80%99N%20Run">{ico("star")}<span class="go">↗</span><h3>Entreprises et partenaires</h3><p>Écrivez-nous, ou consultez la page <b>Partenaires</b>.</p></a>
+  <a class="card rv d2" href="mailto:{CONTACT}?subject=Presse%20Stud%E2%80%99N%20Run">{ico("hand")}<span class="go">↗</span><h3>Presse</h3><p>Un dossier de presse sera disponible ici avant la course. En attendant, écrivez-nous.</p></a>
 </div>
 </div></section>
 '''
 
+# ---------------- LÉGAL ----------------
+legal_hero = lambda t, h: hero("Informations légales", h, "")
+mentions = hero("Informations légales", "MENTIONS <em>LÉGALES</em>", "") + f'''
+<section style="padding-top:0"><div class="wrap"><div class="prose">
+<h2>Éditeur du site</h2>
+<p>Stud’N Run, association loi 1901 déclarée à Toulouse (SIRET : en cours d’obtention). Siège : Toulouse.</p>
+<p>Codirecteurs de la publication : Noah Salvatge et Yanis Jaber. Contact : <a href="mailto:{CONTACT}">{CONTACT}</a>.</p>
+<h2>Hébergement</h2>
+<p>Site hébergé par GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis).</p>
+<h2>Propriété intellectuelle</h2>
+<p>Le nom, le logo et les contenus du site appartiennent à Stud’N Run. Toute reproduction sans accord est interdite. Les logos des écoles et des partenaires appartiennent à leurs propriétaires.</p>
+<h2>Responsabilité</h2>
+<p>Les informations (date, parcours, horaires, tarifs) sont susceptibles d’évoluer jusqu’à la course et dépendent des autorisations de la Ville de Toulouse et de la préfecture.</p>
+</div></div></section>
+'''
+confidentialite = hero("Informations légales", "VIE <em>PRIVÉE</em>", "") + f'''
+<section style="padding-top:0"><div class="wrap"><div class="prose">
+<h2>Quelles données ?</h2>
+<p>Quand tu nous écris, ou que tu utilises le formulaire de pré-inscription ou de bénévolat, nous recevons ton prénom, ton e-mail et, si tu l’indiques, ton école. Ces formulaires ouvrent ton application e-mail : rien n’est envoyé tant que tu n’as pas envoyé le message toi-même.</p>
+<h2>Pourquoi ?</h2>
+<p>Uniquement pour te prévenir de l’ouverture des inscriptions ou te recontacter à propos du bénévolat. Tes données ne sont ni vendues ni transmises à des tiers.</p>
+<h2>Combien de temps ?</h2>
+<p>Jusqu’à la fin de l’édition 2027, puis supprimées, sauf si tu demandes à les conserver.</p>
+<h2>Tes droits</h2>
+<p>Tu peux demander l’accès, la rectification ou la suppression de tes données à tout moment à <a href="mailto:{CONTACT}">{CONTACT}</a>.</p>
+<h2>Cookies</h2>
+<p>Ce site ne dépose aucun cookie de mesure d’audience ni de publicité, donc pas de bandeau à valider. Les polices (Google Fonts) et la carte du parcours sont chargées depuis des services externes, qui peuvent voir ton adresse IP comme sur tout site web.</p>
+</div></div></section>
+'''
+
 # ---------------- ASSOCIATION ----------------
-TEAM = [("C", "Camille Martin", "Présidence et coordination"), ("A", "Alex Moreau", "Parcours et logistique"), ("L", "Lina Bernard", "Bénévoles et vie de campus")]
+TEAM = [("N", "Noah Salvatge", "Codirecteur"), ("Y", "Yanis Jaber", "Codirecteur")]
 association = hero("L’association", "PORTER LA <em>COURSE</em>", "Une équipe étudiante qui rassemble les campus toulousains autour du sport.") + f'''
 <section style="padding-top:0"><div class="wrap">
-<div class="sec-head"><div><p class="eyebrow rv">L’équipe (fictive)</p><h2 class="rv d1">ON EST<br><em>DERRIÈRE.</em></h2></div></div>
+<div class="sec-head"><div><p class="eyebrow rv">L’équipe</p><h2 class="rv d1">ON EST <em>DERRIÈRE.</em></h2></div></div>
 <div class="team">{"".join(f'<div class="card member rv{" d"+str(i) if i else ""}"><div class="av" aria-hidden="true">{a}</div><div><h3>{n}</h3><p>{r}</p></div></div>' for i, (a, n, r) in enumerate(TEAM))}</div>
 </div></section>
 <section style="padding-top:0"><div class="wrap">
-<div class="sec-head"><div><p class="eyebrow rv">Rejoins le mouvement</p><h2 class="rv d1">COMMENT<br><em>T’IMPLIQUER.</em></h2></div></div>
+<div class="sec-head"><div><p class="eyebrow rv">Rejoins le mouvement</p><h2 class="rv d1">COMMENT <em>T’IMPLIQUER.</em></h2></div></div>
 <div class="grid-3">
   <div class="card rv">{ico("users")}<h3>Étudiants et BDE</h3><p>Relaie la course sur ton campus et monte une équipe avec ton école.</p></div>
-  <div class="card rv d1">{ico("hand")}<h3>Bénévoles</h3><p>Accueil, dossards, ravitaillement, signaleurs : environ 30 personnes à mobiliser le jour J.</p></div>
+  <div class="card rv d1">{ico("hand")}<h3>Bénévoles</h3><p>Accueil, dossards, ravitaillement, signaleurs : environ 200 personnes à mobiliser le jour J. <a href="benevoles.html" style="color:var(--pink-2)">Je m’inscris →</a></p></div>
   <div class="card rv d2">{ico("star")}<h3>Partenaires</h3><p>Apporte un soutien matériel ou financier et associe ta marque à l’événement.</p></div>
 </div>
-<p style="color:var(--muted);font-size:.85rem;margin-top:30px">Ces personnes et ces rôles sont fictifs. Aucun contact réel n’est associé à cette démonstration.</p>
+
 </div></section>
 {CTA}
 '''
@@ -629,6 +781,12 @@ PAGES = {
     "horaires.html": ("Horaires · Stud’N Run", horaires, "", ""),
     "infos-pratiques.html": ("Infos pratiques · Stud’N Run", infos, "", ""),
     "inscriptions.html": ("Inscriptions · Stud’N Run", inscriptions, "", ""),
+    "partenaires.html": ("Partenaires · Stud’N Run", partenaires, "", ""),
+    "actualites.html": ("Actualités · Stud’N Run", actualites, "", ""),
+    "benevoles.html": ("Bénévoles · Stud’N Run", benevoles, "", ""),
+    "contact.html": ("Contact · Stud’N Run", contact, "", ""),
+    "mentions-legales.html": ("Mentions légales · Stud’N Run", mentions, "", ""),
+    "confidentialite.html": ("Confidentialité · Stud’N Run", confidentialite, "", ""),
     "association.html": ("Association · Stud’N Run", association, "", ""),
 }
 for slug, (t, body, h, s) in PAGES.items():

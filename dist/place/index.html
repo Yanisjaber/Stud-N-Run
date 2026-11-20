@@ -58,7 +58,10 @@ html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;font:15px/1
   <button class="b" data-v="arch">Arche</button>
   <button class="b" data-v="start">Départ</button>
   <button class="b" data-v="finish">Arrivée</button>
+  <button class="b" data-v="village">Village</button>
+  <button class="b" data-v="scene">Scène</button>
   <button class="b" data-v="sky">Du ciel</button>
+  <button class="b" id="leafBtn">Feuillage</button>
   <button class="b" id="sigBtn">Signaleurs</button>
   <button class="b" id="routeBtn">Itinéraire</button>
   <button class="b on" id="race">Jour de course</button>
@@ -139,8 +142,8 @@ function prism(ring, y0, y1, mats) {
 }
 
 /* ============ repère de course (U = sens de course, V = à droite) ============ */
-const O = new THREE.Vector2(-70.16, -115.23);   // ligne de départ / arrivée : Esplanade de l’Université (GPX provisoire du 16/11/2026)
-const U = new THREE.Vector2(-.03, -1).normalize(), V = new THREE.Vector2(-U.y, U.x);
+const O = new THREE.Vector2(-9.72, 11.51);   // ligne de départ / arrivée : Place Saint-Pierre, en tête du pont Saint-Pierre (parcours du 20/11/2026)
+const U = new THREE.Vector2(.49, -.87).normalize(), V = new THREE.Vector2(-U.y, U.x);
 const FW = (x, z) => [O.x + U.x * x + V.x * z, O.y + U.y * x + V.y * z];
 const HEAD = Math.atan2(-U.y, U.x);
 function frame(x, z, y = 0) { const g = new THREE.Group(), [wx, wz] = FW(x, z); g.position.set(wx, y, wz); g.rotation.y = HEAD; return g; }
@@ -308,8 +311,8 @@ const roadTex = canvasTex(512, 128, (g, w, h) => {
 // axe de la chaussée dans le repère de course : les couloirs suivent le pont puis se recentrent sur la place
 const brF = s => toF(BR_A0.x + BR_D.x * s, BR_A0.y + BR_D.y * s), bz1 = brF(5), bz2 = brF(70);
 const bridgeZ = x => bz1[1] + (bz2[1] - bz1[1]) * (x - bz1[0]) / (bz2[0] - bz1[0]);
-const cz = x => 0;   // plus de pont sous l’arche : le départ est sur l’esplanade
-const czRot = x => HEAD;
+const cz = x => { const t = Math.min(1, Math.max(0, (x + 14) / 12)), k = t * t * (3 - 2 * t); return bridgeZ(Math.min(x, -14)) * (1 - k); };   // les couloirs suivent le pont puis se recentrent sur la place
+const czRot = x => { const m = (cz(x + .5) - cz(x - .5)); return Math.atan2(-(U.y + m * V.y), U.x + m * V.x); };
 
 /* ============ bâtiments réels (IGN BD TOPO) ============ */
 const facade = canvasTex(256, 256, (g) => {
@@ -326,6 +329,7 @@ for (const b of S.bld) {
 }
 
 /* ============ arbres & bancs réels (OpenStreetMap) ============ */
+let canopy = null;
 const trees = S.trees.filter(p => pip(p[0], p[1], landPoly));
 {
   const n = trees.length, bark = M(0xb7a58c, { roughness: 1 });
@@ -337,7 +341,7 @@ const trees = S.trees.filter(p => pip(p[0], p[1], landPoly));
     d.position.set(x, h / 2, z); d.rotation.set(0, 0, 0); d.scale.set(1, h, 1); d.updateMatrix(); trunk.setMatrixAt(i, d.matrix);
     for (let k = 0; k < 4; k++) { const rr = r * R(.55, .8); d.position.set(x + R(-r, r) * .55, h + R(-.5, r * .6), z + R(-r, r) * .55); d.scale.set(rr, rr * .78, rr); d.updateMatrix(); can.setMatrixAt(i * 4 + k, d.matrix); can.setColorAt(i * 4 + k, c.set(pick(greens))); }
   });
-  trunk.castShadow = can.castShadow = true; can.receiveShadow = true; scene.add(trunk, can);
+  trunk.castShadow = can.castShadow = true; can.receiveShadow = true; scene.add(trunk, can); canopy = can;
   const bn = S.benches.filter(p => pip(p[0], p[1], landPoly)), bi = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, .9, .5), M(0x3b4a42, { roughness: .6 }), bn.length);
   bn.forEach(([x, z], i) => { d.position.set(x, .45, z); d.rotation.set(0, R(0, Math.PI), 0); d.scale.set(1, 1, 1); d.updateMatrix(); bi.setMatrixAt(i, d.matrix); }); bi.castShadow = true; scene.add(bi);
 }
@@ -348,20 +352,22 @@ const restGroup = new THREE.Group(); scene.add(restGroup);
 const pinkMat = M(0xff3d97, { roughness: .5 });
 const dummy = new THREE.Object3D();
 
-/* ---- deux arches distinctes : DÉPART (couloir gauche) et ARRIVÉE (couloir droit, quelques mètres plus loin) ---- */
-const clkC = document.createElement('canvas'); clkC.width = 512; clkC.height = 160; const cg = clkC.getContext('2d'), clkT = new THREE.CanvasTexture(clkC); clkT.colorSpace = THREE.SRGBColorSpace;
-window.__clk = (sec) => { cg.fillStyle = '#0b0206'; cg.fillRect(0, 0, 512, 160); cg.fillStyle = '#ff3b3b'; cg.font = '700 118px "Courier New", monospace'; cg.textAlign = 'center'; cg.textBaseline = 'middle'; cg.fillText(String(Math.floor(sec / 60) % 100).padStart(2, '0') + ':' + String(Math.floor(sec) % 60).padStart(2, '0'), 256, 86); clkT.needsUpdate = true; }; window.__clk(0);
-function archAt(xc, zc, label, fg, clock) {
-  const g = frame(xc, zc), dk = M(0x2a2230), hw = 2.7;
-  for (const z of [-hw, hw]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.6, .75, 6.2, 28), pinkMat); p.position.set(0, 3.1, z); p.castShadow = true; g.add(p, box(2, .2, 2, dk, 0, .1, z)); }
-  const beam = new THREE.Mesh(new THREE.CylinderGeometry(.85, .85, hw * 2, 28), pinkMat); beam.rotation.x = Math.PI / 2; beam.position.set(0, 6.4, 0); beam.castShadow = true; g.add(beam);
-  const ban = twoSided(5.6, 1.7, 'STUD’N RUN', { px: .62 }); ban.position.set(0, 8.2, 0); ban.rotation.y = Math.PI / 2; ban.children.forEach(c => c.material.map.anisotropy = 16); g.add(ban, box(.3, .2, 5.6, dk, 0, 7.3, 0));
-  const lb = twoSided(3.6, 1.1, label, { bg: '#14040c', fg }); lb.position.set(0, 5.0, 0); lb.rotation.y = Math.PI / 2; g.add(lb);
-  if (clock) { g.add(box(1.2, 1.1, 2.8, M(0x14040c), 0, 6.4, 0)); for (const sd of [1, -1]) { const c = new THREE.Mesh(new THREE.PlaneGeometry(2.6, .8), new THREE.MeshBasicMaterial({ map: clkT, toneMapped: false })); c.position.set(sd * .62, 6.4, 0); c.rotation.y = sd === 1 ? Math.PI / 2 : -Math.PI / 2; g.add(c); } }
+/* ---- arche départ / arrivée ---- */
+{
+  const g = frame(0, 0), dk = M(0x2a2230);
+  for (const z of [-4.5, 4.5]) { const p = new THREE.Mesh(new THREE.CylinderGeometry(.7, .85, 6.4, 28), pinkMat); p.position.set(0, 3.2, z); p.castShadow = true; g.add(p, box(2.2, .2, 2.2, dk, 0, .1, z)); }
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(1.0, 1.0, 10.0, 28), pinkMat); beam.rotation.x = Math.PI / 2; beam.position.set(0, 6.6, 0); beam.castShadow = true; g.add(beam);
+  const ban = twoSided(9.6, 2.6, 'STUD’N RUN', { px: .66 }); ban.position.set(0, 8.9, 0); ban.rotation.y = Math.PI / 2; ban.children.forEach(c => c.material.map.anisotropy = 16);
+  g.add(ban, box(.3, .22, 9.6, dk, 0, 7.25, 0));
+  for (const z of [-4.3, 4.3]) g.add(box(.2, 1.5, .2, dk, 0, 8, z));
+  const dep = twoSided(2.9, 1.0, 'DÉPART', { bg: '#14040c' }); dep.position.set(0, 4.9, -1.6); dep.rotation.y = Math.PI / 2;
+  const arr = twoSided(2.9, 1.0, 'ARRIVÉE', { bg: '#14040c', fg: '#ffc2de' }); arr.position.set(0, 4.9, 1.6); arr.rotation.y = Math.PI / 2; g.add(dep, arr);
+  const clkC = document.createElement('canvas'); clkC.width = 512; clkC.height = 160; const cg = clkC.getContext('2d'), clkT = new THREE.CanvasTexture(clkC); clkT.colorSpace = THREE.SRGBColorSpace;
+  window.__clk = (sec) => { cg.fillStyle = '#0b0206'; cg.fillRect(0, 0, 512, 160); cg.fillStyle = '#ff3b3b'; cg.font = '700 118px "Courier New", monospace'; cg.textAlign = 'center'; cg.textBaseline = 'middle'; cg.fillText(String(Math.floor(sec / 60) % 100).padStart(2, '0') + ':' + String(Math.floor(sec) % 60).padStart(2, '0'), 256, 86); clkT.needsUpdate = true; }; window.__clk(0);
+  g.add(box(1.2, 1.2, 3.2, M(0x14040c), 0, 6.6, 0));
+  for (const sd of [1, -1]) { const c = new THREE.Mesh(new THREE.PlaneGeometry(3.0, .94), new THREE.MeshBasicMaterial({ map: clkT, toneMapped: false })); c.position.set(sd * .62, 6.6, 0); c.rotation.y = sd === 1 ? Math.PI / 2 : -Math.PI / 2; g.add(c); }
   raceGroup.add(g);
 }
-archAt(0, -1.6, 'DÉPART', '#ffffff', false);
-archAt(10, 1.6, 'ARRIVÉE', '#ffc2de', true);
 
 /* ---- couloirs : tapis rose le long du tracé GPX ---- */
 const carpetTex = canvasTex(128, 256, (g, w, h) => { g.fillStyle = '#e8438a'; g.fillRect(0, 0, w, h); g.strokeStyle = 'rgba(255,255,255,.85)'; g.lineWidth = 9; g.beginPath(); g.moveTo(36, 70); g.lineTo(92, 128); g.lineTo(36, 186); g.stroke(); }, true);
@@ -389,15 +395,8 @@ for (let k = 1; k <= 24; k++) { const t = k / 24, u = 1 - t; bez.push([u * u * A
 const gpxRest = RT.pts.filter((p, i) => i > bi && RT.cum[i] <= 125).map(p => [p[0], p[1]]);
 const startStraightLen = mkPath(straight).len;
 const startPath = mkPath(chaikin([...straight, ...bez, ...gpxRest], 1));
-// couloir d’arrivée : les 135 derniers mètres du tracé GPX, décalés de 1,6 m vers le couloir d’arrivée, puis zone de récupération
-const finPts = []; {
-  // fin du GPX : couloir parallèle au départ (corridor décalé), qui rejoint la ligne dans le même sens que le départ, puis zone de récupération
-  const tail = RT.pts.filter((p, i) => RT.cum[i] >= RT.length - 135 && RT.cum[i] <= RT.length - 86);
-  tail.forEach(p => finPts.push(p));
-  const e = toF(...tail[tail.length - 1]), x0 = e[0], z0 = e[1];
-  for (let x = x0 + 3; x <= 32; x += 3) { const t = Math.min(1, (x - x0) / (-14 - x0)), k = t * t * (3 - 2 * t); finPts.push(FW(x, z0 + (1.6 - z0) * k)); }
-}
-const finPath = mkPath(finPts);
+// couloir d’arrivée : les coureurs descendent le pont Saint-Pierre dans le couloir de droite, passent l’arche puis entrent sur la place (zone de récupération)
+const finPath = mkPath(lanePts(1.6, -95, 26, 5));
 raceGroup.add(ribbon(startPath, 1.45, .05, carpetMat, 4), ribbon(finPath, 1.45, .05, carpetMat, 4));
 {
   const chq = canvasTex(64, 256, (g) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 2; x++) { g.fillStyle = (x + y) % 2 ? '#fff' : '#111'; g.fillRect(x * 32, y * 32, 32, 32); } });
@@ -413,8 +412,6 @@ raceGroup.add(ribbon(startPath, 1.45, .05, carpetMat, 4), ribbon(finPath, 1.45, 
   let run = [];
   const flush = () => { if (run.length > 3) { const P = mkPath(run); const a = ribbon(P, .3, .16, line), b = ribbon(P, 1.1, .14, halo); raceGroup.add(a, b); } run = []; };
   RT.pts.forEach((p, i) => { if (inBox(p) && RT.cum[i] > 128 && RT.cum[i] < RT.length - 135) run.push(p); else flush(); }); flush();
-// 10 km : à la fin du 1er tour, le tracé repasse sous l'arche (même ligne que le départ) et repart sur le 2e tour
-  { const P2 = mkPath(finPts.slice(0)); raceGroup.add(ribbon(P2, .3, .16, line), ribbon(P2, 1.1, .14, halo)); }
 }
 const sigGroup = new THREE.Group(); sigGroup.visible = false; scene.add(sigGroup);
 const SIG = RT.posts.filter(p => p.x > TL[0] + 8 && p.x < BR[0] - 8 && p.z > TL[1] + 8 && p.z < BR[1] - 8);
@@ -424,7 +421,6 @@ const barPos = [];
 function barrierLine(x0, x1, z) { const n = Math.round((x1 - x0) / 2.5); for (let i = 0; i < n; i++) { const x = x0 + (i + .5) * (x1 - x0) / n; barPos.push([...FW(x, cz(x) + z), czRot(x)]); } }
 function barrierPath(P, d0, d1, off, skip) { for (let d = d0; d < d1; d += 2.5) { const p = sample(P, d), x = p.x - p.tz * off, z = p.z + p.tx * off; if (skip && skip(x, z)) continue; barPos.push([x, z, Math.atan2(-p.tz, p.tx)]); } }
 barrierLine(-40, 6, -3.2); barrierLine(-40, 26, 3.2); barrierLine(-40, 26, 0);
-barrierPath(finPath, 0, finPath.len - 38, -1.75); barrierPath(finPath, 0, finPath.len - 38, 1.75);
 { const d0 = startStraightLen + 1; barrierPath(startPath, d0, d0 + 95, -1.75); barrierPath(startPath, d0 + 2, d0 + 95, 1.75, (x, z) => { const f = toF(x, z); return f[0] > -2 && f[0] < 30 && Math.abs(f[1]) < 1.3; }); }
 {
   const a = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, 1.05, .05), M(0xb4bac2, { roughness: .4, metalness: .7 }), barPos.length), b = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, .5, .07), M(0xff3d97, { roughness: .6 }), barPos.length);
@@ -437,54 +433,144 @@ for (let x = -36; x <= 24; x += 6) for (const z of [-3.9, 3.9]) {
   const f = new THREE.Mesh(new THREE.PlaneGeometry(.95, 2.8), new THREE.MeshBasicMaterial({ color: ((x / 6) | 0) % 2 ? 0xff3d97 : 0xfff4f9, side: THREE.DoubleSide, toneMapped: false })); f.position.set(.5, 3.1, 0); pv.add(f); raceGroup.add(pv); flags.push(pv);
 }
 
-/* ---- village : implantation sur les zones réellement libres (hors arbres, bâtiments, couloir) ---- */
-const placePoly = S.ways.place[0].p, taken = [];
-const keepOut = []; for (const P of [startPath, finPath]) for (let d = 0; d <= P.len; d += 3) { const q = sample(P, d); keepOut.push([q.x, q.z]); }
-RT.pts.forEach((p, i) => { if (RT.cum[i] < 160) keepOut.push(p); });
-function freeSites(count, w, d, { maxR = 95, treeR = 3.2, sep = 8, minDist = 0 } = {}) {
-  const cands = [], px = placePoly.map(p => p[0]), pz = placePoly.map(p => p[1]);
-  for (let x = Math.min(...px); x < Math.max(...px); x += 2) for (let z = Math.min(...pz); z < Math.max(...pz); z += 2) {
-    const r = Math.hypot(x - O.x, z - O.y); if (r > maxR || r < minDist) continue;
-    const [fx, fz] = toF(x, z); if (fx > -50 && fx < 36 && Math.abs(fz) < 10 + d / 2) continue;
-    let ok = true; for (const a of [-w / 2, 0, w / 2]) { for (const b of [-d / 2, 0, d / 2]) { const wx = x + U.x * a + V.x * b, wz = z + U.y * a + V.y * b;
-      if (!pip(wx, wz, placePoly) || keepOut.some(k => Math.hypot(k[0] - wx, k[1] - wz) < 6.5) || S.bld.some(q => pip(wx, wz, q.r)) || trees.some(t => Math.hypot(t[0] - wx, t[1] - wz) < treeR) || !pip(wx, wz, landPoly)) { ok = false; break; } } if (!ok) break; }
-    if (ok) cands.push([x, z, r]);
+/* ---- village : implantation choisie zone par zone (plan du 19/11/2026, arche déplacée le 20/11/2026) ----
+   Zone 1 · Tête du pont Saint-Pierre : arche, sas sur le pont, PC course, ravito d’arrivée et secours au bout du couloir d’arrivée.
+            Esplanade de l’Université + rue de la Boule (à 2 min à pied) : consigne et toilettes coureurs.
+   Zone 2 · Place Saint-Pierre : le village (stands écoles et partenaires, food trucks, tables, toilettes) au centre, terrasses des bars laissées libres.
+   Zone 3 · Gradins sur la Garonne : la scène, en bas des gradins ouest, le public assis sur les marches.
+   Chaque élément est cherché autour d’un point choisi ; il ne doit toucher ni bâtiment, ni tronc d’arbre, ni parcours, ni terrasse de bar. */
+const placePoly = S.ways.place[0].p, taken = [], sites = {}, LAYOUT_LOG = [];
+const TERR = (S.terr || []), BARS = (S.bars || []), shirtsV = ['#ff3d97', '#fff4f9', '#14040c', '#ff7ab8', '#ffd23f', '#3d7bff', '#30c48d'];
+const back = (p, k) => { const [x, z] = rotP(p.x, p.z, p.th, 0, -k); return { x, z, th: p.th }; };
+const keepOut = []; for (const P of [startPath, finPath]) for (let d = 0; d <= P.len; d += 2) { const q = sample(P, d); keepOut.push([q.x, q.z]); }
+for (let i = 1; i < RT.pts.length; i++) { const a = RT.pts[i - 1], b = RT.pts[i]; for (let k = 0; k < 3; k++) keepOut.push([a[0] + (b[0] - a[0]) * k / 3, a[1] + (b[1] - a[1]) * k / 3]); }
+for (const [x, z] of barPos) keepOut.push([x, z]);
+const segD = (px, pz, a, b) => { const vx = b[0] - a[0], vz = b[1] - a[1], l = vx * vx + vz * vz || 1e-9; let t = ((px - a[0]) * vx + (pz - a[1]) * vz) / l; t = Math.max(0, Math.min(1, t)); return Math.hypot(px - a[0] - vx * t, pz - a[1] - vz * t); };
+const nearPoly = (x, z, poly, buf) => { if (pip(x, z, poly)) return true; for (let i = 0; i < poly.length - 1; i++) if (segD(x, z, poly[i], poly[i + 1]) < buf) return true; return false; };
+const rotP = (x, z, th, a, b) => [x + a * Math.cos(th) + b * Math.sin(th), z - a * Math.sin(th) + b * Math.cos(th)];
+const face = (x, z, t) => Math.atan2(t[0] - x, t[1] - z);
+// cherche la place libre la plus proche du point visé (spirale), orientation fixe ou tournée vers une cible
+function placeNear(name, at, w, d, o = {}) {
+  const { look, rot, maxR = 14, route = 3.2, tree = 1.6, terr = 2.5, bld = 1.0, sep = 1.2, land = true, region } = o;
+  for (let r = 0; r <= maxR; r += .5) {
+    const n = r ? Math.max(8, Math.round(2 * Math.PI * r / .7)) : 1;
+    for (let k = 0; k < n; k++) {
+      const x = at[0] + r * Math.cos(2 * Math.PI * k / n), z = at[1] + r * Math.sin(2 * Math.PI * k / n), th = rot !== undefined ? rot : look ? face(x, z, look) : 0;
+      const pts = []; for (const a of [-.5, -.25, 0, .25, .5]) for (const b of [-.5, -.25, 0, .25, .5]) pts.push(rotP(x, z, th, a * w, b * d));
+      let ok = true;
+      for (const [px, pz] of pts) {
+        if ((land && !pip(px, pz, landPoly)) || (region && !pip(px, pz, region))) { ok = false; break; }
+        if (S.bld.some(q => nearPoly(px, pz, q.r, bld))) { ok = false; break; }
+        if (trees.some(t => Math.hypot(t[0] - px, t[1] - pz) < tree)) { ok = false; break; }
+        if (keepOut.some(q => Math.hypot(q[0] - px, q[1] - pz) < route)) { ok = false; break; }
+        if (TERR.some(q => nearPoly(px, pz, q, terr))) { ok = false; break; }
+        if (taken.some(t => pip(px, pz, t.ring))) { ok = false; break; }
+      }
+      if (ok) {
+        const ring = [[-.5, -.5], [.5, -.5], [.5, .5], [-.5, .5]].map(([a, b]) => rotP(x, z, th, a * (w + 2 * sep), b * (d + 2 * sep)));
+        taken.push({ x, z, ring, r: 0 }); sites[name] = [x, z]; LAYOUT_LOG.push([name, +x.toFixed(1), +z.toFixed(1), +r.toFixed(1)]); return { x, z, th };
+      }
+    }
   }
-  cands.sort((a, b) => a[2] - b[2]); const out = [];
-  for (const c of cands) { if (out.length >= count) break; if (taken.concat(out).some(t => Math.hypot(t[0] - c[0], t[1] - c[1]) < sep)) continue; out.push(c); }
-  out.forEach(o => taken.push(o)); return out;
+  sites[name] = null; LAYOUT_LOG.push([name, 'PAS DE PLACE']); console.warn('village : pas de place pour', name); return null;
 }
 function person(parent, x, z, col, y0 = 0) {
   const g = new THREE.Group(); g.position.set(x, y0, z);
   const b = new THREE.Mesh(new THREE.CapsuleGeometry(.2, .75, 4, 8), M(col, { roughness: .8 })); b.position.y = 1; b.castShadow = true;
   const h = new THREE.Mesh(new THREE.SphereGeometry(.16, 10, 8), M(pick(['#f1c7a6', '#d9a27a', '#a8714d', '#6f4a33']))); h.position.y = 1.8; h.castShadow = true; g.add(b, h); parent.add(g);
 }
-const sites = {};
-function tent(label, color, o = {}) {
-  const [s] = freeSites(1, 8, 4, { maxR: 110, sep: 7.5 }); if (!s) { sites[label] = null; return; }
-  const [x, z] = s, [, fz] = toF(x, z), g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = HEAD + (fz > 0 ? Math.PI : 0);
-  const w = 8, d = 4, h = 2.7, roofM = M(color, { roughness: .7 }), white = M(0xf6f1ee, { roughness: .8 });
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.1, h, .1, M(0x888a90, { metalness: .6, roughness: .4 }), sx * (w / 2 - .1), h / 2, sz * (d / 2 - .1)));
-  const roof = new THREE.Mesh(new THREE.ConeGeometry(1, 1.2, 4), roofM); roof.rotation.y = Math.PI / 4; roof.scale.set(w / 1.414 * 1.04, 1, d / 1.414 * 1.04); roof.position.y = h + .6; roof.castShadow = true; g.add(roof);
-  g.add(box(w + .1, .35, d + .1, white, 0, h - .1, 0), box(w, h - .4, .05, white, 0, h / 2, -d / 2 + .05), box(.05, h - .4, d, white, -w / 2 + .05, h / 2, 0), box(.05, h - .4, d, white, w / 2 - .05, h / 2, 0), box(w - .6, .95, .9, M(0xeee9e4), 0, .5, d / 2 - 1.2));
-  const sg = signMesh(w * .9, .95, label, { bg: o.bg || '#14040c', fg: o.fg || '#fff', px: .6, icon: o.icon }); sg.position.set(0, h + .35, d / 2 + .02); sg.rotation.x = -.22; g.add(sg);
-  for (let k = 0; k < 2; k++) person(g, R(-w / 3, w / 3), d / 2 - 2.1, pick(['#ff3d97', '#14040c', '#ffffff']));
-  raceGroup.add(g); sites[label] = [x, z];
+const metal = M(0x888a90, { metalness: .6, roughness: .4 }), white = M(0xf6f1ee, { roughness: .8 }), dark = M(0x2a2230, { roughness: .6 }), silver = M(0xc9ccd3, { roughness: .35, metalness: .8 });
+function tentMesh(p, w, d, label, color, o = {}) {
+  const g = new THREE.Group(); g.position.set(p.x, o.y || 0, p.z); g.rotation.y = p.th; const h = 2.6, roofM = M(color, { roughness: .7 });
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.1, h, .1, metal, sx * (w / 2 - .1), h / 2, sz * (d / 2 - .1)));
+  const roof = new THREE.Mesh(new THREE.ConeGeometry(1, 1.1, 4), roofM); roof.rotation.y = Math.PI / 4; roof.scale.set(w / 1.414 * 1.04, 1, d / 1.414 * 1.04); roof.position.y = h + .55; roof.castShadow = true; g.add(roof);
+  g.add(box(w + .1, .32, d + .1, white, 0, h - .1, 0), box(w, h - .4, .05, white, 0, h / 2, -d / 2 + .05));
+  if (!o.open) g.add(box(.05, h - .4, d, white, -w / 2 + .05, h / 2, 0), box(.05, h - .4, d, white, w / 2 - .05, h / 2, 0));
+  g.add(box(w - .5, .95, .7, M(o.counter || 0xeee9e4), 0, .48, d / 2 - .6));
+  const sg = signMesh(w * .92, Math.min(.9, w * .16), label, { bg: o.bg || '#14040c', fg: o.fg || '#fff', px: .6, icon: o.icon }); sg.position.set(0, h + .3, d / 2 + .03); sg.rotation.x = -.2; g.add(sg);
+  for (let k = 0; k < (o.people ?? 2); k++) person(g, R(-w / 3, w / 3), d / 2 + R(.8, 2.2), pick(['#ff3d97', '#14040c', '#ffffff', '#3d7bff']));
+  raceGroup.add(g); return g;
 }
-tent('RETRAIT DOSSARDS', 0xff3d97); tent('CONSIGNE', 0xf4efec, { bg: '#ff3d97' }); tent('RAVITAILLEMENT', 0x4a1830); tent('BDE & PARTENAIRES', 0xff3d97);
-tent('SECOURS', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross' }); tent('PC COURSE', 0x4a1830); tent('RAVITAILLEMENT ARRIVÉE', 0xff3d97); tent('PARTENAIRES', 0xf4efec, { bg: '#ff3d97' });
-{ // scène + podium
-  const [s] = freeSites(1, 14, 10, { maxR: 120, treeR: 2.6, sep: 6, minDist: 18 });
-  if (s) {
-    const [x, z] = s, f = new THREE.Vector2(O.x - x, O.y - z).normalize(), g = new THREE.Group(); g.position.set(x, 0, z); g.rotation.y = Math.atan2(f.y, -f.x);
-    const dark = M(0x2a2230, { roughness: .6 }), silver = M(0xc9ccd3, { roughness: .35, metalness: .8 });
-    g.add(box(6, 1.1, 14, dark, 0, .55, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.3, 7.5, .3, silver, sx * 2.8, 3.8, sz * 6.8));
-    g.add(box(6, .4, 14, silver, 0, 7.6, 0));
-    const scr = signMesh(11, 4.2, 'ARRIVÉE · LIVE', { bg: '#c2107a', px: .5 }); scr.position.set(2.7, 4.6, 0); scr.rotation.y = -Math.PI / 2; g.add(scr);
-    const fb = signMesh(14, 1, 'REMISE DES PRIX · 11 H', { bg: '#ff3d97', px: .6 }); fb.position.set(-3.05, .6, 0); fb.rotation.y = -Math.PI / 2; g.add(fb);
-    [[0, 1.2, 0xff3d97], [-2, .9, 0xfff4f9], [2, .6, 0xffc2de]].forEach(([zz, hh, c]) => g.add(box(1.7, hh, 1.7, M(c, { roughness: .5 }), -6.5, hh / 2, zz)));
-    raceGroup.add(g); sites['SCÈNE'] = [x, z];
-  } else sites['SCÈNE'] = null;
+function addTent(name, at, w, d, label, color, o = {}) { const p = placeNear(name, at, w, d + 2.5, o); if (p) tentMesh(back(p, 1.25), w, d, label, color, o); return p; }
+
+/* ---------- ZONE 1 · Arche en tête du pont (coureurs) ---------- */
+addTent('PC COURSE', FW(3, 9), 4, 4, 'PC COURSE · CHRONO', 0x4a1830, { look: [O.x, O.y], route: 3.5 });
+addTent('SECOURS', FW(16, 12), 5, 5, 'SECOURS', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross', look: FW(16, 2), route: 3.5, maxR: 16 });
+{ // ambulance garée à côté du poste de secours, côté allée de Barcelone
+  const p = sites['SECOURS'] && placeNear('AMBULANCE', [sites['SECOURS'][0] - 1, sites['SECOURS'][1] + 7], 2.2, 6, { rot: 0, route: 3, maxR: 8 });
+  if (p) { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; g.add(box(2.1, 2.5, 5.6, M(0xf7f7f7, { roughness: .5 }), 0, 1.45, 0), box(2.12, .35, 5.62, M(0xe11d2e), 0, 1.3, 0), box(1.9, .5, 1.2, M(0x3a6a8a, { roughness: .2 }), 0, 2.1, 2.3)); for (const sx of [-1, 1]) for (const sz of [-1.9, 1.9]) { const wh = new THREE.Mesh(new THREE.CylinderGeometry(.4, .4, .3, 16), M(0x18181c)); wh.rotation.z = Math.PI / 2; wh.position.set(sx * 1.05, .4, sz); g.add(wh); } raceGroup.add(g); }
+}
+addTent('RAVITAILLEMENT ARRIVÉE', FW(32, 3), 6, 3, 'EAU · FRUITS · MÉDAILLES', 0xff3d97, { look: FW(24, 1.6), route: 2.6, tree: 1.4, maxR: 12 });
+addTent('CONSIGNE', [-55, -128], 6, 3, 'CONSIGNE', 0xf4efec, { bg: '#ff3d97', look: [-62, -120], route: 3 });
+
+/* toilettes : rangées de cabines (2 m entre chaque rangée) */
+function toilets(name, at, n, o = {}) {
+  const w = n * 1.3, d = 1.4, p0 = placeNear(name, at, w, d + 3, o); if (!p0) return null; const p = back(p0, 1.5);
+  const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th;
+  const shell = [M(0x3d7bff, { roughness: .6 }), M(0xff3d97, { roughness: .6 })], door = M(0xf6f1ee, { roughness: .6 });
+  for (let i = 0; i < n; i++) { const x = -w / 2 + .65 + i * 1.3; g.add(box(1.2, 2.3, 1.3, shell[o.pink && i % 3 === 2 ? 1 : 0], x, 1.15, 0), box(1.25, .12, 1.35, door, x, 2.36, 0), box(.7, 1.8, .03, door, x, 1.0, .67)); }
+  const sg = signMesh(Math.min(w * .7, 5), .7, 'TOILETTES', { bg: '#14040c', px: .6 }); sg.position.set(0, 3.0, .7); g.add(sg, box(.06, .7, .06, metal, -1.2, 2.55, .6), box(.06, .7, .06, metal, 1.2, 2.55, .6));
+  raceGroup.add(g); return p;
+}
+toilets('TOILETTES COUREURS', [-82, -82], 10, { rot: Math.PI / 2, route: 3, tree: 1.4 });
+toilets('TOILETTES AUDITORIUM', [-27, -101], 8, { route: 3, tree: 1.6, look: [-27, -90] });
+
+/* ---------- ZONE 2 · Place Saint-Pierre (village) ---------- */
+// stands des écoles / BDE : une allée sous les platanes, au centre de la place, à distance des terrasses
+const SCHOOLS = ['UT CAPITOLE', 'JEAN-JAURÈS', 'PAUL-SABATIER', 'INSA', 'TBS', 'TSE', 'ENSEEIHT', 'SCIENCES PO'];
+const schoolSpots = [[-36, -24], [-28, -30], [-20, -24], [-12, -30], [-4, -24], [-36, -14], [-24, -16], [-10, -18]];
+SCHOOLS.forEach((s, i) => addTent('STAND ' + s, schoolSpots[i], 3, 3, s, i % 2 ? 0xff3d97 : 0xf4efec, { bg: i % 2 ? '#14040c' : '#ff3d97', look: [-20, -21], route: 3.5, tree: 1.5, terr: 3, region: placePoly, maxR: 7, people: 2 }));
+// partenaires : à l’entrée du village côté rue Valade
+['PARTENAIRE 1', 'PARTENAIRE 2'].forEach((s, i) => addTent(s, [[0, -36], [6, -30]][i], 3, 3, s, 0x4a1830, { look: [-20, -21], route: 3.5, tree: 1.2, terr: 3, region: placePoly, maxR: 8 }));
+addTent('INFO VILLAGE', [-46, -12], 3, 3, 'INFOS · OBJETS TROUVÉS', 0xff3d97, { look: [-20, -21], route: 3.5, tree: 1.5, terr: 3, region: placePoly, maxR: 8 });
+// food trucks : côté est de la place, entre le pont et la rue des Blanchers, guichet tourné vers le centre
+function foodTruck(name, at, label, col, o = {}) {
+  const p0 = placeNear(name, at, 6.4, 2.6 + 3, { route: 3.5, tree: 1.3, terr: 3, region: placePoly, maxR: 14, ...o }); if (!p0) return null; const p = back(p0, 1.5);
+  const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; const body = M(col, { roughness: .55 });
+  g.add(box(6.2, 2.5, 2.4, body, 0, 1.75, 0), box(1.9, 1.8, 2.4, body, 2.9, 1.4, 0), box(1.0, .8, 2.2, M(0x2b3a48, { roughness: .2 }), 3.4, 1.9, 0));
+  g.add(box(3.4, 1.0, .05, M(0x14040c), -.8, 2.0, 1.22), box(3.6, .06, .9, M(0xfff4f9), -.8, 2.65, 1.65), box(3.4, .08, .4, M(0xd9d0c8), -.8, 1.45, 1.4));
+  for (const sx of [-2, 2.2]) for (const sz of [-1.15, 1.15]) { const wh = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .3, 16), M(0x18181c)); wh.rotation.x = Math.PI / 2; wh.position.set(sx, .42, sz); g.add(wh); }
+  const sg = signMesh(3.6, .6, label, { bg: '#14040c', px: .62 }); sg.position.set(-.8, 3.25, 1.2); g.add(sg);
+  for (let k = 0; k < 3; k++) person(g, R(-2.4, .8), R(2.4, 3.6), pick(['#ff3d97', '#fff4f9', '#14040c', '#3d7bff']));
+  raceGroup.add(g); return p;
+}
+const FT = [['FOOD TRUCK 1', [20, -4], 'BURGERS', 0xff3d97], ['FOOD TRUCK 2', [26, 5], 'PÂTES & PIZZA', 0xffd23f], ['FOOD TRUCK 3', [28, 15], 'VEGGIE', 0x30c48d], ['FOOD TRUCK 4', [26, 25], 'CRÊPES & GLACES', 0xfff4f9]];
+for (const [n, at, l, c] of FT) foodTruck(n, at, l, c, { look: [8, 12] });
+{ // mange-debout et tables devant les food trucks
+  const tbl = M(0xfff4f9, { roughness: .6 }), leg = M(0x2a2230);
+  for (const at of [[10, 4], [12, 12], [14, 20], [6, 16], [8, 0], [16, 26]]) { const p = placeNear('TABLE ' + at, at, 1.4, 1.4, { route: 3, tree: 1.2, terr: 2.5, region: placePoly, maxR: 5, sep: .6 }); if (!p) continue;
+    const g = new THREE.Group(); g.position.set(p.x, 0, p.z); const top = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .05, 18), tbl); top.position.y = 1.1; g.add(top, box(.08, 1.1, .08, leg, 0, .55, 0)); for (let k = 0; k < 3; k++) person(g, Math.cos(k * 2.1) * .75, Math.sin(k * 2.1) * .75, pick(shirtsV)); raceGroup.add(g); }
+}
+// l’arche et le couloir d’arrivée occupent maintenant le sud de la place : on essaie plusieurs emplacements
+for (const at of [[-2, 2], [14, -24], [-46, -24], [36, 32]]) if (toilets('TOILETTES VILLAGE', at, 8, { route: 3.2, tree: 1.2, terr: 3, region: placePoly, maxR: 10, look: [-10, -10], pink: 1 })) break;
+{ // tri des déchets
+  for (const at of [[-30, -12], [4, -18], [18, 26]]) { const p = placeNear('TRI ' + at, at, 2.4, .8, { route: 3, tree: 1, terr: 2.5, region: placePoly, maxR: 6, sep: .5 }); if (!p) continue;
+    const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; [0xffd23f, 0x30c48d, 0x8a8a90].forEach((c, k) => g.add(box(.7, 1.0, .7, M(c, { roughness: .5 }), -.8 + k * .8, .5, 0))); raceGroup.add(g); }
+}
+
+/* ---------- ZONE 3 · Scène en bas des gradins ouest ---------- */
+{
+  const G = G1, e = (() => { const a = G.ring[0]; let best = 0, A, B; for (let i = 0; i < G.ring.length; i++) { const p = G.ring[i], q = G.ring[(i + 1) % G.ring.length], l = Math.hypot(q[0] - p[0], q[1] - p[1]); if (l > best) { best = l; A = p; B = q; } } return { A, B, L: best }; })();
+  // palier le plus large le plus bas : la scène s’y pose, dos à la Garonne, face aux marches
+  let gi = -1, gw = 0; G.groups.forEach((g, i) => { const w = g.limit - (i ? G.groups[i - 1].limit : 0); if (i > 0 && w >= gw - .5 && w > 4) { gw = w; gi = i; } });
+  if (gi < 0) gi = G.groups.length - 1;
+  const g0 = G.groups[gi], tmid = ((gi ? G.groups[gi - 1].limit : 0) + g0.limit) / 2, n = G.n;
+  const mx = (e.A[0] + e.B[0]) / 2, mz = (e.A[1] + e.B[1]) / 2, tm = mx * n[0] + mz * n[1] - G.t0;
+  const cx = mx + n[0] * (tmid - tm), cz2 = mz + n[1] * (tmid - tm), y = g0.top, depth = Math.min(7, gw - .6), wid = Math.min(14, e.L * .45);
+  const g = new THREE.Group(); g.position.set(cx, y, cz2); g.rotation.y = Math.atan2(-n[0], -n[1]);   // +z local = vers les marches
+  g.add(box(wid, 1.2, depth, dark, 0, .6, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.3, 7.5, .3, silver, sx * (wid / 2 - .2), 3.75, sz * (depth / 2 - .2)));
+  g.add(box(wid, .45, depth, silver, 0, 7.6, 0), box(wid - .6, 5.2, .1, M(0x14040c), 0, 4.0, -depth / 2 + .3));
+  const scr = signMesh(wid * .62, 3.2, 'STUD’N RUN · LIVE', { bg: '#c2107a', px: .42 }); scr.position.set(0, 4.3, -depth / 2 + .4); g.add(scr);
+  const fb = signMesh(wid, .9, 'SCÈNE · PODIUM 20 H 45 · AFTER 21 H 30', { bg: '#ff3d97', px: .55 }); fb.position.set(0, .6, depth / 2 + .02); g.add(fb);
+  [[0, 1.0, 0xff3d97], [-1.8, .75, 0xfff4f9], [1.8, .5, 0xffc2de]].forEach(([xx, hh, c]) => g.add(box(1.6, hh, 1.4, M(c, { roughness: .5 }), xx, 1.2 + hh / 2, .8)));
+  for (const sx of [-1, 1]) { const sp = box(1.1, 2.4, 1.0, M(0x18181c, { roughness: .4 }), sx * (wid / 2 + .9), 1.2, depth / 2 - .8); g.add(sp); }
+  raceGroup.add(g); sites['SCÈNE'] = [cx, cz2]; window.__stage = { cx, cz: cz2, y, wid, depth, gw, n };
+}
+
+/* terrasses des bars : surlignées au sol (laissées libres) */
+{
+  const mat = new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: .32, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
+  for (const q of TERR) { const sh = new THREE.Shape(q.map(([x, z]) => new THREE.Vector2(x, -z))), gg = new THREE.ShapeGeometry(sh); gg.rotateX(-Math.PI / 2); const m = new THREE.Mesh(gg, mat); m.position.y = .06; raceGroup.add(m); }
 }
 
 /* ---- coureurs & spectateurs ---- */
@@ -511,52 +597,71 @@ for (const G of [G1, G2]) for (let i = 0; i < 70; i++) {
 }
 const specSet = crowd(spectators.length);
 
-/* ---- hors course : terrasses de café ---- */
+/* ---- hors course : les terrasses réelles des bars (OpenStreetMap) ---- */
 {
-  const iron = M(0x2e3a34, { roughness: .5, metalness: .4 });
-  for (const [x, z] of freeSites(6, 4, 3, { maxR: 100, sep: 6, treeR: 2.4, minDist: 20 })) {
-    const g = new THREE.Group(); g.position.set(x, 0, z); g.add(box(1.8, .06, .8, M(0x8a6a48), 0, .8, 0), box(1.9, .06, .3, M(0x8a6a48), 0, .45, .7), box(1.9, .06, .3, M(0x8a6a48), 0, .45, -.7));
-    const um = new THREE.Mesh(new THREE.ConeGeometry(1.6, .6, 8), M(0x3a4254)); um.position.y = 2.4; um.castShadow = true; g.add(um, box(.05, 2.2, .05, iron, 0, 1.2, 0)); restGroup.add(g);
-  }
+  const iron = M(0x2e3a34, { roughness: .5, metalness: .4 }), wood = M(0x8a6a48);
+  for (const q of TERR) { const c = q.slice(0, -1).reduce((s, p, _, a) => [s[0] + p[0] / a.length, s[1] + p[1] / a.length], [0, 0]);
+    const g = new THREE.Group(); g.position.set(c[0], 0, c[1]); g.add(box(1.8, .06, .8, wood, 0, .8, 0), box(1.9, .06, .3, wood, 0, .45, .7), box(1.9, .06, .3, wood, 0, .45, -.7));
+    const um = new THREE.Mesh(new THREE.ConeGeometry(1.6, .6, 8), M(0x3a4254)); um.position.y = 2.4; um.castShadow = true; g.add(um, box(.05, 2.2, .05, iron, 0, 1.2, 0)); restGroup.add(g); }
 }
 
 /* ============ pins & vues ============ */
 const camFrom = (fx, fz, y, tx, tz, ty) => { const a = FW(fx, fz), b = FW(tx, tz); return { p: [a[0], y, a[1]], t: [b[0], ty, b[1]] }; };
 const V3 = {
-  over: { p: [-175, 120, 95], t: [-32, 0, -34] },
+  over: { p: [-150, 105, 150], t: [-5, 0, 10] },
   arch: camFrom(-24, -2.5, 3.5, 4, -2.5, 4.6),
   start: camFrom(2, -2.5, 3.2, -34, -2.5, 1.6),
   finish: camFrom(34, 2.5, 3.4, -10, 2.5, 1.6),
   sky: { p: [-6, 230, 14], t: [-6, 0, 4] },
+  village: { p: [42, 46, -58], t: [-8, 0, -6], see: 1 },
+  scene: (s => ({ p: [s.cx - s.n[0] * 16 + s.n[1] * 9, s.y + 11, s.cz - s.n[1] * 16 - s.n[0] * 9], t: [s.cx, s.y + 3, s.cz], see: 1 }))(window.__stage),
 };
 const A = FW(0, 0), P9 = FW(-9, -2.5), P18 = FW(-18, 2.5);
 const ITEMS = [
-  ['Arches Départ et Arrivée', 'Deux arches : DÉPART sur le couloir de gauche, ARRIVÉE (avec horloge de course) sur le couloir de droite, 10 m plus loin.', [A[0], 11, A[1]], V3.arch, true],
-  ['Sas de départ', 'Sur l’esplanade de l’Université : 10 km devant, 5 km derrière.', [P9[0], 3, P9[1]], camFrom(-1, -2.5, 3.2, -34, -2.5, 1.6), true],
-  ['Couloir d’arrivée', 'Les coureurs reviennent par le pont Saint-Pierre et l’allée de Barcelone, puis franchissent la ligne sur l’esplanade.', [P18[0], 3, P18[1]], camFrom(10, 2.5, 3.2, -30, 2.5, 1.6), true],
+  ['Arche Départ · Arrivée', 'Arche de 10 m au-dessus des deux couloirs, avec horloge de course. Speaker et chrono juste à côté (PC course).', [A[0], 11, A[1]], V3.arch, true],
+  ['Sas de départ', 'Sur le pont Saint-Pierre, fermé à la circulation : un départ à la fois, le 5 km à 17 h 30 puis le 10 km à 18 h 45. Les coureurs passent l’arche puis tournent à droite vers le quai Saint-Pierre.', [P9[0], 3, P9[1]], camFrom(-1, -2.5, 3.2, -34, -2.5, 1.6), true],
+  ['Couloir d’arrivée', 'Les deux courses finissent par le pont Saint-Pierre : les coureurs descendent le pont dans le couloir de droite et franchissent la ligne en tête du pont, côté place.', [P18[0], 3, P18[1]], camFrom(10, 2.5, 3.2, -30, 2.5, 1.6), true],
 ];
-for (const [k, t, d] of [['RETRAIT DOSSARDS', 'Retrait des dossards', 'À TSE : la veille 17 h – 22 h, ou le matin 9 h – 12 h. Pièce d’identité et carte étudiante.'], ['CONSIGNE', 'Consigne', 'Consigne gratuite au village.'], ['RAVITAILLEMENT', 'Ravitaillement', 'Eau, fruits et boissons.'], ['BDE & PARTENAIRES', 'BDE & partenaires', 'Stands des campus et des marques.'], ['SECOURS', 'Secours', 'Poste de secours de la Croix-Rouge ou de la Protection civile.'], ['PC COURSE', 'PC course', 'Chronométrage et coordination radio.'], ['RAVITAILLEMENT ARRIVÉE', 'Ravitaillement d’arrivée', 'Eau, fruits, médaille.'], ['PARTENAIRES', 'Partenaires', 'Stands des marques partenaires.'], ['SCÈNE', 'Scène & podium', 'Remise des prix à 11 h.']])
-  if (sites[k]) { const p = sites[k]; ITEMS.push([t, d, [p[0], k === 'SCÈNE' ? 9 : 4.6, p[1]], { p: [p[0] + 15, 8, p[1] + 15], t: [p[0], 1.5, p[1]] }, true]); }
-ITEMS.push(['Pont Saint-Pierre', 'Retour de la boucle : 235 m de pont avant la place Saint-Pierre et l’arrivée.', [-45, 8, 62], { p: [-5, 14, -20], t: [-60, 0, 100] }, false],
+const NOTES = [
+  ['CONSIGNE', 'Consigne', 'Sacs des coureurs, sur l’esplanade contre le bâtiment TSE, à 2 min à pied de l’arche.'],
+  ['PC COURSE', 'PC course · chrono · speaker', 'Face à la ligne : chronométrage, radio, sono du départ et de l’arrivée.'],
+  ['RAVITAILLEMENT ARRIVÉE', 'Ravito d’arrivée & médailles', 'Au bout du couloir d’arrivée, sur la place : eau, fruits, médaille.'],
+  ['SECOURS', 'Poste de secours', 'À côté de la ligne d’arrivée, ambulance garée à côté : sortie directe par le pont, fermé à la circulation.'],
+  ['TOILETTES COUREURS', 'Toilettes coureurs', '10 cabines près de la rue de la Boule, à côté de la consigne.'],
+  ['TOILETTES AUDITORIUM', 'Toilettes (Auditorium)', '8 cabines sur le terrain près de l’Auditorium, à côté des toilettes publiques existantes.'],
+  ['STAND UT CAPITOLE', 'Allée des écoles', 'Les stands des écoles et BDE sous les platanes, au centre de la place. Noms d’exemple.'],
+  ['PARTENAIRE 1', 'Stands partenaires', 'À l’entrée du village, côté rue Valade.'],
+  ['INFO VILLAGE', 'Point info', 'Infos, objets trouvés, programme de la soirée.'],
+  ['FOOD TRUCK 1', 'Food trucks', '4 food trucks côté est de la place, guichets tournés vers le centre, tables mange-debout devant.'],
+  ['TOILETTES VILLAGE', 'Toilettes village', '8 cabines sur la place, à l’écart du couloir d’arrivée.'],
+  ['SCÈNE', 'Scène sur les gradins', 'En bas des gradins ouest, dos à la Garonne : le public s’assoit sur les marches. Podium à 20 h 45, after à 21 h 30.'],
+];
+for (const [k, t, d] of NOTES) if (sites[k]) { const p = sites[k]; ITEMS.push([t, d, [p[0], k === 'SCÈNE' ? (window.__stage ? window.__stage.y + 10 : 9) : 4.6, p[1]], k === 'SCÈNE' ? V3.scene : { p: [p[0] + 15, 9, p[1] + 15], t: [p[0], 1.5, p[1]] }, true, /STAND|PARTENAIRE|INFO|FOOD|VILLAGE|SCÈNE/.test(k)]); }
+ITEMS.push(['Retrait des dossards (TSE)', 'Dans le bâtiment TSE : la veille 17 h – 22 h, ou le jour J 9 h – 12 h. Pièce d’identité et carte étudiante.', [-62, 12, -142], { p: [-40, 14, -110], t: [-62, 2, -138] }, true]);
+ITEMS.push(['Terrasses des bars', 'En jaune au sol : laissées libres (Pub Saint-Pierre, Chez Tonton, Bar Basque, Saint des Seins…).', [-40, 3, -36], { p: [-20, 22, -2], t: [-30, 0, -40] }, true]);
+ITEMS.push(['Pont Saint-Pierre', 'Fin des deux parcours : 235 m de pont avant l’arrivée. Le sas de départ est aussi sur le pont.', [-45, 8, 62], { p: [-5, 14, -20], t: [-60, 0, 100] }, false],
   ['Gradins sur la Garonne', 'Un spot pour encourager les coureurs.', [(G1.ring[0][0] + G1.ring[2][0]) / 2, 3, (G1.ring[0][1] + G1.ring[2][1]) / 2], { p: [-10, 14, -22], t: [-40, -2, 12] }, false]);
 const legend = document.getElementById('legend');
-legend.innerHTML = '<h2>Sur la place</h2>' + ITEMS.map((it, i) => `<button data-i="${i}"><b>${i + 1}</b><div><span>${it[0]}</span><i>${it[1]}</i></div></button>`).join('');
+legend.innerHTML = '<h2>Sur le parcours</h2>' + ITEMS.map((it, i) => `<button data-i="${i}"><b>${i + 1}</b><div><span>${it[0]}</span><i>${it[1]}</i></div></button>`).join('');
 const pins = ITEMS.map((it, i) => { const b = document.createElement('button'); b.className = 'pin'; b.innerHTML = `${i + 1}<em>${it[0]}</em>`; b.dataset.i = i; document.body.appendChild(b); return b; });
 let fly = null;
 function flyTo(v) { fly = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...v.p), t1: new THREE.Vector3(...v.t) }; }
 controls.addEventListener('start', () => { fly = null; });
-document.addEventListener('click', e => { const i = e.target.closest('[data-i]'); if (i) flyTo(ITEMS[+i.dataset.i][3]); const v = e.target.closest('[data-v]'); if (v) flyTo(V3[v.dataset.v]); });
+let seeThrough = false; const leafBtn = document.getElementById('leafBtn');
+function setLeaves(on) { seeThrough = on; leafBtn.classList.toggle('on', on); const m = canopy.material; m.transparent = on; m.opacity = on ? .22 : 1; m.depthWrite = !on; m.needsUpdate = true; canopy.castShadow = !on; }
+leafBtn.addEventListener('click', () => setLeaves(!seeThrough));
+document.addEventListener('click', e => { const i = e.target.closest('[data-i]'); if (i) { const v = ITEMS[+i.dataset.i]; flyTo(v[3]); if (v[5]) setLeaves(true); } const v = e.target.closest('[data-v]'); if (v) { flyTo(V3[v.dataset.v]); setLeaves(!!V3[v.dataset.v].see); } });
 let raceOn = true; const raceBtn = document.getElementById('race');
 function setRace(on) {
   raceOn = on; raceGroup.visible = on; restGroup.visible = !on; raceBtn.classList.toggle('on', on); raceBtn.textContent = on ? 'Jour de course' : 'Place au repos';
   document.getElementById('sub').textContent = on ? 'jour de course' : 'au repos'; pins.forEach((p, i) => { p.style.display = (on || !ITEMS[i][4]) ? '' : 'none'; });
 }
 raceBtn.addEventListener('click', () => setRace(!raceOn)); setRace(!params.has('empty'));
-const sigPins = SIG.map(p => { const b = document.createElement('button'); b.className = 'pin sig'; b.style.display = 'none'; b.innerHTML = `${p.n}<em>Poste ${p.n} · ${p.street}${p.names.length ? ' × ' + p.names.join(', ') : ' (virage)'}</em>`; document.body.appendChild(b); return b; });
+const sigPins = SIG.map(p => { const b = document.createElement('button'); b.className = 'pin sig'; b.style.display = 'none'; b.innerHTML = `${p.n}<em>Poste ${p.n} · ${p.names.length ? p.names.join(' × ') : p.street}${p.nb ? ' · ' + p.nb + ' signaleur' + (p.nb > 1 ? 's' : '') : ''}</em>`; document.body.appendChild(b); return b; });
 let sigOn = false; const sigBtn = document.getElementById('sigBtn');
 sigBtn.addEventListener('click', () => { sigOn = !sigOn; sigBtn.classList.toggle('on', sigOn); sigPins.forEach(b => b.style.display = sigOn ? '' : 'none'); });
 const rp = document.getElementById('routepanel'), inScene = ([x, z]) => x > TL[0] + 8 && x < BR[0] - 8 && z > TL[1] + 8 && z < BR[1] - 8;
-rp.innerHTML = `<h2>Parcours provisoire · ${(RT.length / 1000).toFixed(2)} km · ${RT.posts.length} postes (carrefours et virages)</h2>` + RT.sections.map((s, k) => {
+rp.innerHTML = `<h2>Parcours du 5 km · ${(RT.length / 1000).toFixed(2).replace('.', ',')} km (le 10 km passe par les mêmes rues autour de la place) · ${RT.posts.length} postes de signaleurs sur les deux courses</h2>` + RT.sections.map((s, k) => {
   const pts = RT.pts.slice(s.i0, s.i1 + 1), mid = pts[Math.floor(pts.length / 2)], inside = inScene(mid), narrow = s.wmed && s.wmed < 8 && s.open < .3;
   return `<div class="row${inside ? ' go' : ''}" data-s="${k}"><b>${(s.start / 1000).toFixed(2)}</b><div>${s.name}<small>${s.hw.join(' · ')}${s.surface.length ? ' · ' + s.surface[0] : ''} · alt. ${s.alt0}→${s.alt1} m${s.wmed && s.open < .5 ? ' · largeur ≈ ' + s.wmed + ' m' : ''}</small></div><span class="${narrow ? 'narrow' : ''}">${s.len} m</span></div>`;
 }).join('');
@@ -567,12 +672,13 @@ rp.addEventListener('click', e => { const r = e.target.closest('.row.go'); if (!
 /* ============ boucle ============ */
 function resize() { const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
 addEventListener('resize', resize); resize();
-const v0 = V3[params.get('view')] || V3.over; camera.position.set(...v0.p); controls.target.set(...v0.t);
+const v0 = V3[params.get('view')] || V3.over; camera.position.set(...v0.p); controls.target.set(...v0.t); if (v0.see || params.has('leaves')) setLeaves(true);
 if (params.has('cam')) { const q = params.get('cam').split(',').map(Number); camera.position.set(q[0], q[1], q[2]); controls.target.set(q[3], q[4], q[5]); }
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches, clock = new THREE.Clock(); let T = params.has('t') ? +params.get('t') : 0, lastClk = -1; const proj = new THREE.Vector3();
 function frameLoop() {
   const dt = Math.min(clock.getDelta(), .05); if (!params.has('t') && !reduce) T += dt;
   if (fly) { fly.t = Math.min(1, fly.t + dt / 1.8); const k = fly.t < .5 ? 4 * fly.t ** 3 : 1 - Math.pow(-2 * fly.t + 2, 3) / 2; camera.position.lerpVectors(fly.p0, fly.p1, k); controls.target.lerpVectors(fly.t0, fly.t1, k); if (fly.t >= 1) fly = null; }
+  { const t = controls.target, k = 8; sun.target.position.set(Math.round(t.x / k) * k, 0, Math.round(t.z / k) * k); sun.position.set(sun.target.position.x + 110, 120, sun.target.position.z + 70); }
   controls.update(); waterTex.offset.x = T * .0008; flags.forEach((f, i) => { f.rotation.y = HEAD + Math.sin(T * 1.6 + i) * .35; });
   if (raceOn) {
     const cyc = T % 60;
@@ -593,7 +699,7 @@ function frameLoop() {
   renderer.render(scene, camera); requestAnimationFrame(frameLoop);
 }
 frameLoop();
-const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 700); window.__ready = true; window.__sites = sites; window.__dbg = { raceGroup, TL, BR, RT };
+const ld = document.getElementById('load'); ld.style.opacity = 0; setTimeout(() => ld.remove(), 700); window.__ready = true; window.__sites = sites; document.body.dataset.sites = JSON.stringify(sites); window.__dbg = { raceGroup, TL, BR, RT };
 </script>
 </body>
 </html>

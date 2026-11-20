@@ -3,7 +3,7 @@ import json, pathlib
 
 ROOT = pathlib.Path(__file__).parent
 DIST = ROOT / "dist"
-R = json.loads((ROOT / "route-svg.json").read_text())
+RT = json.loads((ROOT / "route-svg.json").read_text()); R5, R10 = RT["r5"], RT["r10"]; R = R5
 
 NAV = [("index.html", "Accueil"), ("parcours.html", "Parcours"), ("ecoles.html", "Écoles"), ("horaires.html", "Horaires"),
        ("infos-pratiques.html", "Infos pratiques"), ("actualites.html", "Actualités"), ("partenaires.html", "Partenaires"), ("association.html", "Association")]
@@ -27,11 +27,11 @@ ICONS = {
 }
 def ico(n): return f'<span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">{ICONS[n]}</svg></span>'
 
-def route_svg(cls="", labels=True, runner=True):
+def route_svg(cls="", labels=True, runner=True, R=R5, label="Tracé du 5 km dans Toulouse"):
     km = "".join(f'<circle class="km-dot" cx="{x}" cy="{y}" r="16"/><text class="km-txt" x="{x+26}" y="{y+10}">{i}</text>'
                  for i, (x, y) in enumerate(R["km"]) if i and labels)
     sx, sy = R["km"][0]
-    return (f'<svg class="{cls}" viewBox="0 0 {R["w"]} {R["h"]}" role="img" aria-label="Tracé de la boucle de 5 km dans Toulouse">'
+    return (f'<svg class="{cls}" viewBox="0 0 {R["w"]} {R["h"]}" role="img" aria-label="{label}">'
             f'<path class="route-bg" d="{R["d"]}"/><path class="route-path" d="{R["d"]}"/>{km}'
             f'<circle class="start-dot" cx="{sx}" cy="{sy}" r="20"/>'
             + (f'<circle class="runner" r="11" cx="{sx}" cy="{sy}" style="opacity:0"/>' if runner else "") + "</svg>")
@@ -68,14 +68,14 @@ def page(slug, title, desc, body, head_extra="", scripts=""):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
-{head_extra}<script src="script.js" defer></script>
+<link rel="stylesheet" href="styles.css?v=7">
+{head_extra}<script src="script.js?v=4" defer></script>
 {scripts}</head>
 <body>
 <div class="glow" aria-hidden="true"></div>
 <header class="site-header">
   <div class="wrap nav">
-    <a class="brand" href="index.html"><img src="assets/logo.svg" alt="Stud’N Run" width="244" height="44"></a>
+    <a class="brand" href="index.html"><img src="assets/logo-texte.svg" alt="Stud’N Run" width="190" height="32"></a>
     <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
     <nav class="nav-links" id="nav" aria-label="Navigation principale">{links}<a class="cta" href="inscriptions.html"{CUR if slug == "inscriptions.html" else ""}>S’inscrire</a></nav>
   </div>
@@ -103,9 +103,8 @@ def hero(eyebrow, h1, lead):
 MARQ = '<div class="marquee{cls}" aria-hidden="true"><div class="marquee-track">' + "".join(
     f"<span>{w}</span>" for w in ["5 KM", "10 KM", "PLACE SAINT-PIERRE", "TOUS CAMPUS", "12 JUIN 2027", "UNE VILLE, DEUX DÉFIS"] * 4) + "</div></div>"
 
-def loops(n):
-    return f'<svg class="loops" viewBox="0 0 {R["w"]} {R["h"]}" aria-hidden="true">' + "".join(
-        f'<path d="{R["d"]}" transform="translate({i*60} {i*60})"/>' for i in range(n)) + "</svg>"
+def loops(R):
+    return f'<svg class="loops" viewBox="0 0 {R["w"]} {R["h"]}" aria-hidden="true"><path d="{R["d"]}"/></svg>'
 
 CTA = '''<section><div class="wrap"><div class="cta-band rv">
 <span class="ring" style="width:500px;height:500px;left:-150px;top:-200px"></span><span class="ring" style="width:380px;height:380px;right:-120px;bottom:-180px"></span>
@@ -114,18 +113,32 @@ CTA = '''<section><div class="wrap"><div class="cta-band rv">
 <div class="btns" style="justify-content:center"><a class="btn" href="inscriptions.html">Je prends mon dossard <span class="arr">→</span></a></div>
 </div></div></section>'''
 
-STEPS = [
-    ("0", "Esplanade de l’Université", "Départ à deux pas de la Place Saint-Pierre, au cœur du quartier étudiant. L’ambiance est garantie dès la ligne."),
-    ("0,2", "Campus de Toulouse 1", "On remonte le boulevard Duportal puis on traverse le campus par les rues de l’Université et des Puits Creusés."),
-    ("0,9", "Place Anatole France", "Puis la rue Valade, tout droit vers la Place Saint-Pierre et son village."),
-    ("1,3", "Place Saint-Pierre", "Premier passage devant le village, juste avant de rejoindre les quais de la Garonne."),
-    ("1,6", "Les quais", "Quai Lucien Lombard, place de la Daurade puis quais de la Daurade et de Tounis, face au fleuve."),
-    ("2,5", "Quai de Tounis", "Point d’eau sur le quai, demi-tour au bout puis retour sur le même axe vers le Pont Neuf."),
-    ("3,4", "Pont Neuf", "Traversée de la Garonne, avec la vue sur les quais."),
-    ("3,6", "Saint-Cyprien", "Rue de la République puis rue du Pont Saint-Pierre, côté rive gauche."),
-    ("4,4", "Pont Saint-Pierre", "Retour rive droite, dernière ligne droite vers l’esplanade. Pour le 10 km, c’est reparti pour un tour."),
+STEPS = [  # 5 km (accueil)
+    ("0", "Place Saint-Pierre", "Départ au cœur du quartier étudiant, au bord de la Garonne. L’ambiance est garantie dès la ligne."),
+    ("0,4", "Campus de Toulouse 1", "Le boulevard Armand Duportal puis les rues de l’Université et des Puits Creusés, à travers le campus."),
+    ("1,1", "Vers le Capitole", "Rue Antoine Deville et rue Romiguières jusqu’à la place du Capitole."),
+    ("1,7", "Rues du centre", "Rue Gambetta, rue Peyrolières et rue de la Daurade, dans le vieux Toulouse."),
+    ("2,1", "Les berges", "Descente au port de la Daurade, puis les promenades Henri-Martin et François Gauzy, au bord de l’eau."),
+    ("3,1", "Quai de Tounis", "Remontée sur le quai et point d’eau, direction le Pont Neuf."),
+    ("3,6", "Pont Neuf", "Traversée de la Garonne, avec la vue sur les quais."),
+    ("3,9", "Saint-Cyprien", "Rue de la République puis rue du Pont Saint-Pierre, côté rive gauche."),
+    ("4,7", "Pont Saint-Pierre", "Retour rive droite et arrivée place Saint-Pierre."),
 ]
-KM = R["km_total"]; KMs = f"{KM:.2f}".replace(".", ","); KM2s = f"{R.get('km_total2', 2*KM):.2f}".replace(".", ",")
+STEPS10 = [  # 10 km (page parcours) ; le 3e champ booléen = étape mise en avant
+    ("0", "Place Saint-Pierre", "Départ au bord de la Garonne. Les deux courses partent d’ici, à des heures différentes.", True),
+    ("0,4", "Campus de Toulouse 1", "Le boulevard Armand Duportal puis les rues de l’Université et des Puits Creusés.", False),
+    ("1,2", "Place du Capitole", "Rue Antoine Deville jusqu’au Capitole, puis les rues Gambetta, Peyrolières et de la Daurade.", False),
+    ("2,1", "Les berges", "Port de la Daurade, puis les promenades Henri-Martin et François Gauzy, au bord de l’eau.", False),
+    ("3,1", "Quai de Tounis", "Remontée sur le quai et point d’eau vers le km 3,3.", False),
+    ("3,7", "Place du Pont Neuf", "Le 5 km tourne sur le Pont Neuf vers Saint-Cyprien. Le 10 km continue tout droit.", True),
+    ("3,9", "Avenue de la Garonnette", "Plein sud le long du fleuve, jusqu’au pont du Halage de Tounis.", False),
+    ("4,8", "Île du Ramier", "Avenue du Grand Ramier et allées du Stadium, demi-tour vers le km 6, point d’eau vers le km 6,5.", False),
+    ("6,5", "Pont Pierre de Coubertin", "Puis l’allée Fernand Jourdant et la passerelle Robert Poujade.", False),
+    ("7,8", "Berges rive gauche", "Le long de la Garonne jusqu’au cours Dillon.", False),
+    ("9,0", "Saint-Cyprien", "Rue de la République et rue du Pont Saint-Pierre : le 10 km retrouve la fin du 5 km.", False),
+    ("9,9", "Pont Saint-Pierre", "Retour rive droite et arrivée place Saint-Pierre.", True),
+]
+KM = R5["km_total"]; KMs = f"{KM:.2f}".replace(".", ","); KM2 = R10["km_total"]; KM2s = f"{KM2:.2f}".replace(".", ",")
 
 # ---------------- ACCUEIL ----------------
 index = f'''
@@ -135,35 +148,54 @@ index = f'''
       <p class="eyebrow">Course étudiante · Toulouse</p>
       <h1><span class="l"><span>STUD’N</span></span><span class="l"><span><em>RUN</em></span></span></h1>
       <div class="hero-meta"><span class="chip"><b>12.06</b> 2027</span><span class="chip">Place Saint-Pierre</span><span class="chip"><b>5</b> ou <b>10</b> km</span></div>
-      <p class="lead">Tous les campus de Toulouse sur la même ligne de départ. Une boucle au cœur de la ville, deux ponts sur la Garonne, et une arrivée en fête.</p>
-      <div class="btns" style="margin-top:28px"><a class="btn" href="inscriptions.html">Je m’inscris <span class="arr">→</span></a><a class="btn ghost" href="parcours.html">Voir le parcours 3D</a></div>
       <div class="countdown" data-date="2027-06-12T17:30:00+02:00" aria-label="Compte à rebours avant le départ">
         <div><b>–</b><span>jours</span></div><div><b>–</b><span>heures</span></div><div><b>–</b><span>min</span></div><div><b>–</b><span>sec</span></div>
       </div>
     </div>
-    <div class="hero-route">{route_svg()}</div>
   </div>
   <span class="scroll-hint">Défiler</span>
+</section>
+<section class="engage">
+  <div class="wrap">
+    <div class="engage-box rv">
+      <div class="engage-txt engage-fg">
+        <p class="eyebrow">Notre engagement</p>
+        <div class="engage-num">100<small> %</small></div>
+        <h2>DU BÉNÉFICE REVERSÉ <em>À 3 ASSOCIATIONS</em></h2>
+        <p class="lead">Tout ce qui reste une fois les dépenses payées, ainsi que les dons du jour, est partagé à parts égales entre trois associations toulousaines qui luttent contre la précarité étudiante.</p>
+        <a class="btn ghost" href="infos-pratiques.html">En savoir plus <span class="arr">→</span></a>
+      </div>
+      <ul class="engage-list engage-fg">
+        <li><span class="n">1</span><div><b>Association n°1</b><small>Nom annoncé prochainement</small></div></li>
+        <li><span class="n">2</span><div><b>Association n°2</b><small>Nom annoncé prochainement</small></div></li>
+        <li><span class="n">3</span><div><b>Association n°3</b><small>Nom annoncé prochainement</small></div></li>
+      </ul>
+    </div>
+  </div>
 </section>
 <section>
   <div class="wrap">
     <div class="sec-head"><div><p class="eyebrow rv">Choisis ton défi</p><h2 class="rv d1">UNE VILLE. <em>DEUX DÉFIS.</em></h2></div>
-    <p class="lead rv d2">La même boucle de 5 km, à courir une fois ou deux. Débutant ou habitué, il y a une distance pour toi.</p></div>
+    <p class="lead rv d2">Deux parcours au départ de la Place Saint-Pierre : le 5 km file par le Capitole et le Pont Neuf, le 10 km pousse jusqu’à l’Île du Ramier. Débutant ou habitué, il y a une distance pour toi.</p></div>
     <div class="duo">
-      <article class="dist rv">{loops(1)}<span class="tag">Découverte</span><div class="big">5<small>KM</small></div>
-        <ul><li><span>Boucles</span><b>1</b></li><li><span>Distance</span><b>{KMs} km</b></li><li><span>Dénivelé</span><b>≈ 50 m D+</b></li></ul></article>
-      <article class="dist hot rv d1">{loops(2)}<span class="tag">Challenge</span><div class="big">10<small>KM</small></div>
-        <ul><li><span>Boucles</span><b>2</b></li><li><span>Distance</span><b>{KM2s} km</b></li><li><span>Dénivelé</span><b>≈ 100 m D+</b></li></ul></article>
+      <article class="dist rv">{loops(R5)}<span class="tag">Découverte</span><div class="big">5<small>KM</small></div>
+        <ul><li><span>Départ</span><b>17 h 30</b></li><li><span>Distance</span><b>{KMs} km</b></li><li><span>Dénivelé</span><b>≈ {round(R5["dplus"], -1):.0f} m D+</b></li></ul></article>
+      <article class="dist hot rv d1">{loops(R10)}<span class="tag">Challenge</span><div class="big">10<small>KM</small></div>
+        <ul><li><span>Départ</span><b>18 h 45</b></li><li><span>Distance</span><b>{KM2s} km</b></li><li><span>Dénivelé</span><b>≈ {round(R10["dplus"], -1):.0f} m D+</b></li></ul></article>
     </div>
   </div>
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">La boucle</p><h2 class="rv d1">5 KM DANS <em>LA VILLE ROSE.</em></h2></div>
-    <a class="btn ghost rv d2" href="parcours.html">Explorer en 3D <span class="arr">→</span></a></div>
-    <div class="story">
+    <div class="sec-head"><div><p class="eyebrow rv">Les parcours</p><h2 class="rv d1">DEUX PARCOURS DANS <em>LA VILLE ROSE.</em></h2></div>
+    <div class="story-head rv d2"><p class="lead">Les deux courses partent de la Place Saint-Pierre. Choisis ton parcours pour le suivre kilomètre par kilomètre.</p><span class="route-tabs story-tabs" role="group" aria-label="Choisir le parcours"><button class="btn story-tab on" type="button" data-story="r5" aria-pressed="true">5 km</button><button class="btn ghost story-tab" type="button" data-story="r10" aria-pressed="false">10 km</button></span><a class="btn ghost" href="parcours.html">Explorer en 3D <span class="arr">→</span></a></div></div>
+    <div class="story" data-story="r5">
       <div class="story-map">{route_svg(runner=True)}</div>
       <ol class="steps">{"".join(f'<li class="step"><span class="km">{k}<small style="font-size:.45em"> km</small></span><div><h3>{t}</h3><p>{d}</p></div></li>' for k, t, d in STEPS)}</ol>
+    </div>
+    <div class="story" data-story="r10" hidden>
+      <div class="story-map">{route_svg(runner=True, R=R10, label="Tracé du 10 km dans Toulouse")}</div>
+      <ol class="steps">{"".join(f'<li class="step"><span class="km">{k}<small style="font-size:.45em"> km</small></span><div><h3>{t}</h3><p>{d}</p></div></li>' for k, t, d, _ in STEPS10)}</ol>
     </div>
   </div>
 </section>
@@ -189,14 +221,21 @@ index = f'''
 '''
 
 # ---------------- PARCOURS ----------------
-lo, hi = R["lo"], R["hi"]
-parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Esplanade de l’Université, à côté de la Place Saint-Pierre. Une boucle de {KMs} km, une fois pour le 5 km, deux fois pour le 10 km.") + f'''
+lo, hi = min(R5["lo"], R10["lo"]), max(R5["hi"], R10["hi"])
+def profile_svg(R, title):
+    L = R["km_total"]
+    ticks = "".join(f'<text x="{min(max(i*1000/L, 14), 985):.0f}" y="225" text-anchor="middle">{i} km</text>' for i in range(0, int(L)+1, 1 if L < 6 else 2))
+    return (f'<div class="profile rv" style="margin-top:20px"><p class="eyebrow">{title}</p>'
+            f'<svg viewBox="0 0 1000 230" role="img" aria-label="{title}, de {R["lo"]} à {R["hi"]} mètres">'
+            '<defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3d97" stop-opacity=".55"/><stop offset="1" stop-color="#ff3d97" stop-opacity="0"/></linearGradient></defs>'
+            f'<path class="area" d="{R["prof"]} L1000 200 L0 200 Z"/><path class="ln" d="{R["prof"]}"/>{ticks}</svg></div>')
+parcours = hero("Le parcours", "LES <em>PARCOURS</em>", f"Départ et arrivée Place Saint-Pierre. Le 5 km ({KMs} km) passe par le campus de Toulouse 1, le Capitole, les berges et le Pont Neuf. Le 10 km ({KM2s} km) reprend le même début puis file jusqu’à l’Île du Ramier.") + f'''
 <section style="padding-top:0">
   <div class="wrap">
     <div class="map-shell rv">
-      <div id="map3d" aria-label="Carte 3D interactive du parcours"></div>
-      <div class="map-ui"><button class="btn" id="fly-btn" type="button">▶&nbsp; Survoler le parcours</button><button class="btn ghost" id="reset-btn" type="button" style="background:rgba(20,4,12,.75)">Vue d’ensemble</button><div class="map-progress"><i></i></div><span class="map-km">0,00 km</span></div>
-      <noscript><img src="assets/parcours-carte.jpg" alt="Carte du parcours"></noscript>
+      <div id="map3d" aria-label="Carte 3D interactive des parcours"></div>
+      <div class="map-ui"><span class="route-tabs" role="group" aria-label="Choisir le parcours"><button class="btn route-tab on" type="button" data-route="5km" aria-pressed="true">5 km</button><button class="btn ghost route-tab" type="button" data-route="10km" aria-pressed="false">10 km</button></span><button class="btn" id="fly-btn" type="button">▶&nbsp; Survoler le parcours</button><button class="btn ghost" id="reset-btn" type="button" style="background:rgba(20,4,12,.75)">Vue d’ensemble</button><div class="map-progress"><i></i></div><span class="map-km">0,00 km</span></div>
+      <noscript><img src="assets/parcours-carte.jpg" alt="Carte des parcours de 5 et 10 km"></noscript>
     </div>
     <p style="color:var(--muted);font-size:.85rem;margin-top:12px">Ctrl + molette pour zoomer, clic droit + glisser pour pivoter et incliner. Deux doigts sur mobile.</p>
   </div>
@@ -204,32 +243,27 @@ parcours = hero("Le parcours", "LA <em>BOUCLE</em>", f"Départ et arrivée Espla
 <section style="padding-top:0">
   <div class="wrap">
     <div class="stats" style="margin-bottom:30px">
-      <div class="stat rv"><b>{KMs}</b><span>km par boucle</span></div>
-      <div class="stat rv d1"><b>{KM2s}</b><span>km pour 2 boucles</span></div>
-      <div class="stat rv d2"><b>≈50</b><span>m D+ par boucle</span></div>
-      <div class="stat rv d3"><b>{round(lo)}–{round(hi)}</b><span>m d’altitude</span></div>
+      <div class="stat rv"><b>{KMs}</b><span>km pour le 5 km</span></div>
+      <div class="stat rv d1"><b>{KM2s}</b><span>km pour le 10 km</span></div>
+      <div class="stat rv d2"><b>≈{round(R10["dplus"], -1):.0f}</b><span>m D+ sur le 10 km (≈{round(R5["dplus"], -1):.0f} sur le 5 km)</span></div>
+      <div class="stat rv d3"><b>{lo}–{hi}</b><span>m d’altitude</span></div>
     </div>
-    <div class="profile rv">
-      <p class="eyebrow">Profil altimétrique · 1 boucle</p>
-      <svg viewBox="0 0 1000 230" role="img" aria-label="Profil altimétrique de la boucle, de {round(lo)} à {round(hi)} mètres">
-        <defs><linearGradient id="pg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff3d97" stop-opacity=".55"/><stop offset="1" stop-color="#ff3d97" stop-opacity="0"/></linearGradient></defs>
-        <path class="area" d="{R["prof"]} L1000 200 L0 200 Z"/><path class="ln" d="{R["prof"]}"/>
-        {"".join(f'<text x="{min(max(i*1000/KM,14),985):.0f}" y="225" text-anchor="middle">{i} km</text>' for i in range(6))}
-      </svg>
-    </div>
+    {profile_svg(R5, "Profil altimétrique · 5 km")}
+    {profile_svg(R10, "Profil altimétrique · 10 km")}
   </div>
 </section>
 <section style="padding-top:0">
   <div class="wrap">
-    <div class="sec-head"><div><p class="eyebrow rv">Points de passage</p><h2 class="rv d1">KILOMÈTRE <em>PAR KILOMÈTRE.</em></h2></div></div>
-    <ol class="timeline">{"".join(f'<li class="tl rv{" key" if i in (0, len(STEPS)-1) else ""}"><time>{k} km</time><div><h3>{t}</h3><p>{d}</p></div></li>' for i, (k, t, d) in enumerate(STEPS))}</ol>
-    <div class="btns rv" style="margin-top:50px"><a class="btn" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF) <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-parcours.gpx" download>Trace GPX pour ta montre <span class="arr">↓</span></a></div>
+    <div class="sec-head"><div><p class="eyebrow rv">Points de passage · 10 km</p><h2 class="rv d1">KILOMÈTRE <em>PAR KILOMÈTRE.</em></h2></div>
+    <p class="lead rv d2">Le 5 km suit le même chemin jusqu’à la place du Pont Neuf (km 3,7), traverse le pont et rejoint directement Saint-Cyprien.</p></div>
+    <ol class="timeline">{"".join(f'<li class="tl rv{" key" if key else ""}"><time>{k} km</time><div><h3>{t}</h3><p>{d}</p></div></li>' for k, t, d, key in STEPS10)}</ol>
+    <div class="btns rv" style="margin-top:50px"><a class="btn" href="assets/stud-n-run-plan-parcours.pdf" download>Télécharger le plan (PDF) <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-5km.gpx" download>GPX du 5 km <span class="arr">↓</span></a><a class="btn ghost" href="assets/stud-n-run-10km.gpx" download>GPX du 10 km <span class="arr">↓</span></a></div>
   </div>
 </section>
 <section style="padding-top:0"><div class="wrap">
   <div class="cta-band rv" style="text-align:left;background:linear-gradient(120deg,#33101f,#1f0814)">
     <p class="eyebrow">Maquette 3D</p><h2 style="font-size:clamp(2.2rem,4.6vw,3.8rem)">LE VILLAGE <em>JOUR DE COURSE</em></h2>
-    <p class="lead" style="margin-bottom:26px">La Place Saint-Pierre à l’échelle réelle : bâtiments, quais, gradins, pont et arche de départ et d’arrivée. Survole la place et explore l’implantation du village.</p>
+    <p class="lead" style="margin-bottom:26px">La Place Saint-Pierre à l’échelle réelle : l’arche en tête du pont Saint-Pierre, la scène en bas des gradins, les stands des écoles sous les platanes, les food trucks et les toilettes. Les terrasses des bars restent libres.</p>
     <div class="btns"><a class="btn" href="place/index.html">Explorer la place en 3D <span class="arr">→</span></a></div>
   </div>
 </div></section>
@@ -244,9 +278,9 @@ DAYS = [("Vendredi 11 juin", "La veille", [
           ("9 h – 12 h", "Retrait des dossards", "Toujours à TSE, avec ta pièce d’identité et ta carte étudiante.", False),
           ("13 h 00", "Ouverture du village", "Accueil, consigne et stands des BDE.", False),
           ("17 h 20", "Appel du 5 km", "Direction la ligne de départ. Pas d’échauffement collectif : échauffe-toi de ton côté.", False),
-          ("17 h 30", "Départ du 5 km", "Le 5 km fait une boucle.", True),
+          ("17 h 30", "Départ du 5 km", "Une boucle de 5 km par le Capitole, les berges et le Pont Neuf.", True),
           ("18 h 30", "Appel du 10 km", "Le 10 km se place sur la ligne de départ.", False),
-          ("18 h 45", "Départ du 10 km", "Le 10 km fait deux boucles.", True),
+          ("18 h 45", "Départ du 10 km", "Une grande boucle de 10 km jusqu’à l’Île du Ramier.", True),
           ("20 h 45", "Remise des prix", "Podiums par distance, prix du campus le plus représenté.", True),
           ("21 h 30", "After run", "La fête continue au village.", False)])]
 horaires = hero("Vendredi 11 et samedi 12 juin 2027", "LES <em>HORAIRES</em>", "Le programme, de la veille à l’after run.") + f'''
@@ -258,11 +292,11 @@ horaires = hero("Vendredi 11 et samedi 12 juin 2027", "LES <em>HORAIRES</em>", "
 
 # ---------------- INFOS ----------------
 FAQ = [("À qui s’adresse la course ?", "Aux étudiants des écoles et universités de Toulouse, débutants comme coureurs réguliers. Dans cet exemple, la course est ouverte aux étudiants majeurs, quel que soit leur niveau."),
-       ("5 ou 10 km, je choisis comment ?", "Le 5 km est une boucle, idéale pour une première course. Le 10 km, ce sont deux boucles pour ceux qui veulent un vrai chrono. Tu choisis à l’inscription."),
+       ("5 ou 10 km, je choisis comment ?", "Le 5 km est une boucle par le centre et les berges, idéale pour une première course. Le 10 km est une grande boucle qui pousse jusqu’à l’Île du Ramier, pour ceux qui veulent un vrai chrono. Tu choisis à l’inscription."),
        ("Quels documents faut-il fournir ?", "Les justificatifs demandés (carte étudiante, document médical) seront précisés à l’ouverture des inscriptions, selon la réglementation en vigueur."),
-       ("Y a-t-il du ravitaillement ?", "Un point d’eau vers le km 2,5, sur le quai de Tounis, où les coureurs du 10 km passent deux fois. Un ravitaillement complet attend tout le monde à l’arrivée."),
+       ("Y a-t-il du ravitaillement ?", "Un point d’eau sur le quai de Tounis vers le km 3,3, pour les deux courses, et un second pour le 10 km sur l’Île du Ramier, vers le km 6,5. Un ravitaillement complet attend tout le monde à l’arrivée."),
        ("Je peux venir encourager ?", "Oui ! La Place Saint-Pierre et les deux ponts sont les meilleurs spots. Reste derrière les barrières pour laisser le passage aux coureurs."),
-       ("Où va l’argent des inscriptions ?", "Une partie des inscriptions et tous les dons du jour sont reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante : Le Casse-dalle, Le Petit Sab’lé et Le Rayon 31."),
+       ("Où va l’argent des inscriptions ?", "Les inscriptions servent à financer la course. Tout le bénéfice, c’est-à-dire ce qui reste une fois les dépenses payées, ainsi que les dons du jour, est reversé à parts égales à trois associations toulousaines qui luttent contre la précarité étudiante."),
        ("Mon école ou mon BDE peut participer ?", "Oui, 189 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
        ("Une question qui n’est pas ici ?", f"Écris-nous à <a href=\"mailto:{CONTACT}\">{CONTACT}</a>, on te répond vite."),
        ("Comment devenir bénévole ?", "Accueil, dossards, signaleurs sur le parcours : découvre les rôles sur la page Association.")]
@@ -272,7 +306,7 @@ infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et 
   <div class="card rv">{ico("pin")}<h3>Accès</h3><p>Place Saint-Pierre, Toulouse. Viens à pied, à vélo ou en transports, il n’y a pas de parking sur place.</p></div>
   <div class="card rv d1">{ico("bib")}<h3>Dossards</h3><p>Retrait à TSE, la veille de 17 h à 22 h ou le matin de la course de 9 h à 12 h.</p></div>
   <div class="card rv d2">{ico("bag")}<h3>Consigne</h3><p>Consigne gratuite au village. Garde tes objets de valeur avec toi.</p></div>
-  <div class="card rv">{ico("drop")}<h3>Ravitaillement</h3><p>Point d’eau au km 2,5, ravitaillement complet à l’arrivée. Gobelets recyclables.</p></div>
+  <div class="card rv">{ico("drop")}<h3>Ravitaillement</h3><p>Point d’eau au km 3,3 (et au km 6,5 pour le 10 km), ravitaillement complet à l’arrivée. Gobelets recyclables.</p></div>
   <div class="card rv d1">{ico("heart")}<h3>Secours</h3><p>Un poste de secours au village, une équipe mobile sur le parcours et des signaleurs à chaque carrefour.</p></div>
   <div class="card rv d2">{ico("star")}<h3>Après la course</h3><p>Podiums, stands des BDE et musique sur la place pour fêter ça.</p></div>
 </div>
@@ -303,7 +337,7 @@ inscriptions = hero("Inscriptions · du 1er février au 5 juin 2027", "PRENDS TO
     <ul><li>1 boucle de {KMs} km</li><li>Chronométrage</li><li>Ravitaillement à l’arrivée</li><li>Accès au village</li></ul>
     <a class="btn ghost" aria-disabled="true" role="link">Bientôt disponible</a></div>
   <div class="card price feat rv d1"><span class="badge">Challenge</span><h3 style="font-size:3rem">10 KM</h3><div class="amt">10€<small> / dossard</small></div>
-    <ul><li>2 boucles, {KM2s} km</li><li>Chronométrage avec temps de passage</li><li>Point d’eau au km 2,5 et 7,5</li><li>Accès au village</li></ul>
+    <ul><li>1 grande boucle de {KM2s} km</li><li>Chronométrage avec temps de passage</li><li>Points d’eau aux km 3,3 et 6,5</li><li>Accès au village</li></ul>
     <a class="btn" aria-disabled="true" role="link">Bientôt disponible</a></div>
 </div>
 <div class="stats" style="margin-top:36px">
@@ -338,7 +372,7 @@ partenaires = hero("Partenaires", "S’ASSOCIER <em>À LA COURSE</em>", "Un publ
 <div class="sec-head"><div><p class="eyebrow rv">Pourquoi s’associer</p><h2 class="rv d1">UN PUBLIC, <em>UNE CAUSE.</em></h2></div></div>
 <div class="grid-3">
   <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 189 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
-  <div class="card rv d1">{ico("heart")}<h3>Une cause qui donne du sens</h3><p>Une partie des inscriptions et tous les dons du jour sont reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante.</p></div>
+  <div class="card rv d1">{ico("heart")}<h3>Une cause qui donne du sens</h3><p>Tous les bénéfices de la course sont reversés, à parts égales, à trois associations toulousaines qui luttent contre la précarité étudiante.</p></div>
   <div class="card rv d2">{ico("star")}<h3>Un événement fait pour être vu</h3><p>Départ et arrivée au bord de la Garonne, arche, dossards, écran géant : votre soutien est visible du premier au dernier coureur.</p></div>
 </div>
 </div></section>
@@ -354,10 +388,12 @@ partenaires = hero("Partenaires", "S’ASSOCIER <em>À LA COURSE</em>", "Un publ
 # ---------------- ACTUALITÉS ----------------
 # Ajouter une actualité = une ligne ici (la plus récente en premier).
 ARTICLES = [
+    ("20 novembre 2026", "Deux nouveaux parcours",
+     "Le 5 km et le 10 km ont maintenant chacun leur tracé, au départ de la Place Saint-Pierre. Le 5 km (4,98 km) passe par le campus de Toulouse 1, le Capitole, les berges de la Garonne et le Pont Neuf. Le 10 km (10,11 km) reprend le même début puis file jusqu’à l’Île du Ramier. Les tracés restent à valider avec la Ville."),
     ("17 novembre 2026", "La date est fixée : samedi 12 juin 2027",
-     "La première édition de Stud’N Run aura lieu le <b>samedi 12 juin 2027</b>, au départ de l’Esplanade de l’Université, à côté de la Place Saint-Pierre. Les inscriptions ouvriront le 1er février 2027."),
-    ("17 novembre 2026", "Trois associations, une par université",
-     "Une partie des inscriptions et tous les dons du jour seront reversés, à parts égales, à trois associations qui luttent contre la précarité étudiante : Le Casse-dalle (Jean-Jaurès), Le Petit Sab’lé (Paul-Sabatier) et Le Rayon 31 (Capitole)."),
+     "La première édition de Stud’N Run aura lieu le <b>samedi 12 juin 2027</b>, au départ de la Place Saint-Pierre. Les inscriptions ouvriront le 1er février 2027."),
+    ("17 novembre 2026", "Trois associations toulousaines",
+     "Tous les bénéfices de la course et les dons du jour seront reversés, à parts égales, à trois associations toulousaines qui luttent contre la précarité étudiante. Leurs noms seront annoncés prochainement."),
     ("16 novembre 2026", "Un premier parcours de 4,96 km",
      "Le tracé provisoire est une boucle de 4,96 km autour du campus de Toulouse 1, avec les quais de la Garonne, le Pont Neuf, Saint-Cyprien et le Pont Saint-Pierre. Le 5 km fait une boucle, le 10 km en fait deux. Il reste à valider avec la Ville."),
     ("17 novembre 2026", "189 écoles invitées au challenge",
@@ -411,7 +447,7 @@ legal_hero = lambda t, h: hero("Informations légales", h, "")
 mentions = hero("Informations légales", "MENTIONS <em>LÉGALES</em>", "") + f'''
 <section style="padding-top:0"><div class="wrap"><div class="prose">
 <h2>Éditeur du site</h2>
-<p>Stud’N Run, association loi 1901 déclarée à Toulouse (SIRET : en cours d’obtention). Siège : Toulouse.</p>
+<p>Stud’N Run, association loi 1901 déclarée à la sous-préfecture de Muret (Haute-Garonne) le 15 novembre 2026, n° RNA W313043091. SIRET : 133 128 884 00011. Siège : Toulouse.</p>
 <p>Codirecteurs de la publication : Noah Salvatge et Yanis Jaber. Contact : <a href="mailto:{CONTACT}">{CONTACT}</a>.</p>
 <h2>Hébergement</h2>
 <p>Site hébergé par GitHub Pages (GitHub, Inc., 88 Colin P. Kelly Jr. Street, San Francisco, CA 94107, États-Unis).</p>
@@ -782,7 +818,7 @@ document.addEventListener("DOMContentLoaded", function () {
 '''
 
 MAP_HEAD = '<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css">\n'
-MAP_JS = '<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>\n<script src="parcours-3d.js" defer></script>\n'
+MAP_JS = '<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js" defer></script>\n<script src="parcours-3d.js?v=2" defer></script>\n'
 D = "Stud’N Run, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre."
 PAGES = {
     "index.html": ("Stud’N Run · Course étudiante Toulouse", index, "", ""),

@@ -64,19 +64,32 @@
     })(performance.now());
   }
 
-  /* scroll-driven route story */
-  var story = document.querySelector('.story');
-  if (story) {
-    var sp = story.querySelector('.route-path'), sr = story.querySelector('.runner'), steps = story.querySelectorAll('.step');
-    var SL = sp.getTotalLength();
+  /* scroll-driven route story (un bloc par parcours, onglets 5 km / 10 km) */
+  var stories = Array.prototype.slice.call(document.querySelectorAll('.story')).map(function (story) {
+    var sp = story.querySelector('.route-path'), sr = story.querySelector('.runner'), steps = story.querySelectorAll('.step'), SL = 0;
     function upd() {
+      if (story.hidden) return;
+      if (!SL) { SL = sp.getTotalLength(); story.querySelectorAll('.route-path').forEach(function (p) { p.style.setProperty('--len', Math.ceil(p.getTotalLength())); }); }
       var r = story.getBoundingClientRect(), h = innerHeight;
       var p = Math.min(1, Math.max(0, (h * .55 - r.top) / (r.height - h * .3)));
       sp.style.setProperty('--p', p);
-      var pt = sp.getPointAtLength(p * SL); sr.setAttribute('cx', pt.x); sr.setAttribute('cy', pt.y);
+      var pt = sp.getPointAtLength(p * SL); sr.setAttribute('cx', pt.x); sr.setAttribute('cy', pt.y); sr.style.opacity = 1;
       steps.forEach(function (s) { var b = s.getBoundingClientRect(); s.classList.toggle('on', b.top < h * .7 && b.bottom > h * .2); });
     }
-    addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); upd();
+    return { el: story, upd: upd };
+  });
+  if (stories.length) {
+    var updAll = function () { stories.forEach(function (s) { s.upd(); }); };
+    addEventListener('scroll', updAll, { passive: true }); addEventListener('resize', updAll); updAll();
+    var stabs = document.querySelectorAll('.story-tab');
+    Array.prototype.forEach.call(stabs, function (t) {
+      t.addEventListener('click', function () {
+        var k = t.getAttribute('data-story');
+        Array.prototype.forEach.call(stabs, function (o) { var on = o === t; o.classList.toggle('on', on); o.classList.toggle('ghost', !on); o.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+        stories.forEach(function (s) { s.el.hidden = s.el.getAttribute('data-story') !== k; s.el.querySelectorAll('.rv').forEach(function (x) { x.classList.add('in'); }); });
+        updAll();
+      });
+    });
   }
 
   /* countdown */

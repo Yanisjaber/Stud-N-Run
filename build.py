@@ -202,7 +202,7 @@ index = f'''
 <section style="padding-top:0">
   <div class="wrap stats">
     <div class="stat rv"><b data-count="5000">0</b><span>coureurs, 5 ou 10 km</span></div>
-    <div class="stat rv d1"><b data-count="189">0</b><span>écoles et universités invitées</span></div>
+    <div class="stat rv d1"><b data-count="187">0</b><span>écoles et universités invitées</span></div>
     <div class="stat rv d2"><b data-count="200">0</b><span>bénévoles le jour J</span></div>
     <div class="stat rv d3"><b data-count="3">0</b><span>associations soutenues</span></div>
   </div>
@@ -297,7 +297,7 @@ FAQ = [("À qui s’adresse la course ?", "Aux étudiants des écoles et univers
        ("Y a-t-il du ravitaillement ?", "Un point d’eau sur le quai de Tounis vers le km 3,3, pour les deux courses, et un second pour le 10 km sur l’Île du Ramier, vers le km 6,5. Un ravitaillement complet attend tout le monde à l’arrivée."),
        ("Je peux venir encourager ?", "Oui ! La Place Saint-Pierre et les deux ponts sont les meilleurs spots. Reste derrière les barrières pour laisser le passage aux coureurs."),
        ("Où va l’argent des inscriptions ?", "Les inscriptions servent à financer la course. Tout le bénéfice, c’est-à-dire ce qui reste une fois les dépenses payées, ainsi que les dons du jour, est reversé à parts égales à trois associations toulousaines qui luttent contre la précarité étudiante."),
-       ("Mon école ou mon BDE peut participer ?", "Oui, 189 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
+       ("Mon école ou mon BDE peut participer ?", "Oui, 187 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
        ("Une question qui n’est pas ici ?", f"Écris-nous à <a href=\"mailto:{CONTACT}\">{CONTACT}</a>, on te répond vite."),
        ("Comment devenir bénévole ?", "Accueil, dossards, signaleurs sur le parcours : découvre les rôles sur la page Association.")]
 infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et réponses aux questions fréquentes.") + f'''
@@ -371,7 +371,7 @@ partenaires = hero("Partenaires", "S’ASSOCIER <em>À LA COURSE</em>", "Un publ
 <section style="padding-top:0"><div class="wrap">
 <div class="sec-head"><div><p class="eyebrow rv">Pourquoi s’associer</p><h2 class="rv d1">UN PUBLIC, <em>UNE CAUSE.</em></h2></div></div>
 <div class="grid-3">
-  <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 189 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
+  <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 187 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
   <div class="card rv d1">{ico("heart")}<h3>Une cause qui donne du sens</h3><p>Tous les bénéfices de la course sont reversés, à parts égales, à trois associations toulousaines qui luttent contre la précarité étudiante.</p></div>
   <div class="card rv d2">{ico("star")}<h3>Un événement fait pour être vu</h3><p>Départ et arrivée au bord de la Garonne, arche, dossards, écran géant : votre soutien est visible du premier au dernier coureur.</p></div>
 </div>
@@ -729,12 +729,16 @@ document.addEventListener("DOMContentLoaded", function () {
     function sN(e, k) { return e.x2 && e.x2.length ? e.n + " · site " + (k + 1) + "/" + (e.x2.length + 1) : e.n; }
     var bt = document.createElement("button"); bt.type = "button"; bt.className = "sch-edit-bt"; bt.textContent = "✎ Déplacer les points";
     document.querySelector(".sch-bar").appendChild(bt);
-    var pn = document.createElement("div"); pn.className = "sch-edit-panel"; pn.hidden = true; wrapMap.style.position = "relative"; wrapMap.appendChild(pn);
+    /* Statut « Localisation » du Sheet : vert = validé, rouge = à placer (mode édition seulement) */
+    var stat = {};
+    fetch("/api/statuts").then(function (r) { return r.json(); }).then(function (s) { stat = s || {}; if (map && map.getSource("ece")) refresh(); if (edit && !sel) idle(); }).catch(function () {});
+    function nTodo() { return data.filter(function (e) { return stat[e.id] !== "validé"; }).length; }
+    var pn =document.createElement("div"); pn.className = "sch-edit-panel"; pn.hidden = true; wrapMap.style.position = "relative"; wrapMap.appendChild(pn);
     function eGeo() {
       var f = [];
       data.forEach(function (e) {
         [e.xy].concat((e.x2 || []).map(function (s) { return s.xy; })).forEach(function (xy, k) {
-          if (xy && !(sel && e.id === sel.id && k === selK)) f.push({ type: "Feature", properties: { id: e.id, n: sN(e, k), k: k }, geometry: { type: "Point", coordinates: [xy[1], xy[0]] } });
+          if (xy && !(sel && e.id === sel.id && k === selK)) f.push({ type: "Feature", properties: { id: e.id, n: sN(e, k), k: k, v: stat[e.id] === "validé" ? 1 : 0 }, geometry: { type: "Point", coordinates: [xy[1], xy[0]] } });
         });
       });
       return { type: "FeatureCollection", features: f };
@@ -742,7 +746,7 @@ document.addEventListener("DOMContentLoaded", function () {
     function layers() {
       if (map.getSource("ece")) return;
       map.addSource("ece", { type: "geojson", data: eGeo() });
-      map.addLayer({ id: "pt-e", type: "circle", source: "ece", layout: { visibility: "none" }, paint: { "circle-color": "#ff3d97", "circle-radius": 7, "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
+      map.addLayer({ id: "pt-e", type: "circle", source: "ece", layout: { visibility: "none" }, paint: { "circle-color": ["case", ["==", ["get", "v"], 1], "#1fa055", "#e0262f"], "circle-radius": ["case", ["==", ["get", "v"], 1], 6, 8], "circle-stroke-width": 2, "circle-stroke-color": "#fff" } });
       map.addLayer({ id: "pt-e-n", type: "symbol", source: "ece", minzoom: 14, layout: { visibility: "none", "text-field": ["get", "n"], "text-size": 11, "text-offset": [0, 1.2], "text-anchor": "top", "text-font": ["Noto Sans Regular"], "text-max-width": 12 }, paint: { "text-color": "#14040c", "text-halo-color": "#fff", "text-halo-width": 1.5 } });
       map.on("click", "pt-e", function (ev) { var p = ev.features[0].properties; pick(byId[p.id], +p.k || 0); });
       map.on("mouseenter", "pt-e", function () { map.getCanvas().style.cursor = "pointer"; });
@@ -750,7 +754,8 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     function refresh() { if (map.getSource("ece")) map.getSource("ece").setData(eGeo()); updateMap(); }
     function msg(h) { pn.innerHTML = h; pn.hidden = false; }
-    function idle() { msg("<b>Mode édition</b><p>Clique sur une école pour la sélectionner, puis glisse son point à la bonne place.</p>"); }
+    function idle() { msg("<b>Mode édition</b><p>Clique sur une école pour la sélectionner, puis glisse son point à la bonne place.</p>" +
+      '<p class="m"><span style="color:#e0262f">●</span> à placer' + (Object.keys(stat).length ? " (" + nTodo() + ")" : "") + ' · <span style="color:#1fa055">●</span> validée</p>'); }
     function toggle(on) {
       edit = on; bt.classList.toggle("on", on); bt.textContent = on ? "✓ Terminer l’édition" : "✎ Déplacer les points";
       if (on) setView("carte");
@@ -803,7 +808,7 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(function (r) { return r.json(); }).then(function (res) {
           if (!res.ok) { b.disabled = false; b.textContent = "Valider"; alertMsg(res.error || "Erreur"); return; }
           if (k) { e.x2[k - 1] = { xy: [body.lat, body.lon], a: body.adresse || null }; }
-          else { e.xy = [body.lat, body.lon]; e.a = body.adresse || null; e.c = body.commune || e.c; e.ap = 0; }
+          else { e.xy = [body.lat, body.lon]; e.a = body.adresse || null; e.c = body.commune || e.c; e.ap = 0; stat[e.id] = "validé"; }
           if (mk) mk.remove(); mk = null; sel = null; selK = 0; refresh();
           msg("<b>✓ Enregistré</b><p>" + esc(sN(e, k)) + "</p><p class=\\"m\\">" + esc(body.adresse || "") + " — Sheet et site mis à jour.</p>");
           setTimeout(function () { if (edit && !sel) idle(); }, 3500);

@@ -60,6 +60,7 @@ html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;font:15px/1
   <button class="b" data-v="finish">Arrivée</button>
   <button class="b" data-v="village">Village</button>
   <button class="b" data-v="scene">Scène</button>
+  <button class="b" data-v="plan">Plan A–K</button>
   <button class="b" data-v="sky">Du ciel</button>
   <button class="b" id="leafBtn">Feuillage</button>
   <button class="b" id="sigBtn">Signaleurs</button>
@@ -68,7 +69,7 @@ html,body{margin:0;height:100%;background:var(--ink);overflow:hidden;font:15px/1
 </div>
 <div class="legend" id="legend"></div>
 <div class="routepanel" id="routepanel" hidden></div>
-<div class="note">Modèle à l’échelle réelle : bâtiments et hauteurs IGN BD TOPO, arbres et mobilier © contributeurs OpenStreetMap, photo aérienne IGN, tracé GPX. Implantation à valider avec la mairie et la préfecture.</div>
+<div class="note">Modèle à l’échelle réelle : bâtiments et hauteurs IGN BD TOPO, arbres et mobilier © contributeurs OpenStreetMap, photo aérienne IGN, tracé GPX. Implantation d’après le plan de travail du 21/11/2026 (positions ± 2 m), à valider avec la mairie et la préfecture.</div>
 <div class="hint">Glisser pour tourner · molette pour zoomer · clic droit pour déplacer</div>
 <div id="load"><div>Chargement de la place…<small>photo aérienne, bâtiments, arbres</small></div></div>
 
@@ -88,6 +89,7 @@ const [LAT0, LON0] = S.origin, KX = S.kx, KZ = S.kz;
 const GROUND = 141.5;               // altitude de la place (BD TOPO)
 const WATER_Y = S.water;            // niveau de la Garonne (MNT IGN)
 const RT = await (await fetch('data/route_plan.json')).json();   // parcours officiel annoté
+const PL = await (await fetch('data/plan_2026-11-21.json')).json();   // plan d’implantation du 21/11/2026, recalé sur la photo aérienne
 
 /* ============ renderer / scène ============ */
 const canvas = document.getElementById('c');
@@ -142,7 +144,7 @@ function prism(ring, y0, y1, mats) {
 }
 
 /* ============ repère de course (U = sens de course, V = à droite) ============ */
-const O = new THREE.Vector2(-9.72, 11.51);   // ligne de départ / arrivée : Place Saint-Pierre, en tête du pont Saint-Pierre (parcours du 20/11/2026)
+const O = new THREE.Vector2(-9.6, 14.6);   // ligne d’arrivée A du plan du 21/11/2026 : au pied du pont Saint-Pierre, côté place
 const U = new THREE.Vector2(.49, -.87).normalize(), V = new THREE.Vector2(-U.y, U.x);
 const FW = (x, z) => [O.x + U.x * x + V.x * z, O.y + U.y * x + V.y * z];
 const HEAD = Math.atan2(-U.y, U.x);
@@ -150,7 +152,7 @@ function frame(x, z, y = 0) { const g = new THREE.Group(), [wx, wz] = FW(x, z); 
 const toF = (wx, wz) => [(wx - O.x) * U.x + (wz - O.y) * U.y, (wx - O.x) * V.x + (wz - O.y) * V.y];
 
 /* ============ sol : photo aérienne IGN ============ */
-const Z19 = 19, TX0 = 264229, TX1 = 264237, TY0 = 191439, TY1 = 191445, NT = 2 ** Z19;
+const Z19 = 19, TX0 = 264229, TX1 = 264237, TY0 = 191435, TY1 = 191445, NT = 2 ** Z19;
 const tileLL = (x, y) => { const lon = x / NT * 360 - 180, lat = Math.atan(Math.sinh(Math.PI * (1 - 2 * y / NT))) * 180 / Math.PI; return [(lon - LON0) * KX, -(lat - LAT0) * KZ]; };
 const TL = tileLL(TX0, TY0), BR = tileLL(TX1 + 1, TY1 + 1);
 const orthoTex = await (async () => {
@@ -169,8 +171,12 @@ const landPoly = (() => {
   const b = [[5.63, 50.84], [211.72, 211.12]]; const xEnd = b[0][0] + (z1 - b[0][1]) * (b[1][0] - b[0][0]) / (b[1][1] - b[0][1]);
   return [[x0, zStart], ...bank, [-61.61, 8.15], [-56.74, 2.32], [-33.31, -1.95], [-31.68, -.99], [-30.24, .13], [-29.69, .48], [-21.2, 5.68], [-17.53, 8.31], [-16.46, 10.45], [-16.36, 11.75], [-26.62, 31.12], [-15.14, 37.91], [-5.57, 19.17], [-4.95, 18.55], [-4.12, 18.34], [-3.42, 18.53], [-2.8, 18.93], [-2.43, 18.39], [2.46, 21.71], [7.37, 25.47], [7.89, 28.35], [10.52, 42.31], [5.63, 50.84], [xEnd, z1], [x1, z1], [x1, z0], [x0, z0]];
 })();
+// canal de Brienne (OSM) + bassin de l’écluse Saint-Pierre jusqu’à la Garonne (orthophoto IGN, annotation du 21/11/2026)
+const CANAL = [[-325,-264.77],[-148.72,-177.08],[-141.84,-172.17],[-132.7,-162.54],[-124.72,-152.89],[-120.66,-146.46],[-117.78,-139.34],[-115.96,-132.79],[-114.66,-126.89],[-114.28,-122.45],[-114.36,-117.09],[-114.92,-112.58],[-115.54,-108.63],[-112.63,-101.09],[-113.86,-97.33],[-113.5,-95],[-116,-93],[-119,-90],[-124.3,-80],[-126.4,-70],[-128,-64],[-128,-60],[-129,-57],[-130,-54],[-136.17,-39.02],[-131.67,-35.99],[-125,-51],[-123,-54],[-121,-57],[-117,-64],[-115,-70],[-112.9,-80],[-110,-90],[-108.5,-95],[-106.57,-98.93],[-100.33,-102.37],[-98.96,-110.4],[-98.08,-117.41],[-98.06,-126.21],[-98.6,-131.66],[-99.38,-137.25],[-101.66,-145.3],[-104.49,-153.28],[-106.41,-157.78],[-107.58,-160.19],[-109.04,-162.59],[-111.57,-166.75],[-116.33,-172.33],[-122.06,-179.64],[-129.84,-186.51],[-149.09,-198.43],[-325,-285.81]];
+const onLand = (x, z) => pip(x, z, landPoly) && !pip(x, z, CANAL);
 {
   const sh = new THREE.Shape(landPoly.map(([x, z]) => new THREE.Vector2(x, -z)));
+  sh.holes.push(new THREE.Path(CANAL.map(([x, z]) => new THREE.Vector2(x, -z))));
   const g = new THREE.ShapeGeometry(sh); g.rotateX(-Math.PI / 2);
   const p = g.attributes.position, uv = new Float32Array(p.count * 2);
   for (let i = 0; i < p.count; i++) { uv[2 * i] = (p.getX(i) - TL[0]) / (BR[0] - TL[0]); uv[2 * i + 1] = 1 - (p.getZ(i) - TL[1]) / (BR[1] - TL[1]); }
@@ -197,6 +203,7 @@ function wallAlong(pts, y0 = WATER_Y - .3, y1 = 0) {
 { // mur de quai ouest et est
   wallAlong([[landPoly[0][0], landPoly[0][1]], ...bank]);
   wallAlong([[5.63, 50.84], landPoly[landPoly.length - 4]]);
+  const m = CANAL.findIndex(p => p[0] === -136.17); wallAlong(CANAL.slice(0, m + 1)); wallAlong(CANAL.slice(m + 1));   // quais du canal et du bassin
 }
 function clipHalf(poly, n, T) { // garde dot(p,n) <= T
   const out = []; for (let i = 0; i < poly.length; i++) { const a = poly[i], b = poly[(i + 1) % poly.length]; const da = a[0] * n[0] + a[1] * n[1] - T, db = b[0] * n[0] + b[1] * n[1] - T;
@@ -236,6 +243,13 @@ const G1 = gradins(bleach1, S.grad['1456519207']), G2 = gradins(bleach2, S.grad[
   const cop = box(L + .4, .3, 1.7, stone, (E[0] + F[0]) / 2, -1.05, (E[1] + F[1]) / 2); cop.rotation.y = cul.rotation.y; scene.add(cop);
 }
 const gradinY = (G, x, z) => { const t = x * G.n[0] + z * G.n[1] - G.t0; const g = G.groups.find(g => t <= g.limit) || G.groups[G.groups.length - 1]; return g.top; };
+const LOW1 = G1.groups[G1.groups.length - 1].top, LOW2 = G2.groups[G2.groups.length - 1].top;
+{ // quais bas au-delà des gradins (barrages J du plan du 21/11/2026) : promenade Henri-Martin au nord-ouest, quai bas vers la Daurade au sud-est
+  const mat = M(0x8d8478, { roughness: .95 });
+  const strip = (pts, n, w, y) => { for (let i = 0; i < pts.length - 1; i++) { const a = pts[i], b = pts[i + 1]; scene.add(prism([a, b, [b[0] + n[0] * w, b[1] + n[1] * w], [a[0] + n[0] * w, a[1] + n[1] * w]], WATER_Y - .3, y - .02, mat)); } };
+  strip([[-128.61, -33.23], [-117.93, -26.02], [-63.25, 10.1]], [-.551, .834], 6, LOW1);
+  strip([[5.63, 50.84], [53, 87.4]], [-.61, .79], 12, LOW2);
+}
 
 /* ============ Pont Saint-Pierre : cotes OSM (13,1 m, 4 piles) + photos ============ */
 const BR_A0 = new THREE.Vector2(-20.885, 34.515), BR_A1 = new THREE.Vector2(-130.52, 242.42);
@@ -330,7 +344,7 @@ for (const b of S.bld) {
 
 /* ============ arbres & bancs réels (OpenStreetMap) ============ */
 let canopy = null;
-const trees = S.trees.filter(p => pip(p[0], p[1], landPoly));
+const trees = S.trees.filter(p => onLand(p[0], p[1]));
 {
   const n = trees.length, bark = M(0xb7a58c, { roughness: 1 });
   const trunk = new THREE.InstancedMesh(new THREE.CylinderGeometry(.3, .46, 1, 7), bark, n);
@@ -342,7 +356,7 @@ const trees = S.trees.filter(p => pip(p[0], p[1], landPoly));
     for (let k = 0; k < 4; k++) { const rr = r * R(.55, .8); d.position.set(x + R(-r, r) * .55, h + R(-.5, r * .6), z + R(-r, r) * .55); d.scale.set(rr, rr * .78, rr); d.updateMatrix(); can.setMatrixAt(i * 4 + k, d.matrix); can.setColorAt(i * 4 + k, c.set(pick(greens))); }
   });
   trunk.castShadow = can.castShadow = true; can.receiveShadow = true; scene.add(trunk, can); canopy = can;
-  const bn = S.benches.filter(p => pip(p[0], p[1], landPoly)), bi = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, .9, .5), M(0x3b4a42, { roughness: .6 }), bn.length);
+  const bn = S.benches.filter(p => onLand(p[0], p[1])), bi = new THREE.InstancedMesh(new THREE.BoxGeometry(1.8, .9, .5), M(0x3b4a42, { roughness: .6 }), bn.length);
   bn.forEach(([x, z], i) => { d.position.set(x, .45, z); d.rotation.set(0, R(0, Math.PI), 0); d.scale.set(1, 1, 1); d.updateMatrix(); bi.setMatrixAt(i, d.matrix); }); bi.castShadow = true; scene.add(bi);
 }
 
@@ -395,9 +409,18 @@ for (let k = 1; k <= 24; k++) { const t = k / 24, u = 1 - t; bez.push([u * u * A
 const gpxRest = RT.pts.filter((p, i) => i > bi && RT.cum[i] <= 125).map(p => [p[0], p[1]]);
 const startStraightLen = mkPath(straight).len;
 const startPath = mkPath(chaikin([...straight, ...bez, ...gpxRest], 1));
-// couloir d’arrivée : les coureurs descendent le pont Saint-Pierre dans le couloir de droite, passent l’arche puis entrent sur la place (zone de récupération)
-const finPath = mkPath(lanePts(1.6, -95, 26, 5));
-raceGroup.add(ribbon(startPath, 1.45, .05, carpetMat, 4), ribbon(finPath, 1.45, .05, carpetMat, 4));
+// couloir d’arrivée : les coureurs descendent le pont Saint-Pierre dans le couloir de droite et franchissent la ligne A au pied du pont
+const finRun = mkPath(lanePts(1.6, -95, 2, 5));
+// parcours des finishers (plan du 21/11/2026) : récupération B sous les arbres, quai Saint-Pierre barriéré à sens unique,
+// rue de la Boule (ravito E), consignes F, puis l’esplanade de l’Université et le village
+const WALK = [[-4.6, 9.5], [-2.6, 4], [-2.8, -1.5], [-5.5, -4.5], [-10, -3.5], [-14, -1.5], [-20, -1.2], [-27, -2.2], [-34, -4], [-41, -5.8], [-48, -5.2], [-56, -3.6], [-63, -3.2], [-70, -5.4], [-78, -10], [-84.5, -15], [-88, -19.5], [-86.5, -24], [-80.5, -32.5], [-77.6, -39.5], [-76.4, -50], [-75.4, -62], [-74.3, -73], [-73.4, -82], [-73, -94], [-72.6, -105], [-68, -110.5], [-60, -113], [-51, -115], [-43, -116.5], [-38.5, -112.5], [-39, -104]];
+const finPath = mkPath([...finRun.pts, ...chaikin(WALK, 2)]);
+raceGroup.add(ribbon(startPath, 1.45, .05, carpetMat, 4), ribbon(finRun, 1.45, .05, carpetMat, 4));
+{ // flèches vertes au sol : sens des finishers
+  const arrowTex = canvasTex(128, 128, (g, w, h) => { g.clearRect(0, 0, w, h); g.strokeStyle = '#2fb85e'; g.lineWidth = 16; g.lineCap = g.lineJoin = 'round'; g.beginPath(); g.moveTo(30, 28); g.lineTo(94, 64); g.lineTo(30, 100); g.stroke(); });
+  const am = new THREE.MeshBasicMaterial({ map: arrowTex, transparent: true, depthWrite: false, toneMapped: false, polygonOffset: true, polygonOffsetFactor: -6, polygonOffsetUnits: -6 });
+  for (let d = finRun.len + 4; d < finPath.len - 2; d += 9) { const s = sample(finPath, d), m = new THREE.Mesh(new THREE.PlaneGeometry(1.6, 1.6), am); m.rotation.set(-Math.PI / 2, 0, Math.atan2(-s.tz, s.tx)); m.position.set(s.x, .07, s.z); raceGroup.add(m); }
+}
 {
   const chq = canvasTex(64, 256, (g) => { for (let y = 0; y < 8; y++) for (let x = 0; x < 2; x++) { g.fillStyle = (x + y) % 2 ? '#fff' : '#111'; g.fillRect(x * 32, y * 32, 32, 32); } });
   const g = frame(.3, 0), f = new THREE.Mesh(new THREE.PlaneGeometry(1.2, 3.0), new THREE.MeshBasicMaterial({ map: chq, toneMapped: false })); f.rotation.x = -Math.PI / 2; f.position.set(0, .08, 1.6); g.add(f);
@@ -420,25 +443,26 @@ const SIG = RT.posts.filter(p => p.x > TL[0] + 8 && p.x < BR[0] - 8 && p.z > TL[
 const barPos = [];
 function barrierLine(x0, x1, z) { const n = Math.round((x1 - x0) / 2.5); for (let i = 0; i < n; i++) { const x = x0 + (i + .5) * (x1 - x0) / n; barPos.push([...FW(x, cz(x) + z), czRot(x)]); } }
 function barrierPath(P, d0, d1, off, skip) { for (let d = d0; d < d1; d += 2.5) { const p = sample(P, d), x = p.x - p.tz * off, z = p.z + p.tx * off; if (skip && skip(x, z)) continue; barPos.push([x, z, Math.atan2(-p.tz, p.tx)]); } }
-barrierLine(-40, 6, -3.2); barrierLine(-40, 26, 3.2); barrierLine(-40, 26, 0);
-{ const d0 = startStraightLen + 1; barrierPath(startPath, d0, d0 + 95, -1.75); barrierPath(startPath, d0 + 2, d0 + 95, 1.75, (x, z) => { const f = toF(x, z); return f[0] > -2 && f[0] < 30 && Math.abs(f[1]) < 1.3; }); }
+barrierLine(-40, -1, -3.2); barrierLine(-40, -1, 3.2); barrierLine(-40, -1, 0);   // sur le pont : sas de départ et couloir d’arrivée, jusqu’à la ligne
+for (const [x, z, r] of PL.barrieres) barPos.push([x, z, r]);                       // barrières orange du plan du 21/11/2026
 {
   const a = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, 1.05, .05), M(0xb4bac2, { roughness: .4, metalness: .7 }), barPos.length), b = new THREE.InstancedMesh(new THREE.BoxGeometry(2.45, .5, .07), M(0xff3d97, { roughness: .6 }), barPos.length);
   barPos.forEach(([x, z, r], i) => { dummy.position.set(x, .55, z); dummy.rotation.set(0, r, 0); dummy.scale.set(1, 1, 1); dummy.updateMatrix(); a.setMatrixAt(i, dummy.matrix); dummy.position.y = .78; dummy.updateMatrix(); b.setMatrixAt(i, dummy.matrix); });
   a.castShadow = b.castShadow = true; raceGroup.add(a, b);
 }
 const flags = [];
-for (let x = -36; x <= 24; x += 6) for (const z of [-3.9, 3.9]) {
+for (let x = -36; x <= -6; x += 6) for (const z of [-3.9, 3.9]) {
   const pv = frame(x, cz(x) + z); pv.add(box(.05, 4.6, .05, M(0xdddddd), 0, 2.3, 0));
   const f = new THREE.Mesh(new THREE.PlaneGeometry(.95, 2.8), new THREE.MeshBasicMaterial({ color: ((x / 6) | 0) % 2 ? 0xff3d97 : 0xfff4f9, side: THREE.DoubleSide, toneMapped: false })); f.position.set(.5, 3.1, 0); pv.add(f); raceGroup.add(pv); flags.push(pv);
 }
 
-/* ---- village : implantation choisie zone par zone (plan du 19/11/2026, arche déplacée le 20/11/2026) ----
-   Zone 1 · Tête du pont Saint-Pierre : arche, sas sur le pont, PC course, ravito d’arrivée et secours au bout du couloir d’arrivée.
-            Esplanade de l’Université + rue de la Boule (à 2 min à pied) : consigne et toilettes coureurs.
-   Zone 2 · Place Saint-Pierre : le village (stands écoles et partenaires, food trucks, tables, toilettes) au centre, terrasses des bars laissées libres.
-   Zone 3 · Gradins sur la Garonne : la scène, en bas des gradins ouest, le public assis sur les marches.
-   Chaque élément est cherché autour d’un point choisi ; il ne doit toucher ni bâtiment, ni tronc d’arbre, ni parcours, ni terrasse de bar. */
+/* ---- implantation : plan de travail du 21/11/2026 (« Plan d’implantation · Place Saint-Pierre ») ----
+   A ligne d’arrivée au pied du pont · B récupération sous les arbres · C poste médical avancé · D scène · E ravito · F consignes
+   G espace staff et bénévoles · H base médicale · I toilettes · J points de sécurité et barrages · K food trucks, bars et stands.
+   Parcours des finishers : ligne A → récupération B → quai Saint-Pierre barriéré à sens unique → ravito E (rue de la Boule) → consignes F
+   → esplanade de l’Université et village, sortie par la place.
+   Le plan (schéma non à l’échelle sur fond Plans d’Apple) est recalé sur la photo aérienne IGN : écart d’environ 1 à 2 m. Chaque élément
+   est posé au plus près de sa position sur le plan, sans toucher bâtiment, tronc d’arbre, barrière ni couloir. */
 const placePoly = S.ways.place[0].p, taken = [], sites = {}, LAYOUT_LOG = [];
 const TERR = (S.terr || []), BARS = (S.bars || []), shirtsV = ['#ff3d97', '#fff4f9', '#14040c', '#ff7ab8', '#ffd23f', '#3d7bff', '#30c48d'];
 const back = (p, k) => { const [x, z] = rotP(p.x, p.z, p.th, 0, -k); return { x, z, th: p.th }; };
@@ -449,6 +473,7 @@ const segD = (px, pz, a, b) => { const vx = b[0] - a[0], vz = b[1] - a[1], l = v
 const nearPoly = (x, z, poly, buf) => { if (pip(x, z, poly)) return true; for (let i = 0; i < poly.length - 1; i++) if (segD(x, z, poly[i], poly[i + 1]) < buf) return true; return false; };
 const rotP = (x, z, th, a, b) => [x + a * Math.cos(th) + b * Math.sin(th), z - a * Math.sin(th) + b * Math.cos(th)];
 const face = (x, z, t) => Math.atan2(t[0] - x, t[1] - z);
+const inBld = (x, z, buf) => S.bld.some(q => nearPoly(x, z, q.r, buf));
 // cherche la place libre la plus proche du point visé (spirale), orientation fixe ou tournée vers une cible
 function placeNear(name, at, w, d, o = {}) {
   const { look, rot, maxR = 14, route = 3.2, tree = 1.6, terr = 2.5, bld = 1.0, sep = 1.2, land = true, region } = o;
@@ -459,8 +484,8 @@ function placeNear(name, at, w, d, o = {}) {
       const pts = []; for (const a of [-.5, -.25, 0, .25, .5]) for (const b of [-.5, -.25, 0, .25, .5]) pts.push(rotP(x, z, th, a * w, b * d));
       let ok = true;
       for (const [px, pz] of pts) {
-        if ((land && !pip(px, pz, landPoly)) || (region && !pip(px, pz, region))) { ok = false; break; }
-        if (S.bld.some(q => nearPoly(px, pz, q.r, bld))) { ok = false; break; }
+        if ((land && !onLand(px, pz)) || (region && !pip(px, pz, region))) { ok = false; break; }
+        if (inBld(px, pz, bld)) { ok = false; break; }
         if (trees.some(t => Math.hypot(t[0] - px, t[1] - pz) < tree)) { ok = false; break; }
         if (keepOut.some(q => Math.hypot(q[0] - px, q[1] - pz) < route)) { ok = false; break; }
         if (TERR.some(q => nearPoly(px, pz, q, terr))) { ok = false; break; }
@@ -472,7 +497,7 @@ function placeNear(name, at, w, d, o = {}) {
       }
     }
   }
-  sites[name] = null; LAYOUT_LOG.push([name, 'PAS DE PLACE']); console.warn('village : pas de place pour', name); return null;
+  sites[name] = null; LAYOUT_LOG.push([name, 'PAS DE PLACE']); console.warn('implantation : pas de place pour', name); return null;
 }
 function person(parent, x, z, col, y0 = 0) {
   const g = new THREE.Group(); g.position.set(x, y0, z);
@@ -492,40 +517,118 @@ function tentMesh(p, w, d, label, color, o = {}) {
   raceGroup.add(g); return g;
 }
 function addTent(name, at, w, d, label, color, o = {}) { const p = placeNear(name, at, w, d + 2.5, o); if (p) tentMesh(back(p, 1.25), w, d, label, color, o); return p; }
+// distance le long d’un chemin du point le plus proche de (x, z)
+const dAt = (P, x, z) => { let best = 1e9, bd = 0; for (let d = 0; d <= P.len; d += .5) { const s = sample(P, d), e = Math.hypot(s.x - x, s.z - z); if (e < best) { best = e; bd = d; } } return bd; };
+const vest = '#ffd23f', medic = M(0xf4efec, { roughness: .7 });
 
-/* ---------- ZONE 1 · Arche en tête du pont (coureurs) ---------- */
-addTent('PC COURSE', FW(3, 9), 4, 4, 'PC COURSE · CHRONO', 0x4a1830, { look: [O.x, O.y], route: 3.5 });
-addTent('SECOURS', FW(16, 12), 5, 5, 'SECOURS', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross', look: FW(16, 2), route: 3.5, maxR: 16 });
-{ // ambulance garée à côté du poste de secours, côté allée de Barcelone
-  const p = sites['SECOURS'] && placeNear('AMBULANCE', [sites['SECOURS'][0] - 1, sites['SECOURS'][1] + 7], 2.2, 6, { rot: 0, route: 3, maxR: 8 });
+/* ---------- A · ligne d’arrivée : speaker et chrono près de la ligne, reliés à la sono de la scène ---------- */
+{
+  const p = placeNear('SPEAKER', FW(3, 6.8), 2.4, 1.8, { look: [O.x, O.y], route: 1.4, tree: 1, bld: .5, maxR: 5 });
+  if (p) { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th;
+    g.add(box(2.2, .08, .9, M(0x14040c), 0, 1.05, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.07, 1.05, .07, metal, sx * 1, .52, sz * .38));
+    for (const sx of [-1.5, 1.5]) g.add(box(.55, .9, .45, M(0x18181c, { roughness: .4 }), sx, 2.2, 0), box(.05, 1.8, .05, metal, sx, .9, 0));
+    const sg = signMesh(2.2, .42, 'SPEAKER · CHRONO', { bg: '#14040c', px: .6 }); sg.position.set(0, .7, .47); g.add(sg); person(g, -.4, -.8, '#ff3d97'); person(g, .6, -.8, '#14040c'); raceGroup.add(g); }
+}
+
+/* ---------- B · récupération sous les arbres : eau, couverture et médaille dès la ligne ---------- */
+{
+  const p = placeNear('B · RÉCUPÉRATION', [0.6, 5.5], 4.2, 1.2, { look: [-3, 6], route: .9, tree: .7, bld: .5, terr: .5, maxR: 9, sep: .4 });
+  if (p) { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th;
+    g.add(box(4, .08, .8, white, 0, .9, 0), box(3.9, .8, .05, M(0xff3d97), 0, .5, .38));
+    for (let i = 0; i < 6; i++) g.add(box(.36, .28, .26, M(0x8fd3ff, { roughness: .3 }), -1.6 + i * .62, 1.08, -.15));          // packs d’eau
+    for (let i = 0; i < 3; i++) g.add(box(.5, .3, .4, M(0xd8c27a, { metalness: .6, roughness: .3 }), -1.2 + i * 1.2, 1.09, .2)); // couvertures de survie
+    const sg = signMesh(4, .5, 'EAU · COUVERTURE · MÉDAILLE', { bg: '#14040c', px: .55 }); sg.position.set(0, 2.2, .1); g.add(sg, box(.05, 2.4, .05, metal, -1.9, 1.2, 0), box(.05, 2.4, .05, metal, 1.9, 1.2, 0));
+    for (let k = 0; k < 4; k++) person(g, -1.5 + k, -.9, vest);
+    raceGroup.add(g); }
+}
+
+/* ---------- C · poste médical avancé à l’arrivée (couloir libre depuis la ligne), ambulance par le carrefour ---------- */
+addTent('C · POSTE MÉDICAL', [3.2, -2.2], 3, 3, 'POSTE MÉDICAL', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross', look: [-2, 6], route: 1.5, tree: 1.1, bld: .5, maxR: 5, people: 1 });
+{
+  const p = placeNear('AMBULANCE', [9.5, -10], 2.2, 6, { rot: Math.atan2(.48, -.88), route: 1.2, tree: 1.1, maxR: 7, terr: .5 });
   if (p) { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; g.add(box(2.1, 2.5, 5.6, M(0xf7f7f7, { roughness: .5 }), 0, 1.45, 0), box(2.12, .35, 5.62, M(0xe11d2e), 0, 1.3, 0), box(1.9, .5, 1.2, M(0x3a6a8a, { roughness: .2 }), 0, 2.1, 2.3)); for (const sx of [-1, 1]) for (const sz of [-1.9, 1.9]) { const wh = new THREE.Mesh(new THREE.CylinderGeometry(.4, .4, .3, 16), M(0x18181c)); wh.rotation.z = Math.PI / 2; wh.position.set(sx * 1.05, .4, sz); g.add(wh); } raceGroup.add(g); }
 }
-addTent('RAVITAILLEMENT ARRIVÉE', FW(32, 3), 6, 3, 'EAU · FRUITS · MÉDAILLES', 0xff3d97, { look: FW(24, 1.6), route: 2.6, tree: 1.4, maxR: 12 });
-addTent('CONSIGNE', [-55, -128], 6, 3, 'CONSIGNE', 0xf4efec, { bg: '#ff3d97', look: [-62, -120], route: 3 });
 
-/* toilettes : rangées de cabines (2 m entre chaque rangée) */
+/* ---------- D · scène adossée au bâtiment à l’angle de la rue Valade (plan du 21/11/2026), tournée vers la place ---------- */
+{
+  const wid = 7.6, depth = 5, p = placeNear('D · SCÈNE', [7.4, -31.9], wid, depth, { rot: -.615, route: 1, tree: .6, bld: .15, terr: .3, maxR: 2.5, sep: .6 });
+  if (p) { const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th;   // +z local = vers la place
+    g.add(box(wid, 1.0, depth, dark, 0, .5, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.25, 6.2, .25, silver, sx * (wid / 2 - .15), 3.1, sz * (depth / 2 - .15)));
+    g.add(box(wid, .4, depth, silver, 0, 6.3, 0), box(wid - .5, 4.4, .1, M(0x14040c), 0, 3.3, -depth / 2 + .25));
+    const scr = signMesh(wid * .62, 2.6, 'STUD’N RUN · LIVE', { bg: '#c2107a', px: .42 }); scr.position.set(0, 3.6, -depth / 2 + .35); g.add(scr);
+    const fb = signMesh(wid, .8, 'SCÈNE · PODIUM 20 H 45 · AFTER 21 H 30', { bg: '#ff3d97', px: .55 }); fb.position.set(0, .5, depth / 2 + .02); g.add(fb);
+    [[0, .9, 0xff3d97], [-1.6, .65, 0xfff4f9], [1.6, .45, 0xffc2de]].forEach(([xx, hh, c]) => g.add(box(1.4, hh, 1.2, M(c, { roughness: .5 }), xx, 1.0 + hh / 2, .6)));
+    for (const sx of [-1, 1]) g.add(box(1.0, 2.2, .9, M(0x18181c, { roughness: .4 }), sx * (wid / 2 - .7), 2.1, depth / 2 - .7));
+    person(g, -.6, 1.2, '#ff3d97', 1.0); person(g, .8, .4, '#14040c', 1.0); raceGroup.add(g); }
+}
+
+/* ---------- E · ravito, rue de la Boule, côté est du couloir des finishers ---------- */
+{
+  const d0 = dAt(finPath, -77.6, -28), d1 = dAt(finPath, -75.4, -47), tbl = M(0xfff4f9, { roughness: .6 }); let first = null, n = 0;
+  for (let d = Math.min(d0, d1); d <= Math.max(d0, d1); d += 2.1) {
+    const s = sample(finPath, d), r = Math.atan2(-s.tz, s.tx);
+    for (const off of [2.1, 1.8]) {
+      const x = s.x - s.tz * off, z = s.z + s.tx * off, c = rotP(x, z, r, 0, 0);
+      if ([-.95, 0, .95].some(a => inBld(x + Math.cos(r) * a + Math.sin(r) * .7, z - Math.sin(r) * a + Math.cos(r) * .7, .15) || inBld(x + Math.cos(r) * a, z - Math.sin(r) * a, .15))) continue;
+      const g = new THREE.Group(); g.position.set(c[0], 0, c[1]); g.rotation.y = r;
+      g.add(box(1.9, .06, .75, tbl, 0, .88, 0), box(1.85, .8, .04, M(0x12b9f0), 0, .45, -.36));
+      for (let k = 0; k < 5; k++) g.add(box(.09, .24, .09, M(k % 2 ? 0x8fd3ff : 0xffb347, { roughness: .3 }), -.7 + k * .35, 1.03, R(-.2, .2)));
+      if (rnd() < .8) person(g, R(-.5, .5), .9, vest);
+      raceGroup.add(g); n++; if (!first) first = [c[0], c[1]]; break;
+    }
+  }
+  if (first) { const s = sample(finPath, (d0 + d1) / 2); sites['E · RAVITO'] = [s.x - s.tz * 2, s.z + s.tx * 2]; LAYOUT_LOG.push(['E · RAVITO', n + ' tables']); }
+  const s = sample(finPath, Math.min(d0, d1) - 1.5), g = new THREE.Group(); g.position.set(s.x, 0, s.z); g.rotation.y = Math.atan2(-s.tz, s.tx) + Math.PI / 2;
+  const sg = twoSided(3.6, .7, 'RAVITO', { bg: '#12b9f0', px: .6 }); sg.position.y = 3.2; g.add(sg, box(.06, 3.6, .06, metal, -1.85, 1.8, 0), box(.06, 3.6, .06, metal, 1.85, 1.8, 0)); raceGroup.add(g);
+}
+
+/* ---------- F · consignes, le long de l’allée de Barcelone, au bout de la rue de la Boule ---------- */
+[-108.5, -103.5, -93.5, -89, -84.5, -80].forEach((z, i) => addTent('F · CONSIGNES ' + (i + 1), [-80.6, z], 3, 4, 'CONSIGNES', 0xff3d97, { bg: '#ff3d97', look: [-70, z], route: 1.6, tree: 1.1, bld: .5, terr: .5, maxR: 4, sep: .3, people: 1 }));
+
+/* ---------- H · base médicale, contre l’allée de Barcelone à l’angle nord-ouest de l’esplanade (accès des secours par le nord) ---------- */
+addTent('H · BASE MÉDICALE', [-79.6, -124], 4, 4, 'BASE MÉDICALE', 0xf4efec, { bg: '#ffffff', fg: '#e11d2e', icon: 'cross', rot: Math.PI / 2, route: .4, tree: 1, bld: .4, terr: .5, maxR: 4, sep: .5, people: 2 });
+
+/* ---------- G · espace staff et bénévoles, contre le bâtiment de l’esplanade ---------- */
+[['PC ORGANISATION', [-74, -122]], ['ACCUEIL BÉNÉVOLES', [-65, -121.5]], ['STAFF', [-56, -121]], ['MATÉRIEL', [-74, -134]]].forEach(([l, at]) =>
+  addTent('G · ' + l, at, 4, 4, l, 0x4a1b79, { bg: '#4a1b79', look: [-66, -116], route: 1.6, tree: 1.2, bld: .6, terr: .5, region: PL.G, maxR: 9, people: 3 }));
+{ // tables et bénévoles devant les tentes
+  for (const at of [[-68, -128], [-60, -126], [-70, -140]]) { const p = placeNear('G · TABLE ' + at, at, 2, 1, { route: 1.2, tree: 1, bld: .5, region: PL.G, maxR: 6, sep: .5 }); if (!p) continue;
+    const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; g.add(box(1.9, .06, .8, white, 0, .75, 0), box(.06, .75, .06, metal, -.85, .37, 0), box(.06, .75, .06, metal, .85, .37, 0)); for (let k = 0; k < 3; k++) person(g, R(-.8, .8), (k % 2 ? 1 : -1) * R(.7, 1.1), pick(['#4a1b79', vest, '#ff3d97'])); raceGroup.add(g); }
+}
+
+
+/* ---------- I · toilettes : un seul bloc pour l’instant, rue de la Boule (au sud du jardin de l’esplanade) ---------- */
 function toilets(name, at, n, o = {}) {
-  const w = n * 1.3, d = 1.4, p0 = placeNear(name, at, w, d + 3, o); if (!p0) return null; const p = back(p0, 1.5);
+  const w = n * 1.3, d = 1.4, fr = o.front ?? 3, p0 = placeNear(name, at, w, d + fr, o); if (!p0) return null; const p = back(p0, fr / 2);
   const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th;
   const shell = [M(0x3d7bff, { roughness: .6 }), M(0xff3d97, { roughness: .6 })], door = M(0xf6f1ee, { roughness: .6 });
   for (let i = 0; i < n; i++) { const x = -w / 2 + .65 + i * 1.3; g.add(box(1.2, 2.3, 1.3, shell[o.pink && i % 3 === 2 ? 1 : 0], x, 1.15, 0), box(1.25, .12, 1.35, door, x, 2.36, 0), box(.7, 1.8, .03, door, x, 1.0, .67)); }
   const sg = signMesh(Math.min(w * .7, 5), .7, 'TOILETTES', { bg: '#14040c', px: .6 }); sg.position.set(0, 3.0, .7); g.add(sg, box(.06, .7, .06, metal, -1.2, 2.55, .6), box(.06, .7, .06, metal, 1.2, 2.55, .6));
   raceGroup.add(g); return p;
 }
-toilets('TOILETTES COUREURS', [-82, -82], 10, { rot: Math.PI / 2, route: 3, tree: 1.4 });
-toilets('TOILETTES AUDITORIUM', [-27, -101], 8, { route: 3, tree: 1.6, look: [-27, -90] });
+if (!toilets('I · TOILETTES', [-57, -76.8], 12, { rot: Math.PI + .08, front: 1.2, route: .9, tree: 1.1, bld: .3, terr: .5, maxR: 4, sep: .3, pink: 1 })) {
+  toilets('I · TOILETTES', [-61.5, -77.6], 6, { rot: Math.PI + .08, route: 1.4, tree: 1.1, bld: .4, terr: .5, maxR: 5, pink: 1 });
+  toilets('I · TOILETTES (2)', [-52.5, -78.2], 6, { rot: Math.PI + .08, route: 1.2, tree: 1, bld: .4, terr: .5, maxR: 9, pink: 1 });
+}
 
-/* ---------- ZONE 2 · Place Saint-Pierre (village) ---------- */
-// stands des écoles / BDE : une allée sous les platanes, au centre de la place, à distance des terrasses
-const SCHOOLS = ['UT CAPITOLE', 'JEAN-JAURÈS', 'PAUL-SABATIER', 'INSA', 'TBS', 'TSE', 'ENSEEIHT', 'SCIENCES PO'];
-const schoolSpots = [[-36, -24], [-28, -30], [-20, -24], [-12, -30], [-4, -24], [-36, -14], [-24, -16], [-10, -18]];
-SCHOOLS.forEach((s, i) => addTent('STAND ' + s, schoolSpots[i], 3, 3, s, i % 2 ? 0xff3d97 : 0xf4efec, { bg: i % 2 ? '#14040c' : '#ff3d97', look: [-20, -21], route: 3.5, tree: 1.5, terr: 3, region: placePoly, maxR: 7, people: 2 }));
-// partenaires : à l’entrée du village côté rue Valade
-['PARTENAIRE 1', 'PARTENAIRE 2'].forEach((s, i) => addTent(s, [[0, -36], [6, -30]][i], 3, 3, s, 0x4a1830, { look: [-20, -21], route: 3.5, tree: 1.2, terr: 3, region: placePoly, maxR: 8 }));
-addTent('INFO VILLAGE', [-46, -12], 3, 3, 'INFOS · OBJETS TROUVÉS', 0xff3d97, { look: [-20, -21], route: 3.5, tree: 1.5, terr: 3, region: placePoly, maxR: 8 });
-// food trucks : côté est de la place, entre le pont et la rue des Blanchers, guichet tourné vers le centre
+/* ---------- J · points de sécurité et barrages de rues (protection anti-véhicule à valider avec la préfecture) ---------- */
+const BARRAGES = [['J · RUE VALADE', [15.8, -23.3], .6, 6.5, 0], ['J · SUD DE LA PLACE', [15, 45.2], -.12, 19, 0], ['J · QUAI BAS (DAURADE)', [.5, 58], -.79, 8.5, LOW2], ['J · QUAI BAS (HENRI-MARTIN)', [-64.4, 11.7], -.96, 5, LOW1]];
+{
+  const gba = M(0xf2f2f2, { roughness: .7 }), red = M(0xe11d2e, { roughness: .6 });
+  for (const [name, c, a, L, y] of BARRAGES) {
+    const n = Math.max(2, Math.round(L / 2.1)), ux = Math.cos(a), uz = Math.sin(a), r = -a;
+    for (let i = 0; i < n; i++) { const t = (i - (n - 1) / 2) * L / n, g = new THREE.Group(); g.position.set(c[0] + ux * t, y, c[1] + uz * t); g.rotation.y = r;
+      g.add(box(2.0, .8, .6, gba, 0, .4, 0), box(2.02, .14, .62, red, 0, .55, 0)); raceGroup.add(g); }
+    const g = new THREE.Group(); g.position.set(c[0] - uz * 1.4, y, c[1] + ux * 1.4); g.rotation.y = r;
+    const sg = twoSided(1.6, .5, 'BARRAGE', { bg: '#e11d2e', px: .6 }); sg.position.y = 1.9; g.add(sg, box(.05, 1.9, .05, metal, 0, .95, 0));
+    person(g, -1.2, .6, vest); person(g, 1.4, .4, vest); raceGroup.add(g);
+    sites[name] = [c[0], c[1]]; LAYOUT_LOG.push([name, n + ' blocs']);
+  }
+}
+
+/* ---------- K · food trucks, bars et stands ---------- */
 function foodTruck(name, at, label, col, o = {}) {
-  const p0 = placeNear(name, at, 6.4, 2.6 + 3, { route: 3.5, tree: 1.3, terr: 3, region: placePoly, maxR: 14, ...o }); if (!p0) return null; const p = back(p0, 1.5);
+  const p0 = placeNear(name, at, 6.4, 2.6 + 3, { route: 2, tree: 1.2, terr: 1, maxR: 6, ...o }); if (!p0) return null; const p = back(p0, 1.5);
   const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; const body = M(col, { roughness: .55 });
   g.add(box(6.2, 2.5, 2.4, body, 0, 1.75, 0), box(1.9, 1.8, 2.4, body, 2.9, 1.4, 0), box(1.0, .8, 2.2, M(0x2b3a48, { roughness: .2 }), 3.4, 1.9, 0));
   g.add(box(3.4, 1.0, .05, M(0x14040c), -.8, 2.0, 1.22), box(3.6, .06, .9, M(0xfff4f9), -.8, 2.65, 1.65), box(3.4, .08, .4, M(0xd9d0c8), -.8, 1.45, 1.4));
@@ -534,40 +637,28 @@ function foodTruck(name, at, label, col, o = {}) {
   for (let k = 0; k < 3; k++) person(g, R(-2.4, .8), R(2.4, 3.6), pick(['#ff3d97', '#fff4f9', '#14040c', '#3d7bff']));
   raceGroup.add(g); return p;
 }
-const FT = [['FOOD TRUCK 1', [20, -4], 'BURGERS', 0xff3d97], ['FOOD TRUCK 2', [26, 5], 'PÂTES & PIZZA', 0xffd23f], ['FOOD TRUCK 3', [28, 15], 'VEGGIE', 0x30c48d], ['FOOD TRUCK 4', [26, 25], 'CRÊPES & GLACES', 0xfff4f9]];
-for (const [n, at, l, c] of FT) foodTruck(n, at, l, c, { look: [8, 12] });
-{ // mange-debout et tables devant les food trucks
+// food trucks : l’espace vert au nord-est de l’esplanade, en deux rangées qui se font face
+const FTK = [[-26.5, -153.5, 'BURGERS', 0xff3d97], [-30.5, -149, 'PÂTES & PIZZA', 0xffd23f], [-33.3, -145.2, 'VEGGIE', 0x30c48d], [-36.8, -139.8, 'CRÊPES & GLACES', 0xfff4f9],
+  [-9.2, -138.5, 'TACOS', 0x3d7bff], [-13.7, -132.6, 'POKE', 0xff7ab8], [-19, -126.8, 'FRITES', 0xffd23f], [-24.3, -121.5, 'BOISSONS', 0x30c48d]];
+FTK.forEach(([x, z, l, c], i) => foodTruck('K · FOOD TRUCK ' + (i + 1), [x, z], l, c, { look: [-23, -137], maxR: 10, route: 1.6, sep: .8 }));
+{ // mange-debout entre les deux rangées, tri des déchets
   const tbl = M(0xfff4f9, { roughness: .6 }), leg = M(0x2a2230);
-  for (const at of [[10, 4], [12, 12], [14, 20], [6, 16], [8, 0], [16, 26]]) { const p = placeNear('TABLE ' + at, at, 1.4, 1.4, { route: 3, tree: 1.2, terr: 2.5, region: placePoly, maxR: 5, sep: .6 }); if (!p) continue;
+  for (const at of [[-23, -137], [-18, -141], [-28, -133], [-20, -131], [-26, -143]]) { const p = placeNear('TABLE ' + at, at, 1.4, 1.4, { route: 1.5, tree: 1.1, terr: 1, maxR: 4, sep: .6 }); if (!p) continue;
     const g = new THREE.Group(); g.position.set(p.x, 0, p.z); const top = new THREE.Mesh(new THREE.CylinderGeometry(.42, .42, .05, 18), tbl); top.position.y = 1.1; g.add(top, box(.08, 1.1, .08, leg, 0, .55, 0)); for (let k = 0; k < 3; k++) person(g, Math.cos(k * 2.1) * .75, Math.sin(k * 2.1) * .75, pick(shirtsV)); raceGroup.add(g); }
-}
-// l’arche et le couloir d’arrivée occupent maintenant le sud de la place : on essaie plusieurs emplacements
-for (const at of [[-2, 2], [14, -24], [-46, -24], [36, 32]]) if (toilets('TOILETTES VILLAGE', at, 8, { route: 3.2, tree: 1.2, terr: 3, region: placePoly, maxR: 10, look: [-10, -10], pink: 1 })) break;
-{ // tri des déchets
-  for (const at of [[-30, -12], [4, -18], [18, 26]]) { const p = placeNear('TRI ' + at, at, 2.4, .8, { route: 3, tree: 1, terr: 2.5, region: placePoly, maxR: 6, sep: .5 }); if (!p) continue;
+  for (const at of [[-22, -128], [-40, -95], [-15, -78], [12, 16]]) { const p = placeNear('TRI ' + at, at, 2.4, .8, { route: 1.5, tree: 1, terr: 1, maxR: 5, sep: .5 }); if (!p) continue;
     const g = new THREE.Group(); g.position.set(p.x, 0, p.z); g.rotation.y = p.th; [0xffd23f, 0x30c48d, 0x8a8a90].forEach((c, k) => g.add(box(.7, 1.0, .7, M(c, { roughness: .5 }), -.8 + k * .8, .5, 0))); raceGroup.add(g); }
 }
+// stands : autour de la place de l’esplanade (écoles, BDE, partenaires · noms d’exemple)
+const STANDS = ['UT CAPITOLE', 'JEAN-JAURÈS', 'PAUL-SABATIER', 'INSA', 'TBS', 'TSE', 'ENSEEIHT', 'SCIENCES PO', 'PARTENAIRE 1', 'PARTENAIRE 2', 'INFOS · OBJETS TROUVÉS'];
+const standSpots = [[-38.8, -105.5], [-40.9, -101.7], [-43, -98], [-45.1, -94.2], [-47.2, -90.5], [-46.2, -86.6], [-32, -105], [-32, -101], [-32, -97], [-32, -93], [-32, -89]];
+standSpots.forEach((at, i) => { const o = { bg: i === 10 ? '#ff3d97' : i % 2 ? '#14040c' : '#ff3d97', look: [-38.5, -97], route: 1.4, tree: 1, bld: .5, terr: .5, maxR: 8, sep: .25 }; if (!addTent('K · STAND ' + STANDS[i], i === 7 ? [-30.5, -84.5] : at, 3, 3, STANDS[i], i % 2 ? 0xff3d97 : 0xf4efec, o)) addTent('K · STAND ' + STANDS[i], i === 7 ? [-30.5, -84.5] : at, 3, 3, STANDS[i], i % 2 ? 0xff3d97 : 0xf4efec, { ...o, maxR: 16 }); });
+// petite place au sud de l’esplanade : un stand et une buvette
+addTent('K · STAND (PETITE PLACE)', [-20.3, -74.5], 3, 3, 'STAND', 0xf4efec, { bg: '#ff3d97', look: [-14, -72], route: 1.6, tree: 1.1, bld: .5, terr: .5, maxR: 4 });
+addTent('K · BUVETTE', [-12.5, -72], 6, 3, 'BUVETTE', 0xff3d97, { look: [-20, -73], route: 1.6, tree: 1.1, bld: .5, terr: .5, maxR: 5, people: 3 });
+// place Saint-Pierre, côté gradins : quatre stands
+[[22.8, 12.4], [15.6, 20.8], [13.5, 31], [14.5, 38]].forEach((at, i) => { const p = addTent('K · STAND PLACE ' + (i + 1), at, 3, 3, ['PARTENAIRE 3', 'PARTENAIRE 4', 'STAND', 'STAND'][i], 0x4a1830, { look: [12, 26], route: 1.6, tree: 1.1, bld: .5, terr: .5, maxR: 7 }); });
 
-/* ---------- ZONE 3 · Scène en bas des gradins ouest ---------- */
-{
-  const G = G1, e = (() => { const a = G.ring[0]; let best = 0, A, B; for (let i = 0; i < G.ring.length; i++) { const p = G.ring[i], q = G.ring[(i + 1) % G.ring.length], l = Math.hypot(q[0] - p[0], q[1] - p[1]); if (l > best) { best = l; A = p; B = q; } } return { A, B, L: best }; })();
-  // palier le plus large le plus bas : la scène s’y pose, dos à la Garonne, face aux marches
-  let gi = -1, gw = 0; G.groups.forEach((g, i) => { const w = g.limit - (i ? G.groups[i - 1].limit : 0); if (i > 0 && w >= gw - .5 && w > 4) { gw = w; gi = i; } });
-  if (gi < 0) gi = G.groups.length - 1;
-  const g0 = G.groups[gi], tmid = ((gi ? G.groups[gi - 1].limit : 0) + g0.limit) / 2, n = G.n;
-  const mx = (e.A[0] + e.B[0]) / 2, mz = (e.A[1] + e.B[1]) / 2, tm = mx * n[0] + mz * n[1] - G.t0;
-  const cx = mx + n[0] * (tmid - tm), cz2 = mz + n[1] * (tmid - tm), y = g0.top, depth = Math.min(7, gw - .6), wid = Math.min(14, e.L * .45);
-  const g = new THREE.Group(); g.position.set(cx, y, cz2); g.rotation.y = Math.atan2(-n[0], -n[1]);   // +z local = vers les marches
-  g.add(box(wid, 1.2, depth, dark, 0, .6, 0)); for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(box(.3, 7.5, .3, silver, sx * (wid / 2 - .2), 3.75, sz * (depth / 2 - .2)));
-  g.add(box(wid, .45, depth, silver, 0, 7.6, 0), box(wid - .6, 5.2, .1, M(0x14040c), 0, 4.0, -depth / 2 + .3));
-  const scr = signMesh(wid * .62, 3.2, 'STUD’N RUN · LIVE', { bg: '#c2107a', px: .42 }); scr.position.set(0, 4.3, -depth / 2 + .4); g.add(scr);
-  const fb = signMesh(wid, .9, 'SCÈNE · PODIUM 20 H 45 · AFTER 21 H 30', { bg: '#ff3d97', px: .55 }); fb.position.set(0, .6, depth / 2 + .02); g.add(fb);
-  [[0, 1.0, 0xff3d97], [-1.8, .75, 0xfff4f9], [1.8, .5, 0xffc2de]].forEach(([xx, hh, c]) => g.add(box(1.6, hh, 1.4, M(c, { roughness: .5 }), xx, 1.2 + hh / 2, .8)));
-  for (const sx of [-1, 1]) { const sp = box(1.1, 2.4, 1.0, M(0x18181c, { roughness: .4 }), sx * (wid / 2 + .9), 1.2, depth / 2 - .8); g.add(sp); }
-  raceGroup.add(g); sites['SCÈNE'] = [cx, cz2]; window.__stage = { cx, cz: cz2, y, wid, depth, gw, n };
-}
-
-/* terrasses des bars : surlignées au sol (laissées libres) */
+/* terrasses des bars (K) : surlignées au sol, ouvertes pendant la soirée */
 {
   const mat = new THREE.MeshBasicMaterial({ color: 0xffd23f, transparent: true, opacity: .32, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -4, polygonOffsetUnits: -4 });
   for (const q of TERR) { const sh = new THREE.Shape(q.map(([x, z]) => new THREE.Vector2(x, -z))), gg = new THREE.ShapeGeometry(sh); gg.rotateX(-Math.PI / 2); const m = new THREE.Mesh(gg, mat); m.position.y = .06; raceGroup.add(m); }
@@ -586,10 +677,11 @@ function put(set, i, x, z, y, sc, lean = 0) {
 }
 const starters = []; for (let i = 0; i < 110; i++) { const pen10 = i < 46; starters.push({ d0: 40 + (pen10 ? R(-12, -3) : R(-31, -14)), lat: R(-1.1, 1.1), v: R(3.4, 4.9), ph: R(0, 6) }); }
 const startSet = crowd(starters.length);
-const finishers = []; for (let i = 0; i < 40; i++) finishers.push({ lat: R(-1.1, 1.1), v: R(3, 5), off: R(0, 130), ph: R(0, 6) });
+const WALK_V = 1.3, walkLen = finPath.len - finRun.len;   // après la ligne, les finishers marchent
+const finishers = []; for (let i = 0; i < 70; i++) { const v = R(3, 5); finishers.push({ lat: R(-1.1, 1.1), v, cyc: finRun.len / v + walkLen / WALK_V, off: R(0, 260), ph: R(0, 6) }); }
 const finSet = crowd(finishers.length);
 const spectators = [];
-for (let i = 0; i < 150; i++) { const [x, z] = FW(R(-6, 24), (rnd() < .5 ? -1 : 1) * R(6.2, 9)); if (pip(x, z, landPoly) && !keepOut.some(k => Math.hypot(k[0] - x, k[1] - z) < 3.4 && false) && !S.bld.some(q => pip(x, z, q.r)) && !trees.some(t => Math.hypot(t[0] - x, t[1] - z) < 1.2)) spectators.push({ x, z, y: 0, ph: R(0, 6) }); }
+for (let i = 0; i < 150; i++) { const [x, z] = FW(R(-34, -4), (rnd() < .5 ? -1 : 1) * R(6.2, 8.5)); if (onLand(x, z) && !keepOut.some(k => Math.hypot(k[0] - x, k[1] - z) < 3.4 && false) && !S.bld.some(q => pip(x, z, q.r)) && !trees.some(t => Math.hypot(t[0] - x, t[1] - z) < 1.2)) spectators.push({ x, z, y: 0, ph: R(0, 6) }); }
 for (const G of [G1, G2]) for (let i = 0; i < 70; i++) {
   const ring = G.ring; let x, z, tries = 0;
   do { const a = ring[(rnd() * ring.length) | 0], b = ring[(rnd() * ring.length) | 0], c = ring[(rnd() * ring.length) | 0]; let u = rnd(), v = rnd(); if (u + v > 1) { u = 1 - u; v = 1 - v; } x = a[0] + (b[0] - a[0]) * u + (c[0] - a[0]) * v; z = a[1] + (b[1] - a[1]) * u + (c[1] - a[1]) * v; } while (!pip(x, z, ring) && ++tries < 8);
@@ -613,37 +705,42 @@ const V3 = {
   start: camFrom(2, -2.5, 3.2, -34, -2.5, 1.6),
   finish: camFrom(34, 2.5, 3.4, -10, 2.5, 1.6),
   sky: { p: [-6, 230, 14], t: [-6, 0, 4] },
-  village: { p: [42, 46, -58], t: [-8, 0, -6], see: 1 },
-  scene: (s => ({ p: [s.cx - s.n[0] * 16 + s.n[1] * 9, s.y + 11, s.cz - s.n[1] * 16 - s.n[0] * 9], t: [s.cx, s.y + 3, s.cz], see: 1 }))(window.__stage),
+  village: { p: [-128, 62, -78], t: [-48, 0, -118], see: 1 },
+  scene: { p: [-5, 13, -16], t: [7.4, 3, -31.9], see: 1 },
+  plan: { p: [-38, 290, -55], t: [-38, 0, -56] },
 };
 const A = FW(0, 0), P9 = FW(-9, -2.5), P18 = FW(-18, 2.5);
 const ITEMS = [
-  ['Arche Départ · Arrivée', 'Arche de 10 m au-dessus des deux couloirs, avec horloge de course. Speaker et chrono juste à côté (PC course).', [A[0], 11, A[1]], V3.arch, true],
-  ['Sas de départ', 'Sur le pont Saint-Pierre, fermé à la circulation : un départ à la fois, le 5 km à 17 h 30 puis le 10 km à 18 h 45. Les coureurs passent l’arche puis tournent à droite vers le quai Saint-Pierre.', [P9[0], 3, P9[1]], camFrom(-1, -2.5, 3.2, -34, -2.5, 1.6), true],
-  ['Couloir d’arrivée', 'Les deux courses finissent par le pont Saint-Pierre : les coureurs descendent le pont dans le couloir de droite et franchissent la ligne en tête du pont, côté place.', [P18[0], 3, P18[1]], camFrom(10, 2.5, 3.2, -30, 2.5, 1.6), true],
+  ['Ligne d’arrivée', 'Au pied du pont Saint-Pierre, côté place : arche de 10 m avec horloge de course. Speaker et chrono juste à côté. C’est aussi la ligne de départ.', [A[0], 11, A[1]], V3.arch, true, 0, 'A'],
+  ['Sas de départ', 'Sur le pont Saint-Pierre, fermé à la circulation : le 5 km à 17 h 30 puis le 10 km à 18 h 45. Les coureurs passent l’arche puis tournent à droite vers le quai Saint-Pierre.', [P9[0], 3, P9[1]], camFrom(-1, -2.5, 3.2, -34, -2.5, 1.6), true],
+  ['Arrivée par le pont', 'Les deux courses finissent par le pont Saint-Pierre : les coureurs le descendent dans le couloir de droite et franchissent la ligne A.', [P18[0], 3, P18[1]], camFrom(10, 2.5, 3.2, -30, 2.5, 1.6), true],
 ];
 const NOTES = [
-  ['CONSIGNE', 'Consigne', 'Sacs des coureurs, sur l’esplanade contre le bâtiment TSE, à 2 min à pied de l’arche.'],
-  ['PC COURSE', 'PC course · chrono · speaker', 'Face à la ligne : chronométrage, radio, sono du départ et de l’arrivée.'],
-  ['RAVITAILLEMENT ARRIVÉE', 'Ravito d’arrivée & médailles', 'Au bout du couloir d’arrivée, sur la place : eau, fruits, médaille.'],
-  ['SECOURS', 'Poste de secours', 'À côté de la ligne d’arrivée, ambulance garée à côté : sortie directe par le pont, fermé à la circulation.'],
-  ['TOILETTES COUREURS', 'Toilettes coureurs', '10 cabines près de la rue de la Boule, à côté de la consigne.'],
-  ['TOILETTES AUDITORIUM', 'Toilettes (Auditorium)', '8 cabines sur le terrain près de l’Auditorium, à côté des toilettes publiques existantes.'],
-  ['STAND UT CAPITOLE', 'Allée des écoles', 'Les stands des écoles et BDE sous les platanes, au centre de la place. Noms d’exemple.'],
-  ['PARTENAIRE 1', 'Stands partenaires', 'À l’entrée du village, côté rue Valade.'],
-  ['INFO VILLAGE', 'Point info', 'Infos, objets trouvés, programme de la soirée.'],
-  ['FOOD TRUCK 1', 'Food trucks', '4 food trucks côté est de la place, guichets tournés vers le centre, tables mange-debout devant.'],
-  ['TOILETTES VILLAGE', 'Toilettes village', '8 cabines sur la place, à l’écart du couloir d’arrivée.'],
-  ['SCÈNE', 'Scène sur les gradins', 'En bas des gradins ouest, dos à la Garonne : le public s’assoit sur les marches. Podium à 20 h 45, after à 21 h 30.'],
+  ['B · RÉCUPÉRATION', 'B', 'Récupération sous les arbres', 'Dès la ligne : eau, couverture de survie et médaille. Les flèches vertes au sol montrent le chemin des finishers.'],
+  ['C · POSTE MÉDICAL', 'C', 'Poste médical avancé', 'À quelques mètres de la ligne, ambulance garée au carrefour : sortie directe par la rue Valade.'],
+  ['D · SCÈNE', 'D', 'Scène', 'Adossée au bâtiment à l’angle de la rue Valade, à côté de la terrasse du bar, tournée vers la place. Podium à 20 h 45, after à 21 h 30.'],
+  ['E · RAVITO', 'E', 'Ravito', 'Rue de la Boule, sur le chemin des finishers, après le quai Saint-Pierre barriéré à sens unique.'],
+  ['F · CONSIGNES 1', 'F', 'Consignes', 'Le long de l’allée de Barcelone, au bout de la rue de la Boule : les coureurs récupèrent leur sac en sortant du ravito.'],
+  ['G · PC ORGANISATION', 'G', 'Staff et bénévoles', 'Contre le bâtiment de l’esplanade, au nord : PC organisation, accueil des bénévoles, matériel.'],
+  ['H · BASE MÉDICALE', 'H', 'Base médicale', 'Angle nord-ouest de l’esplanade, accès des secours par l’allée de Barcelone.'],
+  ['I · TOILETTES', 'I', 'Toilettes', 'Une rangée de cabines rue de la Boule, au sud du jardin de l’esplanade. Seul bloc prévu sur le plan pour l’instant.'],
+  ['J · RUE VALADE', 'J', 'Barrage rue Valade', 'Blocs anti-véhicule et 2 bénévoles. Protection à valider avec la préfecture.'],
+  ['J · SUD DE LA PLACE', 'J', 'Barrage sud de la place', 'Ferme l’accès à la place côté rue des Blanchers.'],
+  ['J · QUAI BAS (DAURADE)', 'J', 'Barrage quai bas (Daurade)', 'Sur le quai bas, au sud-est des gradins.'],
+  ['J · QUAI BAS (HENRI-MARTIN)', 'J', 'Barrage quai bas (Henri-Martin)', 'Sur le quai bas, au nord-ouest des gradins.'],
+  ['K · FOOD TRUCK 1', 'K', 'Food trucks', '8 food trucks sur l’espace vert au nord-est de l’esplanade, en deux rangées, mange-debout au milieu.'],
+  ['K · STAND UT CAPITOLE', 'K', 'Stands écoles et partenaires', 'Autour de la place de l’esplanade (noms d’exemple), avec le point infos et objets trouvés.'],
+  ['K · BUVETTE', 'K', 'Buvette et stand', 'Sur la petite place au sud de l’esplanade.'],
+  ['K · STAND PLACE 1', 'K', 'Stands de la place', 'Quatre stands sur la place Saint-Pierre, côté gradins.'],
 ];
-for (const [k, t, d] of NOTES) if (sites[k]) { const p = sites[k]; ITEMS.push([t, d, [p[0], k === 'SCÈNE' ? (window.__stage ? window.__stage.y + 10 : 9) : 4.6, p[1]], k === 'SCÈNE' ? V3.scene : { p: [p[0] + 15, 9, p[1] + 15], t: [p[0], 1.5, p[1]] }, true, /STAND|PARTENAIRE|INFO|FOOD|VILLAGE|SCÈNE/.test(k)]); }
+for (const [k, L, t, d] of NOTES) if (sites[k]) { const p = sites[k], y = k.includes('QUAI BAS') ? 4 : k === 'D · SCÈNE' ? 9 : 4.6; ITEMS.push([t, d, [p[0], y, p[1]], k === 'D · SCÈNE' ? V3.scene : { p: [p[0] + 15, 9 + (y > 4.6 ? 4 : 0), p[1] + 15], t: [p[0], 1.5, p[1]] }, true, /^K|SCÈNE|RAVITO|CONSIGNES|STAFF|PC ORG/.test(k), L]); }
 ITEMS.push(['Retrait des dossards (TSE)', 'Dans le bâtiment TSE : la veille 17 h – 22 h, ou le jour J 9 h – 12 h. Pièce d’identité et carte étudiante.', [-62, 12, -142], { p: [-40, 14, -110], t: [-62, 2, -138] }, true]);
-ITEMS.push(['Terrasses des bars', 'En jaune au sol : laissées libres (Pub Saint-Pierre, Chez Tonton, Bar Basque, Saint des Seins…).', [-40, 3, -36], { p: [-20, 22, -2], t: [-30, 0, -40] }, true]);
+ITEMS.push(['Terrasses des bars', 'En jaune au sol : les terrasses restent ouvertes pendant la soirée (Pub Saint-Pierre, Chez Tonton, Bar Basque, Saint des Seins…).', [-40, 3, -36], { p: [-20, 22, -2], t: [-30, 0, -40] }, true, 0, 'K']);
 ITEMS.push(['Pont Saint-Pierre', 'Fin des deux parcours : 235 m de pont avant l’arrivée. Le sas de départ est aussi sur le pont.', [-45, 8, 62], { p: [-5, 14, -20], t: [-60, 0, 100] }, false],
   ['Gradins sur la Garonne', 'Un spot pour encourager les coureurs.', [(G1.ring[0][0] + G1.ring[2][0]) / 2, 3, (G1.ring[0][1] + G1.ring[2][1]) / 2], { p: [-10, 14, -22], t: [-40, -2, 12] }, false]);
 const legend = document.getElementById('legend');
-legend.innerHTML = '<h2>Sur le parcours</h2>' + ITEMS.map((it, i) => `<button data-i="${i}"><b>${i + 1}</b><div><span>${it[0]}</span><i>${it[1]}</i></div></button>`).join('');
-const pins = ITEMS.map((it, i) => { const b = document.createElement('button'); b.className = 'pin'; b.innerHTML = `${i + 1}<em>${it[0]}</em>`; b.dataset.i = i; document.body.appendChild(b); return b; });
+legend.innerHTML = '<h2>Plan du 21/11 · A à K</h2>' + ITEMS.map((it, i) => `<button data-i="${i}"><b>${it[6] || i + 1}</b><div><span>${it[0]}</span><i>${it[1]}</i></div></button>`).join('');
+const pins = ITEMS.map((it, i) => { const b = document.createElement('button'); b.className = 'pin'; b.innerHTML = `${it[6] || i + 1}<em>${it[0]}</em>`; b.dataset.i = i; document.body.appendChild(b); return b; });
 let fly = null;
 function flyTo(v) { fly = { t: 0, p0: camera.position.clone(), t0: controls.target.clone(), p1: new THREE.Vector3(...v.p), t1: new THREE.Vector3(...v.t) }; }
 controls.addEventListener('start', () => { fly = null; });
@@ -685,8 +782,8 @@ function frameLoop() {
     starters.forEach((s, i) => { const run = Math.max(0, cyc - 7 - (40 - s.d0) * .03), d = s.d0 + run * s.v, p = sample(startPath, d), mv = run > 0, k = d > startPath.len - 20 ? Math.max(0, (startPath.len - d) / 20) : 1;
       put(startSet, i, p.x - p.tz * s.lat, p.z + p.tx * s.lat, mv ? Math.abs(Math.sin(T * 9 + s.ph)) * .07 : Math.abs(Math.sin(T * 2 + s.ph)) * .02, k, mv ? -.12 : 0); });
     startSet.bodies.instanceMatrix.needsUpdate = startSet.heads.instanceMatrix.needsUpdate = true;
-    finishers.forEach((f, i) => { const d = (f.off + f.v * T) % finPath.len, p = sample(finPath, d), k = d < 6 ? d / 6 : d > finPath.len - 8 ? Math.max(0, (finPath.len - d) / 8) : 1;
-      put(finSet, i, p.x - p.tz * f.lat * .5, p.z + p.tx * f.lat * .5, Math.abs(Math.sin(T * 9 + f.ph)) * .07, k, -.12); });
+    finishers.forEach((f, i) => { const tt = (f.off + T) % f.cyc, tr = finRun.len / f.v, run = tt < tr, d = run ? tt * f.v : finRun.len + (tt - tr) * WALK_V, p = sample(finPath, d), k = d < 6 ? d / 6 : d > finPath.len - 8 ? Math.max(0, (finPath.len - d) / 8) : 1;
+      put(finSet, i, p.x - p.tz * f.lat * .5, p.z + p.tx * f.lat * .5, Math.abs(Math.sin(T * (run ? 9 : 4) + f.ph)) * (run ? .07 : .03), k, run ? -.12 : 0); });
     finSet.bodies.instanceMatrix.needsUpdate = finSet.heads.instanceMatrix.needsUpdate = true;
     spectators.forEach((s, i) => put(specSet, i, s.x, s.z, s.y + Math.abs(Math.sin(T * 3 + s.ph)) * .1, 1));
     specSet.bodies.instanceMatrix.needsUpdate = specSet.heads.instanceMatrix.needsUpdate = true;

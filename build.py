@@ -202,7 +202,7 @@ index = f'''
 <section style="padding-top:0">
   <div class="wrap stats">
     <div class="stat rv"><b data-count="5000">0</b><span>coureurs, 5 ou 10 km</span></div>
-    <div class="stat rv d1"><b data-count="187">0</b><span>écoles et universités invitées</span></div>
+    <div class="stat rv d1"><b data-count="190">0</b><span>écoles et universités invitées</span></div>
     <div class="stat rv d2"><b data-count="200">0</b><span>bénévoles le jour J</span></div>
     <div class="stat rv d3"><b data-count="3">0</b><span>associations soutenues</span></div>
   </div>
@@ -297,7 +297,7 @@ FAQ = [("À qui s’adresse la course ?", "Aux étudiants des écoles et univers
        ("Y a-t-il du ravitaillement ?", "Un point d’eau sur le quai de Tounis vers le km 3,3, pour les deux courses, et un second pour le 10 km sur l’Île du Ramier, vers le km 6,5. Un ravitaillement complet attend tout le monde à l’arrivée."),
        ("Je peux venir encourager ?", "Oui ! La Place Saint-Pierre et les deux ponts sont les meilleurs spots. Reste derrière les barrières pour laisser le passage aux coureurs."),
        ("Où va l’argent des inscriptions ?", "Les inscriptions servent à financer la course. Tout le bénéfice, c’est-à-dire ce qui reste une fois les dépenses payées, ainsi que les dons du jour, est reversé à parts égales à trois associations toulousaines qui luttent contre la précarité étudiante."),
-       ("Mon école ou mon BDE peut participer ?", "Oui, 187 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
+       ("Mon école ou mon BDE peut participer ?", "Oui, 190 écoles et universités toulousaines sont invitées. Chaque campus peut monter son équipe pour le challenge entre écoles : retrouve la liste sur la page Écoles ou écris-nous."),
        ("Une question qui n’est pas ici ?", f"Écris-nous à <a href=\"mailto:{CONTACT}\">{CONTACT}</a>, on te répond vite."),
        ("Comment devenir bénévole ?", "Accueil, dossards, signaleurs sur le parcours : découvre les rôles sur la page Association.")]
 infos = hero("Infos pratiques", "BIEN <em>PRÉPARÉ</em>", "Accès, services et réponses aux questions fréquentes.") + f'''
@@ -371,7 +371,7 @@ partenaires = hero("Partenaires", "S’ASSOCIER <em>À LA COURSE</em>", "Un publ
 <section style="padding-top:0"><div class="wrap">
 <div class="sec-head"><div><p class="eyebrow rv">Pourquoi s’associer</p><h2 class="rv d1">UN PUBLIC, <em>UNE CAUSE.</em></h2></div></div>
 <div class="grid-3">
-  <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 187 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
+  <div class="card rv">{ico("users")}<h3>Un public jeune, réuni</h3><p>Jusqu’à 5 000 étudiants de 18 à 26 ans, issus de 190 écoles et universités toulousaines, sur la même ligne de départ.</p></div>
   <div class="card rv d1">{ico("heart")}<h3>Une cause qui donne du sens</h3><p>Tous les bénéfices de la course sont reversés, à parts égales, à trois associations toulousaines qui luttent contre la précarité étudiante.</p></div>
   <div class="card rv d2">{ico("star")}<h3>Un événement fait pour être vu</h3><p>Départ et arrivée au bord de la Garonne, arche, dossards, écran géant : votre soutien est visible du premier au dernier coureur.</p></div>
 </div>

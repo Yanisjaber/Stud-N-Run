@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bénévoles · Stud’N Run</title>
+<meta name="description" content="Stud’N Run, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<meta name="theme-color" content="#14040c">
+<meta property="og:title" content="Bénévoles · Stud’N Run">
+<meta property="og:description" content="Stud’N Run, course étudiante à Toulouse : 5 et 10 km au départ de la Place Saint-Pierre.">
+<link rel="icon" href="assets/icone.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@1,800;1,900&family=DM+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=7">
+<script src="script.js?v=4" defer></script>
+</head>
+<body>
+<div class="glow" aria-hidden="true"></div>
+<header class="site-header">
+  <div class="wrap nav">
+    <a class="brand" href="index.html"><img src="assets/logo-texte.svg" alt="Stud’N Run" width="190" height="32"></a>
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="nav" aria-label="Menu"><span></span><span></span></button>
+    <nav class="nav-links" id="nav" aria-label="Navigation principale"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="ecoles.html">Écoles</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="actualites.html">Actualités</a><a href="partenaires.html">Partenaires</a><a href="association.html">Association</a><a class="cta" href="inscriptions.html">S’inscrire</a></nav>
+  </div>
+</header>
+<main>
+<section class="page-hero"><div class="wrap"><p class="eyebrow rv">Bénévoles</p><h1 class="rv d1">DEVIENS <em>BÉNÉVOLE</em></h1><p class="lead rv d2">On cherche environ 200 personnes pour que la course se passe bien. Viens vivre la journée de l’intérieur.</p></div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="sec-head"><div><p class="eyebrow rv">Les missions</p><h2 class="rv d1">TON RÔLE <em>LE JOUR J.</em></h2></div></div>
+<div class="grid-3">
+  <div class="card rv"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 10h8M8 14h5"/></svg></span><h3>Accueil et dossards</h3><p>Tu accueilles les coureurs, tu remets les dossards et tu les orientes dans le village.</p></div>
+  <div class="card rv d1"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.5"/></svg></span><h3>Signaleurs</h3><p>Posté·e sur le parcours, tu guides les coureurs et tu veilles à la sécurité aux carrefours.</p></div>
+  <div class="card rv d2"><span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span><h3>Ravitaillement et consigne</h3><p>Eau et ravitaillement à l’arrivée, consigne des sacs, remise des récompenses.</p></div>
+</div>
+</div></section>
+<section style="padding-top:0"><div class="wrap">
+<div class="card prereg rv"><p class="eyebrow">Je me propose</p><h2>JE <em>VEUX AIDER</em></h2>
+<p class="lead">Laisse-nous ton e-mail : on te recontacte avec les détails (horaires, repas, tenue). Une formation courte et un briefing sont prévus avant la course.</p>
+<form id="vol" class="form" novalidate>
+  <label>Prénom<input name="prenom" autocomplete="given-name" required></label>
+  <label>E-mail<input name="email" type="email" autocomplete="email" required></label>
+  <label>Ton école <small>(facultatif)</small><input name="ecole"></label>
+  <label class="chk"><input type="checkbox" name="ok" required> J’accepte d’être contacté·e par Stud’N Run au sujet du bénévolat.</label>
+  <button class="btn" type="submit">Proposer mon aide <span class="arr">→</span></button>
+  <p class="form-note" id="vol-note" role="status"></p>
+</form></div>
+</div></section>
+<script>
+document.getElementById("vol").addEventListener("submit", function (e) {
+  e.preventDefault(); var f = e.target, n = document.getElementById("vol-note");
+  if (!f.prenom.value.trim() || !/^\S+@\S+\.\S+$/.test(f.email.value) || !f.ok.checked) { n.textContent = "Complète ton prénom, un e-mail valide et coche la case."; return; }
+  var body = "Bonjour, je souhaite être bénévole pour la course.\n\nPrénom : " + f.prenom.value + "\nE-mail : " + f.email.value + "\nÉcole : " + (f.ecole.value || "-");
+  location.href = "mailto:studnrun@gmail.com?subject=" + encodeURIComponent("Bénévolat Stud’N Run") + "&body=" + encodeURIComponent(body);
+  n.textContent = "Ton application e-mail s’ouvre : envoie le message pour valider.";
+});
+</script>
+
+</main>
+<div class="notice" role="note">Site en construction · Les tarifs et le parcours sont provisoires.</div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="foot-big" aria-hidden="true">STUD<span>’N</span> RUN</div>
+    
+    <div class="foot-row"><span>Course étudiante · Place Saint-Pierre · Toulouse · <a href="mailto:studnrun@gmail.com">studnrun@gmail.com</a></span><nav aria-label="Pied de page"><a href="index.html">Accueil</a><a href="parcours.html">Parcours</a><a href="ecoles.html">Écoles</a><a href="horaires.html">Horaires</a><a href="infos-pratiques.html">Infos pratiques</a><a href="actualites.html">Actualités</a><a href="partenaires.html">Partenaires</a><a href="association.html">Association</a><a href="inscriptions.html">Inscriptions</a><a href="benevoles.html">Bénévoles</a><a href="contact.html">Contact</a></nav></div>
+    <div class="foot-social" aria-label="Réseaux sociaux"><span class="soon" title="Instagram · bientôt" aria-label="Instagram, bientôt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg></span><span class="soon" title="TikTok · bientôt" aria-label="TikTok, bientôt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 4v10.2a3.6 3.6 0 1 1-3.6-3.6"/><path d="M14 4c.3 2.4 1.9 4 4.5 4.2"/></svg></span><span class="soon" title="LinkedIn · bientôt" aria-label="LinkedIn, bientôt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M8 11v5M8 8v.01M12 16v-5M12 13c0-1.4 1-2 2.2-2 1.3 0 1.8.9 1.8 2.2V16"/></svg></span><span class="soon" title="X · bientôt" aria-label="X, bientôt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4.5 4.5l15 15M19.5 4.5l-15 15"/></svg></span><span class="soon" title="YouTube · bientôt" aria-label="YouTube, bientôt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="4"/><path d="M10.5 9.5v5l4.2-2.5z" fill="currentColor"/></svg></span></div>
+    <div class="foot-legal"><a href="mentions-legales.html">Mentions légales</a><a href="confidentialite.html">Confidentialité</a><span>© 2026 Stud’N Run</span></div>
+  </div>
+</footer>
+</body>
+</html>

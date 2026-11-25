@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # Assemble ce qui est publié sur GitHub Pages (https://yanisjaber.github.io/Stud-N-Run/) :
 #   /        → le site d'organisation (dossier orga/, copie du build de tableau-de-bord)
-#   /site/   → le site public de la course (dossier dist/, produit par build.py)
+#   /site/   → le site public, intégré au site d'orga (orga/site/, copié par tableau-de-bord/scripts/copier-site-public.sh)
 # Les anciennes adresses du site public (ecoles.html, confidentialite.html…) redirigent vers /site/,
 # et ses fichiers (PDF, images…) restent aussi servis à leur ancienne place pour ne casser aucun lien.
 set -euo pipefail
 sortie="${1:-_site}"
-rm -rf "$sortie" && mkdir -p "$sortie/site"
-cp -R dist/. "$sortie/site/"
-(cd dist && find . -type f ! -name '*.html' ! -name '.DS_Store') | while read -r f; do
-  mkdir -p "$sortie/$(dirname "$f")" && cp "dist/$f" "$sortie/$f"
+pub=orga/site
+rm -rf "$sortie" && mkdir -p "$sortie"
+(cd "$pub" && find . -type f ! -name '*.html' ! -name '.DS_Store') | while read -r f; do
+  mkdir -p "$sortie/$(dirname "$f")" && cp "$pub/$f" "$sortie/$f"
 done
-(cd dist && find . -type f -name '*.html' ! -path './index.html') | sed 's|^\./||' | while read -r p; do
+(cd "$pub" && find . -type f -name '*.html' ! -path './index.html') | sed 's|^\./||' | while read -r p; do
   remonte=$(printf '%s' "$p" | awk -F/ '{for(i=1;i<NF;i++) printf "../"}')
   cible="${remonte}site/$p"
   mkdir -p "$sortie/$(dirname "$p")"

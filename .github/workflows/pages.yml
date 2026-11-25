@@ -23,8 +23,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
+      # Site d'orga à la racine, site public dans /site/ (voir assembler.sh)
+      - run: ./assembler.sh _site
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: ./dist
+          path: ./_site
       - id: deployment
         uses: actions/deploy-pages@v4
